@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Customize GNOME Desktop in Ubuntu? - ubuntu</title>
+    <meta name="description" content="Ubuntu's default GNOME desktop environment is highly functional, but it can also be tailored to fit your exact visual preferences and workflow needs. By leveraging built-in settings, the specialized GNOME Tweaks tool, and community extensions, you can al">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-customize-gnome-desktop-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Customize GNOME Desktop in Ubuntu? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-customize-gnome-desktop-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Ubuntu's default GNOME desktop environment is highly functional, but it can also be tailored to fit your exact visual preferences and workflow needs. By leveraging built-in settings, the specialized GNOME Tweaks tool, and community extensions, you can al" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-customize-gnome-desktop-in-ubuntu">How to Customize GNOME
+Desktop in Ubuntu?</h1>
+<p>Ubuntu’s default GNOME desktop environment is highly functional, but
+it can also be tailored to fit your exact visual preferences and
+workflow needs. By leveraging built-in settings, the specialized GNOME
+Tweaks tool, and community extensions, you can alter everything from the
+core desktop theme and icon packs to panel layouts and window behaviors.
+This guide provides a straightforward walkthrough on how to transform
+the look and feel of your Ubuntu desktop, taking it from the standard
+layout to a highly personalized workspace.</p>
+<h2 id="utilize-built-in-ubuntu-settings">1. Utilize Built-in Ubuntu
+Settings</h2>
+<p>Before installing third-party utilities, Ubuntu offers several native
+customization options directly within the system settings.</p>
+<ul>
+<li><strong>Dark Mode and Accent Colors:</strong> Navigate to
+<strong>Settings &gt; Appearance</strong> to switch between Light and
+Dark styles. You can also select from a variety of accent colors that
+apply system-wide to sliders, buttons, and folder highlights.</li>
+<li><strong>Desktop Icon Settings:</strong> Adjust the size of desktop
+icons, choose whether to show the personal folder, and configure how new
+drives behave when mounted.</li>
+<li><strong>Dock Customization:</strong> Modify the Ubuntu Dock by
+changing its position (left, bottom, or right), toggling auto-hide
+functionality, and adjusting icon sizes to save screen real estate.</li>
+</ul>
+<h2 id="install-gnome-tweaks-for-advanced-control">2. Install GNOME
+Tweaks for Advanced Control</h2>
+<p>To unlock deeper visual modifications, you need the <strong>GNOME
+Tweaks</strong> application, which exposes settings hidden by default in
+standard Ubuntu.</p>
+<p>To install it, open your terminal and run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install gnome-tweaks</span></code></pre></div>
+<p>Once installed, open the application to gain control over:</p>
+<ul>
+<li><strong>Themes:</strong> Change the appearance of applications,
+cursors, and icons independently.</li>
+<li><strong>Fonts:</strong> Customize system fonts, sizes, and
+anti-aliasing preferences.</li>
+<li><strong>Window Titlebars:</strong> Choose whether to place the
+minimize, maximize, and close buttons on the left or right, or disable
+specific buttons entirely.</li>
+</ul>
+<h2 id="enhance-functionality-with-gnome-extensions">3. Enhance
+Functionality with GNOME Extensions</h2>
+<p>GNOME Extensions are powerful, community-developed add-ons that can
+fundamentally change how the desktop behaves and looks.</p>
+<h3 id="enable-extension-support">Enable Extension Support</h3>
+<p>To manage these extensions easily, first install the Extension
+Manager tool via the terminal:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gnome-shell-extension-manager</span></code></pre></div>
+<h3 id="popular-extensions-to-consider">Popular Extensions to
+Consider</h3>
+<ul>
+<li><strong>User Themes:</strong> Enables you to load custom shell
+themes downloaded from the internet, which changes the look of the top
+bar and system menus.</li>
+<li><strong>Dash to Dock:</strong> Converts the standard Ubuntu dock
+into a highly customizable dock that can mimic macOS or sit anywhere on
+the screen.</li>
+<li><strong>Blur my Shell:</strong> Adds a modern, blurred aesthetic to
+the overview screen, application grid, and top panel.</li>
+</ul>
+<h2 id="download-custom-themes-and-icons">4. Download Custom Themes and
+Icons</h2>
+<p>If the default options are not enough, you can source thousands of
+community-made themes from websites like
+<strong>GNOME-Look.org</strong>.</p>
+<ul>
+<li><strong>Installing Icon Packs:</strong> Download your chosen icon
+pack, extract the files, and move them to a hidden folder named
+<code>.icons</code> in your Home directory (create it if it doesn’t
+exist).</li>
+<li><strong>Installing Shell Themes:</strong> Download a theme, extract
+it, and place it in a hidden folder named <code>.themes</code> in your
+Home directory.</li>
+<li><strong>Applying Changes:</strong> Open <strong>GNOME
+Tweaks</strong>, navigate to the <strong>Appearance</strong> tab, and
+select your newly added icons or themes from the respective dropdown
+menus.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Do You Upgrade an Older Ubuntu Release? - ubuntu</title>
+    <meta name="description" content="Upgrading an older Ubuntu release to a newer one involves preparing your current system, updating existing software packages, and utilizing Ubuntu's native upgrade management tools to transition safely. The standard procedure ensures data preservation wh">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-do-you-upgrade-an-older-ubuntu-release">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Do You Upgrade an Older Ubuntu Release? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-do-you-upgrade-an-older-ubuntu-release" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Upgrading an older Ubuntu release to a newer one involves preparing your current system, updating existing software packages, and utilizing Ubuntu's native upgrade management tools to transition safely. The standard procedure ensures data preservation wh" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-do-you-upgrade-an-older-ubuntu-release">How Do You Upgrade
+an Older Ubuntu Release?</h1>
+<p>Upgrading an older Ubuntu release to a newer one involves preparing
+your current system, updating existing software packages, and utilizing
+Ubuntu’s native upgrade management tools to transition safely. The
+standard procedure ensures data preservation while replacing core
+operating system components with their updated equivalents. This guide
+covers the essential steps required to execute a system upgrade
+seamlessly from the command line, which applies to both Ubuntu Desktop
+and Server environments.</p>
+<h3 id="phase-1-pre-upgrade-preparations">Phase 1: Pre-Upgrade
+Preparations</h3>
+<p>Before initiating a major operating system upgrade, taking
+precautionary steps minimizes the risk of package conflicts or system
+failure.</p>
+<ul>
+<li><strong>Back Up Crucial Data:</strong> While the upgrade process
+generally keeps user files intact, unexpected errors or power loss can
+compromise the system. Back up your files, configuration directories
+(such as <code>/etc</code>), and database states to an external drive or
+cloud storage.</li>
+<li><strong>Verify Free Disk Space:</strong> Upgrading requires
+downloading hundreds of new packages. Ensure you have at least 10 GB of
+free space on your root partition by checking disk usage:
+<code>df -h /</code></li>
+<li><strong>Disable Third-Party Repositories:</strong> External Personal
+Package Archives (PPAs) and custom repositories can interfere with the
+dependency resolution of the new release. It is safest to disable them
+in your Software sources list before proceeding.</li>
+</ul>
+<h3 id="phase-2-updating-the-current-system">Phase 2: Updating the
+Current System</h3>
+<p>An upgrade must always start from a fully updated version of your
+current release. This prevents version mismatches during the
+transition.</p>
+<p>Open a terminal and run the following commands sequentially to
+refresh your package list, update existing software, and remove obsolete
+packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt dist-upgrade <span class="at">-y</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt autoremove</span></code></pre></div>
+<p>If a new Linux kernel was installed during this process, reboot your
+machine before moving forward:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<h3 id="phase-3-configuring-the-upgrade-tool">Phase 3: Configuring the
+Upgrade Tool</h3>
+<p>Ubuntu uses the <code>update-manager-core</code> package to manage
+release transitions. Verify that the tool is installed on your
+system:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install update-manager-core</span></code></pre></div>
+<p>Next, check the release upgrade configuration file to verify your
+upgrade path behavior:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /etc/update-manager-core/release-upgrades</span></code></pre></div>
+<p>Look for the <code>Prompt=</code> line. If you are running a Long
+Term Support (LTS) version and wish to upgrade to the next sequential
+LTS version (e.g., Ubuntu 22.04 LTS to Ubuntu 24.04 LTS), ensure it is
+set to:</p>
+<pre class="text"><code>Prompt=lts
+</code></pre>
+<p>If you are using a standard short-term release and want to move to
+the next immediate release, it should be set to:</p>
+<pre class="text"><code>Prompt=normal
+</code></pre>
+<h3 id="phase-4-executing-the-release-upgrade">Phase 4: Executing the
+Release Upgrade</h3>
+<p>With the system prepared, launch the interactive upgrade wizard by
+executing:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> do-release-upgrade</span></code></pre></div>
+<blockquote>
+<p><strong>Note for SSH Users:</strong> If you are performing this
+upgrade remotely over SSH, it is highly recommended to run this command
+inside a terminal multiplexer like <code>tmux</code> or
+<code>screen</code>. This prevents the upgrade from failing midway if
+your network connection drops.</p>
+</blockquote>
+<h3 id="phase-5-following-the-interactive-prompts">Phase 5: Following
+the Interactive Prompts</h3>
+<p>The upgrade tool will calculate the changes, alter your system
+repository paths to point to the new release, and present a summary of
+the packages to be downloaded, upgraded, and removed.</p>
+<ol type="1">
+<li><strong>Confirm the Upgrade:</strong> Review the summary and type
+<code>y</code> to begin the download and installation phase.</li>
+<li><strong>Handle Configuration Prompts:</strong> During installation,
+the system may prompt you regarding modified configuration files. You
+can choose to keep your custom configurations or replace them with the
+package maintainer’s defaults.</li>
+<li><strong>Remove Obsolete Packages:</strong> Once the new packages are
+installed, the tool will ask whether you want to delete obsolete
+packages left over from the old OS version. Selecting <code>y</code>
+helps keep your system clean.</li>
+<li><strong>Reboot:</strong> When the process finishes, you will be
+prompted to restart your system to finalize the upgrade.</li>
+</ol>
+<h3 id="phase-6-verifying-the-upgrade">Phase 6: Verifying the
+Upgrade</h3>
+<p>After your system reboots, log in and verify that the operating
+system has successfully updated to the target version by running:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsb_release</span> <span class="at">-a</span></span></code></pre></div>
+<p>The output will display the new version number and description,
+confirming that your standard Ubuntu upgrade is complete.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

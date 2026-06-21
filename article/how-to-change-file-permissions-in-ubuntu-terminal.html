@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Change File Permissions in Ubuntu Terminal? - ubuntu</title>
+    <meta name="description" content="Managing file permissions is a fundamental aspect of Linux security and administration. In Ubuntu, file access is controlled by three permission types (read, write, and execute) assigned to three different categories of users (the owner, the group, and o">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-change-file-permissions-in-ubuntu-terminal">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Change File Permissions in Ubuntu Terminal? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-change-file-permissions-in-ubuntu-terminal" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing file permissions is a fundamental aspect of Linux security and administration. In Ubuntu, file access is controlled by three permission types (read, write, and execute) assigned to three different categories of users (the owner, the group, and o" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-change-file-permissions-in-ubuntu-terminal">How to Change
+File Permissions in Ubuntu Terminal?</h1>
+<p>Managing file permissions is a fundamental aspect of Linux security
+and administration. In Ubuntu, file access is controlled by three
+permission types (read, write, and execute) assigned to three different
+categories of users (the owner, the group, and others). This guide
+provides a quick overview of how to view these permissions using the
+<code>ls -l</code> command and how to modify them using the
+<code>chmod</code> command, utilizing both symbolic and absolute
+(numeric) methods.</p>
+<h2 id="understanding-ubuntu-file-permissions">Understanding Ubuntu File
+Permissions</h2>
+<p>Before changing permissions, it is essential to understand how they
+are structured. When you run the <code>ls -l</code> command in the
+terminal, you will see a 10-character string representing the file type
+and access rights.</p>
+<ul>
+<li><strong>First character:</strong> Represents the file type (e.g.,
+<code>-</code> for a regular file, <code>d</code> for a directory).</li>
+<li><strong>Next three characters:</strong> Represent the
+<strong>Owner</strong> (User) permissions.</li>
+<li><strong>Middle three characters:</strong> Represent the
+<strong>Group</strong> permissions.</li>
+<li><strong>Last three characters:</strong> Represent
+<strong>Others</strong> (everyone else) permissions.</li>
+</ul>
+<p>The standard permission characters are:</p>
+<ul>
+<li><code>r</code> (Read): Permission to view the file contents.</li>
+<li><code>w</code> (Write): Permission to modify or delete the
+file.</li>
+<li><code>x</code> (Execute): Permission to run the file as a program or
+script.</li>
+</ul>
+<h2 id="viewing-current-permissions">Viewing Current Permissions</h2>
+<p>To check the current permissions of files in your directory, open
+your terminal (<code>Ctrl</code> + <code>Alt</code> + <code>T</code>)
+and type the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span></span></code></pre></div>
+<p>This will output a list where permissions look similar to
+<code>-rw-r--r--</code>, indicating that the owner can read and write,
+while the group and others can only read the file.</p>
+<h2 id="changing-permissions-using-the-chmod-command">Changing
+Permissions Using the chmod Command</h2>
+<p>The <code>chmod</code> (change mode) command is the primary tool used
+to modify file permissions in Ubuntu. There are two common ways to use
+it: symbolic mode and absolute (numeric) mode.</p>
+<h3 id="symbolic-mode-text-based">1. Symbolic Mode (Text-Based)</h3>
+<p>Symbolic mode uses letters to represent the users and the
+operations.</p>
+<p><strong>User Categories:</strong></p>
+<ul>
+<li><code>u</code>: User (Owner)</li>
+<li><code>g</code>: Group</li>
+<li><code>o</code>: Others</li>
+<li><code>a</code>: All (User, Group, and Others)</li>
+</ul>
+<p><strong>Operations:</strong></p>
+<ul>
+<li><code>+</code>: Add a permission</li>
+<li><code>-</code>: Remove a permission</li>
+<li><code>=</code>: Set exact permissions</li>
+</ul>
+<p><strong>Examples of Symbolic Mode:</strong></p>
+<ul>
+<li>To grant execute permission to the file owner:</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u+x filename.sh</span></code></pre></div>
+<ul>
+<li>To remove write permission from the group and others:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> go-w document.txt</span></code></pre></div>
+<ul>
+<li>To make a script executable for everyone:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> a+x script.sh</span></code></pre></div>
+<h3 id="absolute-mode-numeric-based">2. Absolute Mode
+(Numeric-Based)</h3>
+<p>Absolute mode uses a three-digit octal number to represent
+permissions for the Owner, Group, and Others. Each digit is calculated
+by adding up the values of the permissions you want to grant.</p>
+<p><strong>Numeric Values:</strong></p>
+<ul>
+<li><code>4</code>: Read (<span class="math inline">\(r\)</span>)</li>
+<li><code>2</code>: Write (<span class="math inline">\(w\)</span>)</li>
+<li><code>1</code>: Execute (<span
+class="math inline">\(x\)</span>)</li>
+<li><code>0</code>: No permission</li>
+</ul>
+<p>To calculate a permission digit, add the numbers together. For
+example, read (<span class="math inline">\(4\)</span>) + write (<span
+class="math inline">\(2\)</span>) = <span
+class="math inline">\(6\)</span>. Read (<span
+class="math inline">\(4\)</span>) + write (<span
+class="math inline">\(2\)</span>) + execute (<span
+class="math inline">\(1\)</span>) = <span
+class="math inline">\(7\)</span>.</p>
+<p><strong>Common Permission Combinations:</strong></p>
+<ul>
+<li><code>777</code>: Everyone can read, write, and execute (highly
+unsecure).</li>
+<li><code>755</code>: Owner can read, write, and execute; group and
+others can only read and execute (standard for scripts and
+directories).</li>
+<li><code>644</code>: Owner can read and write; group and others can
+only read (standard for regular files).</li>
+</ul>
+<p><strong>Examples of Absolute Mode:</strong></p>
+<ul>
+<li>To set a file so only the owner has full access, and others have no
+access (<span class="math inline">\(700\)</span>):</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 private.txt</span></code></pre></div>
+<ul>
+<li>To set standard web server permissions for a public file (<span
+class="math inline">\(644\)</span>):</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 644 index.html</span></code></pre></div>
+<h2 id="modifying-permissions-for-directories-recursively">Modifying
+Permissions for Directories Recursively</h2>
+<p>If you need to change the permissions of a directory and all of the
+files and subdirectories inside it, you must use the recursive flag
+(<code>-R</code>).</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> <span class="at">-R</span> 755 /path/to/directory</span></code></pre></div>
+<h2 id="handling-permission-denied-errors">Handling Permission Denied
+Errors</h2>
+<p>If you attempt to change permissions on a system file or a file owned
+by another user, you will receive a “Permission denied” error. To bypass
+this, prepend the <code>sudo</code> command to run the operation with
+administrative privileges:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 644 /etc/environment</span></code></pre></div>
+<p>You will be prompted to enter your user password to confirm the
+action.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

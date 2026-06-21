@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure a Static IP on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="Configuring a static IP address on an Ubuntu Server ensures your machine maintains a consistent network identity, which is essential for hosting services, SSH access, and predictable network management. Modern Ubuntu Server versions utilize Netplan, a YA">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-a-static-ip-on-ubuntu-server">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure a Static IP on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-a-static-ip-on-ubuntu-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring a static IP address on an Ubuntu Server ensures your machine maintains a consistent network identity, which is essential for hosting services, SSH access, and predictable network management. Modern Ubuntu Server versions utilize Netplan, a YA" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-a-static-ip-on-ubuntu-server">How to Configure
+a Static IP on Ubuntu Server</h1>
+<p>Configuring a static IP address on an Ubuntu Server ensures your
+machine maintains a consistent network identity, which is essential for
+hosting services, SSH access, and predictable network management. Modern
+Ubuntu Server versions utilize <strong>Netplan</strong>, a YAML-based
+network configuration abstraction utility, to manage network settings
+instead of the traditional <code>/etc/network/interfaces</code> file.
+This guide provides a straightforward, step-by-step walkthrough to
+locate your network interface, modify the Netplan configuration file
+with your desired static IP parameters, and safely apply the
+changes.</p>
+<h3 id="step-1-identify-your-network-interface">Step 1: Identify Your
+Network Interface</h3>
+<p>Before changing any settings, you need to know the logical name of
+the network interface you want to configure. You can find this by
+running the following command in your terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> a</span></code></pre></div>
+<p>Look for your primary network interface in the output. It typically
+starts with <code>en</code> or <code>eth</code> (for example,
+<code>eth0</code> or <code>enp0s3</code>). Note this name down, as you
+will need it for the configuration file.</p>
+<h3 id="step-2-locate-the-netplan-configuration-file">Step 2: Locate the
+Netplan Configuration File</h3>
+<p>Netplan stores its configuration files in the
+<code>/etc/netplan/</code> directory. These files use the
+<code>.yaml</code> extension. To see the exact name of your
+configuration file, list the contents of the directory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> /etc/netplan/</span></code></pre></div>
+<p>Common filenames include <code>01-netcfg.yaml</code>,
+<code>50-cloud-init.yaml</code>, or
+<code>00-installer-config.yaml</code>.</p>
+<h3 id="step-3-edit-the-configuration-file">Step 3: Edit the
+Configuration File</h3>
+<p>Open the identified YAML file with a text editor like
+<code>nano</code>. You will need root privileges to edit this file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/netplan/01-netcfg.yaml</span></code></pre></div>
+<blockquote>
+<p><strong>Important Note on YAML Formatting:</strong> YAML files are
+highly sensitive to indentation. Always use spaces for indentation,
+never use the Tab key, and ensure alignment is perfectly consistent.</p>
+</blockquote>
+<p>Modify the file to reflect your static network requirements. A
+standard static IP configuration template looks like this:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">network</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">renderer</span><span class="kw">:</span><span class="at"> networkd</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ethernets</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enp0s3</span><span class="kw">:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp4</span><span class="kw">:</span><span class="at"> </span><span class="ch">no</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">addresses</span><span class="kw">:</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> 192.168.1.50/24</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">routes</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">to</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">via</span><span class="kw">:</span><span class="at"> </span><span class="fl">192.168.1.1</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">nameservers</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">addresses</span><span class="kw">:</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="fl">8.8.8.8</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="fl">8.8.4.4</span></span></code></pre></div>
+<p>Be sure to replace <code>enp0s3</code> with your actual interface
+name, <code>192.168.1.50/24</code> with your desired static IP and
+subnet mask in CIDR notation, <code>192.168.1.1</code> with your gateway
+IP, and the nameserver IPs with your preferred DNS servers (such as
+Google DNS or Cloudflare DNS).</p>
+<p>Once the edits are complete, save and close the file (in Nano, press
+<code>CTRL+O</code>, <code>Enter</code>, then <code>CTRL+X</code>).</p>
+<h3 id="step-4-test-and-apply-the-changes">Step 4: Test and Apply the
+Changes</h3>
+<p>Netplan allows you to safely test your configuration before
+committing to it. This prevents you from being permanently locked out of
+your server if a typo was made. Run the test command:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netplan try</span></code></pre></div>
+<p>If the configuration is valid, Netplan will prompt you to press Enter
+to accept the changes. If you lose connection or do not confirm within
+the countdown limit, Netplan will automatically roll back to your
+previous working settings.</p>
+<p>If you are confident in your configuration and want to apply it
+directly without a trial period, use the apply command:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netplan apply</span></code></pre></div>
+<h3 id="step-5-verify-the-static-ip-configuration">Step 5: Verify the
+Static IP Configuration</h3>
+<p>To confirm that your Ubuntu Server is successfully using the new
+static IP address, run the IP address command once more:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> a show enp0s3</span></code></pre></div>
+<p>Verify that the output displays your newly assigned static IP
+address. Finally, test external network connectivity and DNS resolution
+by pinging an external website:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-c</span> 3 google.com</span></code></pre></div>
+<p>If the ping responses return successfully, your Ubuntu Server is
+fully configured with a stable, static IP address.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

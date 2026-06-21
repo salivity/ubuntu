@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Check Hardware Specs in Ubuntu? - ubuntu</title>
+    <meta name="description" content="This article provides a comprehensive guide on how to view the hardware components and specifications of an Ubuntu system. Whether you are troubleshooting performance issues, upgrading your components, or simply curious about your machine's internals, Ub">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-check-hardware-specs-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Check Hardware Specs in Ubuntu? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-check-hardware-specs-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a comprehensive guide on how to view the hardware components and specifications of an Ubuntu system. Whether you are troubleshooting performance issues, upgrading your components, or simply curious about your machine's internals, Ub" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-check-hardware-specs-in-ubuntu">How to Check Hardware
+Specs in Ubuntu?</h1>
+<p>This article provides a comprehensive guide on how to view the
+hardware components and specifications of an Ubuntu system. Whether you
+are troubleshooting performance issues, upgrading your components, or
+simply curious about your machine’s internals, Ubuntu offers several
+powerful ways to inspect your hardware. We will cover both user-friendly
+graphical interface (GUI) applications for desktop users and robust
+command-line interface (CLI) tools for terminal enthusiasts and server
+administrators.</p>
+<h3 id="checking-hardware-via-the-graphical-interface-gui">Checking
+Hardware via the Graphical Interface (GUI)</h3>
+<p>For users who prefer a visual approach without typing commands,
+Ubuntu provides built-in and easily installable graphical utilities to
+view system information.</p>
+<ul>
+<li><strong>Settings App (Built-in):</strong> The quickest way to see a
+basic overview of your system is through the default settings. Open
+<strong>Settings</strong> and click on the <strong>About</strong>
+section at the bottom of the left sidebar. Here, you will find your
+processor model, total memory (RAM), graphics card, and disk
+capacity.</li>
+<li><strong>Hardinfo (System Profiler and Benchmark):</strong> If you
+need a detailed, categorized breakdown similar to Windows Device
+Manager, <code>hardinfo</code> is an excellent tool. It displays
+comprehensive data about your operating system, CPU, storage, and
+connected peripherals. You can install it by opening a terminal and
+running <code>sudo apt install hardinfo</code>, then launching “System
+Profiler and Benchmark” from your applications menu.</li>
+</ul>
+<h3 id="checking-hardware-via-the-command-line-cli">Checking Hardware
+via the Command Line (CLI)</h3>
+<p>The terminal offers the most detailed and granular information about
+your hardware. These commands are invaluable for remote server
+management or advanced troubleshooting.</p>
+<ul>
+<li><p><strong>lshw (List Hardware):</strong> This is a powerful,
+built-in utility that extracts detailed information on the hardware
+configuration of the machine. Running it by itself generates a massive
+wall of text, so it is best used with specific flags:</p></li>
+<li><p><code>sudo lshw -short</code>: Displays a compact, easy-to-read
+summary of all hardware paths and devices.</p></li>
+<li><p><code>sudo lshw -C memory</code>: Isolates specific hardware
+classes (e.g., replace <code>memory</code> with <code>display</code>,
+<code>network</code>, or <code>cpu</code>).</p></li>
+<li><p><strong>lscpu (CPU Architecture):</strong> To dive deep into your
+processor’s capabilities, simply type <code>lscpu</code>. This command
+fetches detailed information from the system files, displaying the CPU
+architecture, number of cores, threads, clock speed, and cache
+sizes.</p></li>
+<li><p><strong>free -m (RAM Usage and Capacity):</strong> To quickly
+check your total, used, and available physical memory and swap space in
+megabytes, use the command <code>free -m</code>.</p></li>
+<li><p><strong>lsblk and df (Storage Devices):</strong> To view your
+hard drives and solid-state drives, use <code>lsblk</code>. It lists all
+block devices, their partition structures, and their sizes in a clear
+tree format. To see disk space utilization and mount points, use
+<code>df -h</code>.</p></li>
+<li><p><strong>lspci and lsusb (Peripheral Buses):</strong> To inspect
+devices connected to your PCI and USB buses—such as graphics cards,
+network adapters, and external drives—use <code>lspci</code> and
+<code>lsusb</code> respectively. For example, running
+<code>lspci | grep -i vga</code> is the standard way to quickly identify
+your dedicated graphics card.</p></li>
+</ul>
+<h3 id="summary-of-quick-commands">Summary of Quick Commands</h3>
+<p>For quick reference, here is a consolidated list of the most common
+terminal commands used to audit Ubuntu hardware:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Hardware Component Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lscpu</code></td>
+<td>Processor (CPU) details, cores, and architecture</td>
+</tr>
+<tr>
+<td><code>free -h</code></td>
+<td>RAM capacity and current utilization in human-readable format</td>
+</tr>
+<tr>
+<td><code>lsblk</code></td>
+<td>Storage disks, partitions, and sizes</td>
+</tr>
+<tr>
+<td><code>lspci</code></td>
+<td>PCI devices (including Graphics/VGA cards)</td>
+</tr>
+<tr>
+<td><code>lsusb</code></td>
+<td>Connected USB devices and controllers</td>
+</tr>
+<tr>
+<td><code>sudo lshw -short</code></td>
+<td>Full hardware profile summarized in a single list</td>
+</tr>
+</tbody>
+</table></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

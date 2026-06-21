@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Manage Bluetooth in Ubuntu via CLI? - ubuntu</title>
+    <meta name="description" content="Managing Bluetooth devices from the command line in Ubuntu is a powerful way to troubleshoot connectivity issues, automate pairings, or manage headless server environments. This article provides a comprehensive guide to using bluetoothctl, the built-in i">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-manage-bluetooth-in-ubuntu-via-cli">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ubuntu/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Manage Bluetooth in Ubuntu via CLI? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-manage-bluetooth-in-ubuntu-via-cli" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing Bluetooth devices from the command line in Ubuntu is a powerful way to troubleshoot connectivity issues, automate pairings, or manage headless server environments. This article provides a comprehensive guide to using bluetoothctl, the built-in i" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-manage-bluetooth-in-ubuntu-via-cli">How to Manage
+Bluetooth in Ubuntu via CLI?</h1>
+<p>Managing Bluetooth devices from the command line in Ubuntu is a
+powerful way to troubleshoot connectivity issues, automate pairings, or
+manage headless server environments. This article provides a
+comprehensive guide to using <code>bluetoothctl</code>, the built-in
+interactive utility for controlling Bluetooth on Linux. You will learn
+how to turn on your Bluetooth controller, scan for nearby devices, trust
+and pair with them, and connect or disconnect devices seamlessly using
+simple terminal commands.</p>
+<h2 id="getting-started-with-bluetoothctl">Getting Started with
+bluetoothctl</h2>
+<p>Ubuntu includes a built-in command-line tool called
+<code>bluetoothctl</code> which communicates directly with the BlueZ
+Bluetooth protocol stack. To start managing your devices, open your
+terminal and launch the interactive shell by typing:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bluetoothctl</span></span></code></pre></div>
+<p>Once inside, your terminal prompt will change to
+<code>[bluetooth]#</code>. This indicates you are ready to issue
+Bluetooth commands. To exit this interactive mode at any time, simply
+type <code>exit</code>.</p>
+<h2 id="powering-on-and-scanning-for-devices">Powering On and Scanning
+for Devices</h2>
+<p>Before you can connect to a device, you need to ensure your local
+Bluetooth adapter is turned on and visible.</p>
+<ol type="1">
+<li><strong>Turn on the Bluetooth controller:</strong></li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">power</span> on</span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Enable the agent:</strong> The agent manages the pairing
+process, including PIN codes and passkeys.</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">agent</span> on</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">default-agent</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Start scanning:</strong> Turn on discovery mode to find
+nearby Bluetooth devices.</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scan</span> on</span></code></pre></div>
+<p>As the scan runs, you will see a list of discovered devices scrolling
+in your terminal. Each device will display its unique MAC address
+(formatted like <code>AA:BB:CC:DD:EE:FF</code>) and its name. Note down
+the MAC address of the device you want to connect to.</p>
+<h2 id="pairing-and-connecting-a-device">Pairing and Connecting a
+Device</h2>
+<p>Once you have identified the MAC address of your target device, you
+can proceed with the pairing process. Replace
+<code>XX:XX:XX:XX:XX:XX</code> with your actual device’s MAC address in
+the following steps:</p>
+<ol type="1">
+<li><strong>Pair the device:</strong> This establishes a secure
+bond.</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pair</span> XX:XX:XX:XX:XX:XX</span></code></pre></div>
+<p><em>Note: If prompted for a PIN code on your terminal or your device,
+enter it to complete the pairing.</em> 2. <strong>Trust the
+device:</strong> Trusting a device allows it to reconnect automatically
+in the future without asking for permission again.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">trust</span> XX:XX:XX:XX:XX:XX</span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Connect to the device:</strong> Finalize the connection to
+start using your device.</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">connect</span> XX:XX:XX:XX:XX:XX</span></code></pre></div>
+<h2 id="disconnecting-and-removing-devices">Disconnecting and Removing
+Devices</h2>
+<p>If you need to sever a connection or completely clear a device from
+your Ubuntu system’s memory, you can do so with these straightforward
+commands:</p>
+<ul>
+<li><strong>Disconnect a device:</strong> Keeps the device paired but
+stops the active connection.</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">disconnect</span> XX:XX:XX:XX:XX:XX</span></code></pre></div>
+<ul>
+<li><strong>Remove a device:</strong> Unpairs the device completely and
+deletes its configuration.</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">remove</span> XX:XX:XX:XX:XX:XX</span></code></pre></div>
+<ul>
+<li><strong>Turn off Bluetooth:</strong> When you are finished, you can
+power down your local Bluetooth controller to save energy.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">power</span> off</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
