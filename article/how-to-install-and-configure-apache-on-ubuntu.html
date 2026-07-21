@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure Apache on Ubuntu - ubuntu</title>
+    <meta name="description" content="This comprehensive guide provides a straightforward, step-by-step walkthrough for installing and configuring the Apache HTTP server on an Ubuntu Linux system. You will learn how to update your package index, install the Apache service, adjust firewall se">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-apache-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure Apache on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-apache-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This comprehensive guide provides a straightforward, step-by-step walkthrough for installing and configuring the Apache HTTP server on an Ubuntu Linux system. You will learn how to update your package index, install the Apache service, adjust firewall se" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-apache-on-ubuntu">How to Install
+and Configure Apache on Ubuntu</h1>
+<p>This comprehensive guide provides a straightforward, step-by-step
+walkthrough for installing and configuring the Apache HTTP server on an
+Ubuntu Linux system. You will learn how to update your package index,
+install the Apache service, adjust firewall settings to allow web
+traffic, manage the server’s background processes, and set up a basic
+virtual host to serve multiple domains. By the end of this article, you
+will have a fully functioning, secure web server ready to host your
+website content.</p>
+<h2 id="prerequisites-and-preparing-your-system">Prerequisites and
+Preparing Your System</h2>
+<p>Before initiating the installation process, ensure you have a server
+running Ubuntu along with a non-root user account configured with sudo
+privileges. It is vital to update your local package index to guarantee
+that you are downloading the most recent version of the Apache software
+and its dependencies.</p>
+<p>To refresh your package lists, open your terminal window and execute
+the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<h2 id="installing-the-apache-web-server">Installing the Apache Web
+Server</h2>
+<p>With the package index updated, you can proceed to download and
+install Apache using Ubuntu’s default package manager, <code>apt</code>.
+The Apache package is maintained within Ubuntu’s official repositories,
+making the installation highly secure and straightforward.</p>
+<p>Run the following command to begin the installation:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install apache2</span></code></pre></div>
+<p>During this process, the system will calculate the required disk
+space and prompt you for confirmation. Press <code>Y</code> and then
+<code>Enter</code> to allow the installation to finish.</p>
+<h2 id="configuring-the-ufw-firewall">Configuring the UFW Firewall</h2>
+<p>Before you can access your web server from a browser, you must modify
+your Uncomplicated Firewall (UFW) settings to allow external access to
+the default web ports. Apache registers several different application
+profiles with UFW upon installation.</p>
+<p>To view the available Apache firewall profiles, type:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw app list</span></code></pre></div>
+<p>You will see output similar to this:</p>
+<ul>
+<li><strong>Apache</strong>: Opens port 80 (normal, unencrypted web
+traffic).</li>
+<li><strong>Apache Full</strong>: Opens port 80 and port 443 (secure,
+TLS/SSL encrypted traffic).</li>
+<li><strong>Apache Secure</strong>: Opens only port 443.</li>
+</ul>
+<p>It is recommended to enable the most restrictive profile that still
+allows your intended traffic. For a basic setup without an SSL
+certificate, enable the ‘Apache’ profile using this command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow <span class="st">&#39;Apache&#39;</span></span></code></pre></div>
+<p>You can verify the change by checking the firewall status:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status</span></code></pre></div>
+<h2 id="verifying-the-web-server-status">Verifying the Web Server
+Status</h2>
+<p>Once the installation is complete and the firewall is configured,
+Ubuntu automatically starts the Apache service. You can check the status
+of the background process to ensure it is actively running by
+typing:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status apache2</span></code></pre></div>
+<p>The output should indicate that the service is “active (running)”. To
+double-check functionality through a web browser, navigate to your
+server’s public IP address. If you do not know your IP address, you can
+find it by typing:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span> <span class="at">-I</span></span></code></pre></div>
+<p>Type your server’s IP address into your web browser’s address bar.
+You should see the default Ubuntu Apache web page, which serves as a
+confirmation that the server is operating correctly.</p>
+<h2 id="managing-the-apache-process">Managing the Apache Process</h2>
+<p>Now that your web server is functional, you can manage its operation
+using basic management commands via <code>systemctl</code>. These
+commands allow you to stop, start, restart, or reload the server when
+making configuration adjustments.</p>
+<ul>
+<li>To stop your web server:
+<code>sudo systemctl stop apache2</code></li>
+<li>To start the web server when it is stopped:
+<code>sudo systemctl start apache2</code></li>
+<li>To stop and then start the service again:
+<code>sudo systemctl restart apache2</code></li>
+<li>To reload configuration changes without dropping active connections:
+<code>sudo systemctl reload apache2</code></li>
+<li>To prevent Apache from starting automatically at system boot:
+<code>sudo systemctl disable apache2</code></li>
+<li>To re-enable the service to start automatically at boot:
+<code>sudo systemctl enable apache2</code></li>
+</ul>
+<h2 id="setting-up-a-virtual-host">Setting Up a Virtual Host</h2>
+<p>When using the Apache web server, you can use virtual hosts to
+encapsulate configuration details and host more than one domain from a
+single server instance. We will set up a domain called
+<strong>example.com</strong>, but you should replace this with your own
+actual domain name.</p>
+<p>Apache on Ubuntu has one server block enabled by default, configured
+to serve documents from the <code>/var/www/html</code> directory. We
+will leave that intact and create a separate directory structure for our
+new site.</p>
+<h3 id="create-the-directory-structure">1. Create the Directory
+Structure</h3>
+<p>Create the directory for <strong>example.com</strong>, using the
+<code>-p</code> flag to create any necessary parent directories:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /var/www/example.com/public_html</span></code></pre></div>
+<p>Assign ownership of the directory to your current non-root user so
+you can modify the files without sudo:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> <span class="va">$USER</span>:<span class="va">$USER</span> /var/www/example.com/public_html</span></code></pre></div>
+<h3 id="create-a-sample-page">2. Create a Sample Page</h3>
+<p>Create a basic <code>index.html</code> page using your preferred text
+editor to test the virtual host configuration:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> /var/www/example.com/public_html/index.html</span></code></pre></div>
+<p>Inside the file, add the following simple HTML code:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="dt">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Welcome to Example.com!<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Success! The example.com virtual host is working!<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Save and close the file when you are finished.</p>
+<h3 id="create-the-virtual-host-file">3. Create the Virtual Host
+File</h3>
+<p>Instead of modifying the default configuration file directly, create
+a new configuration file for your custom site within the Apache
+directory structure:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apache2/sites-available/example.com.conf</span></code></pre></div>
+<p>Paste in the following configuration block, updating the domain names
+and paths to match your setup:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    ServerAdmin<span class="st"> webmaster@example.com</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> example.com</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    ServerAlias<span class="st"> www.example.com</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/example.com/public_html</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/error.log</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/access.log combined</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<p>Save and close the file.</p>
+<h3 id="enable-the-virtual-host-file">4. Enable the Virtual Host
+File</h3>
+<p>Enable your new virtual host file using the <code>a2ensite</code>
+tool:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2ensite example.com.conf</span></code></pre></div>
+<p>Next, disable the default site configuration file to prevent it from
+overriding your custom domain settings if necessary:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2dissite 000-default.conf</span></code></pre></div>
+<p>Test your configuration file for any syntax or structural errors:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apache2ctl configtest</span></code></pre></div>
+<p>The output should read <code>Syntax OK</code>. If any errors are
+reported, review your configuration text for typos. Finally, restart
+Apache to apply your changes completely:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<p>Your Apache web server is now completely installed, configured, and
+capable of serving your dedicated web traffic on Ubuntu.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

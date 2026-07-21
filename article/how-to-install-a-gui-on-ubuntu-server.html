@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install a GUI on Ubuntu Server? - ubuntu</title>
+    <meta name="description" content="Installing a graphical user interface (GUI) on an Ubuntu Server transforms a command-line-only environment into a visually navigable desktop. While Ubuntu Server defaults to a lightweight text interface to maximize system resources, adding a GUI is a str">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-a-gui-on-ubuntu-server">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install a GUI on Ubuntu Server? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-a-gui-on-ubuntu-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Installing a graphical user interface (GUI) on an Ubuntu Server transforms a command-line-only environment into a visually navigable desktop. While Ubuntu Server defaults to a lightweight text interface to maximize system resources, adding a GUI is a str" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-a-gui-on-ubuntu-server">How to Install a GUI on
+Ubuntu Server?</h1>
+<p>Installing a graphical user interface (GUI) on an Ubuntu Server
+transforms a command-line-only environment into a visually navigable
+desktop. While Ubuntu Server defaults to a lightweight text interface to
+maximize system resources, adding a GUI is a straightforward process
+that can ease server management for users more comfortable with a
+desktop environment. This guide covers how to update your system, choose
+and install a desktop environment (such as GNOME, XFCE, or MATE), and
+manage the display manager to get your graphical interface up and
+running.</p>
+<h2 id="step-1-update-your-system">Step 1: Update Your System</h2>
+<p>Before installing any new software, it is crucial to update your
+system’s package list and upgrade existing packages. This ensures
+compatibility and prevents installation conflicts. Open your terminal
+and run the following commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-choose-and-install-your-desktop-environment">Step 2:
+Choose and Install Your Desktop Environment</h2>
+<p>Ubuntu Server allows you to choose from several desktop environments
+depending on your resource constraints and personal preference. Below
+are the three most common options.</p>
+<h3 id="option-a-full-ubuntu-desktop-gnome">Option A: Full Ubuntu
+Desktop (GNOME)</h3>
+<p>If you want the standard desktop experience found on the regular
+desktop version of Ubuntu, you can install the default GNOME
+environment. Note that this option consumes the most system
+resources.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ubuntu-desktop <span class="at">-y</span></span></code></pre></div>
+<h3 id="option-b-xfce-lubuntuxubuntu---lightweight">Option B: XFCE
+(Lubuntu/Xubuntu - Lightweight)</h3>
+<p>For servers with limited RAM or CPU power, XFCE is a highly
+efficient, lightweight desktop environment that provides a functional
+GUI without a heavy performance tax.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install xfce4 xfce4-goodies <span class="at">-y</span></span></code></pre></div>
+<h3 id="option-c-mate-desktop">Option C: MATE Desktop</h3>
+<p>MATE is a consumption-friendly alternative that offers a traditional
+desktop layout reminiscent of older Ubuntu versions, balancing
+performance and features.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ubuntu-mate-desktop <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-3-configure-the-display-manager">Step 3: Configure the
+Display Manager</h2>
+<p>During the installation of certain desktop environments, you may be
+prompted to choose a default display manager (the software that handles
+the login screen).</p>
+<ul>
+<li><strong>GDM3</strong> is the default manager for GNOME and is
+feature-rich.</li>
+<li><strong>LightDM</strong> is a lightweight alternative preferred for
+XFCE or MATE.</li>
+</ul>
+<p>Use your arrow keys to select your preference if prompted, and press
+Enter to complete the setup. If the GUI does not start automatically
+after installation finishes, you can manually start the display manager
+service or reboot your server:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start gdm3</span></code></pre></div>
+<p><em>(Replace <code>gdm3</code> with <code>lightdm</code> if you chose
+the lightweight option).</em></p>
+<h2 id="step-4-boot-into-the-gui">Step 4: Boot into the GUI</h2>
+<p>Once the installation is complete, restart your server to apply all
+changes and boot directly into your new graphical login screen:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>After rebooting, you will be greeted by a visual login window. Select
+your user account, enter your password, and you can begin managing your
+Ubuntu Server using a graphical interface.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

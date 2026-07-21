@@ -1,0 +1,602 @@
+[
+  [
+    100,
+    "How to Delete a User and Home Directory in Ubuntu?",
+    "Managing user accounts is a fundamental task for system administrators and Linux enthusiasts alike. When a user no longer requires access to an Ubuntu system, removing their account securely and completely is essential for maintaining system cleanliness",
+    false
+  ],
+  [
+    99,
+    "What Is the Role of NetworkManager in Ubuntu?",
+    "The NetworkManager service in Ubuntu is the primary system daemon responsible for detecting, configuring, and managing network connections automatically. From switching between Wi-Fi networks to configuring static IP addresses and VPNs, NetworkManager ab",
+    false
+  ],
+  [
+    98,
+    "How to Configure Ubuntu CLI Proxy Settings?",
+    "Configuring a proxy server for command-line tools in Ubuntu is essential for downloading packages, updating software, and accessing external network resources within a restricted or corporate environment. Because CLI tools handle network requests differe",
+    false
+  ],
+  [
+    97,
+    "How to benchmark CPU performance on Ubuntu?",
+    "Benchmarking CPU performance on Ubuntu involves isolating your system environment and running standardized utility tests like sysbench or Geekbench to measure processing speeds under load. This article walks you through preparing your system, executing t",
+    false
+  ],
+  [
+    96,
+    "How to Create Symbolic Links in Ubuntu?",
+    "This article provides a straightforward guide on how to create a symbolic link (symlink) between two directories in Ubuntu using the terminal. You will learn the correct command syntax, how to verify that your link was created successfully, and how to sa",
+    false
+  ],
+  [
+    95,
+    "How to View the Routing Table in Ubuntu?",
+    "To view the network routing table on an Ubuntu machine, you can use several commands depending on your system version and preference, with ip route being the modern standard. This article provides a quick overview of the primary commands used to check ro",
+    false
+  ],
+  [
+    94,
+    "How to Enable Screen Sharing on Ubuntu Desktop?",
+    "This article provides a straightforward, step-by-step guide on how to enable and configure screen sharing on an Ubuntu desktop. You will learn how to access the built-in sharing settings, configure security options like password protection, and connect f",
+    false
+  ],
+  [
+    93,
+    "What is the Purpose of the Ubuntu /tmp Directory?",
+    "The /tmp directory in the Ubuntu filesystem hierarchy serves as a dedicated, system-wide storage space for temporary files created by the operating system, running applications, and users. These files are essential for short-term processes, such as holdi",
+    false
+  ],
+  [
+    92,
+    "How to Fix Broken Apt Dependencies in Ubuntu?",
+    "When managing software on Ubuntu, you may occasionally encounter broken package dependencies that prevent you from installing or upgrading software. This article provides a straightforward, step-by-step guide to diagnosing and resolving these issues usin",
+    false
+  ],
+  [
+    91,
+    "How to Install Python on Ubuntu?",
+    "This guide provides a straightforward, step-by-step walkthrough for installing the Python programming language on an Ubuntu Linux system. You will learn how to update your system packages, install Python using the Advanced Package Tool (APT), verify the",
+    false
+  ],
+  [
+    90,
+    "How to Block Websites Using Ubuntu Hosts File?",
+    "Editing the hosts file in Ubuntu is a straightforward and powerful way to block access to specific websites across your entire system without needing third-party software. By mapping a website's domain name to a local, non-routing IP address, your system",
+    false
+  ],
+  [
+    89,
+    "Wayland vs Xorg: What is the Difference in Ubuntu?",
+    "This article provides a comprehensive comparison between the Wayland and Xorg display server protocols in Ubuntu. It covers their architectural differences, performance benefits, security models, and how they impact everyday usability—including applica",
+    false
+  ],
+  [
+    88,
+    "How Do You Bypass an Ubuntu User Password?",
+    "If you are locked out of your Ubuntu user account due to a forgotten or malfunctioning password, you can regain system access by using Ubuntu's built-in Recovery Mode. This built-in troubleshooting environment allows you to boot into a root-privileged co",
+    false
+  ],
+  [
+    87,
+    "What is the Purpose of Ubuntu Initramfs?",
+    "The initramfs (initial RAM filesystem) is a temporary, root filesystem loaded into memory during the early stages of the Ubuntu boot process. It serves as a bridge between the bootloader and the actual operating system, containing the essential drivers,",
+    false
+  ],
+  [
+    86,
+    "How to Set Up Samba File Share on Ubuntu?",
+    "Setting up a local network file share using Samba on Ubuntu allows you to seamlessly share files and directories between Ubuntu and other operating systems, such as Windows or macOS, on the same private network. This guide covers the entire process, from",
+    false
+  ],
+  [
+    85,
+    "What is the Function of the chown Command in Ubuntu?",
+    "The chown command in Ubuntu Linux stands for \"change owner\" and is a fundamental administrative tool used to alter the user and/or group ownership of files, directories, and links. Managing ownership is a critical aspect of system security and access con",
+    false
+  ],
+  [
+    84,
+    "How to Change Ubuntu Server Time Zone via CLI?",
+    "Changing the time zone on an Ubuntu server ensures that your system logs, cron jobs, and applications use the correct local time. This guide provides a quick, step-by-step walkthrough on how to check your current time zone, view available time zones, and",
+    false
+  ],
+  [
+    83,
+    "What command displays Ubuntu kernel version?",
+    "Checking your system's kernel version is a fundamental task for troubleshooting, installing hardware drivers, or ensuring your OS has the latest security patches. This article provides a quick overview of the primary commands used to find the running ker",
+    false
+  ],
+  [
+    82,
+    "How to Speed Up Ubuntu Boot Time",
+    "This article provides a comprehensive guide on diagnosing and optimizing a slow Ubuntu boot process. You will learn how to analyze your current startup performance using built-in systemd tools, disable unnecessary startup applications, manage heavy backg",
+    false
+  ],
+  [
+    81,
+    "How to Install Docker on Ubuntu?",
+    "This article provides a straightforward, step-by-step guide to installing Docker on an Ubuntu system. You will learn how to update your package index, install the necessary dependencies, add Docker’s official repository, and set up the Docker Engine. B",
+    false
+  ],
+  [
+    80,
+    "How to Safely Eject a USB Drive in Ubuntu?",
+    "Unmounting and safely removing a USB flash drive in Ubuntu is essential to prevent data corruption and ensure all file transfers are completely finished. While modern operating systems employ write-caching to improve performance, pulling a drive out prem",
+    false
+  ],
+  [
+    79,
+    "What is the Purpose of /var/log/syslog in Ubuntu?",
+    "The /var/log/syslog file in Ubuntu serves as the central repository for operating system logs, capturing a vast range of system activity, daemon messages, and non-kernel applications. It is the primary diagnostic tool for administrators to monitor system",
+    false
+  ],
+  [
+    78,
+    "How to View Hidden Files in Ubuntu File Manager",
+    "This article provides a quick, straightforward guide on how to reveal hidden files and folders within the default Ubuntu file manager (Files/Nautilus). You will learn the instant keyboard shortcut to toggle these files on and off, as well as how to perma",
+    false
+  ],
+  [
+    77,
+    "How to Check Background Service Status in Ubuntu?",
+    "Managing system services is a fundamental task for maintaining a healthy Ubuntu environment. This article provides a quick guide on how to check the status of a specific background service using the standard systemctl command, explores variations for old",
+    false
+  ],
+  [
+    76,
+    "How to Install and Configure Apache on Ubuntu",
+    "This comprehensive guide provides a straightforward, step-by-step walkthrough for installing and configuring the Apache HTTP server on an Ubuntu Linux system. You will learn how to update your package index, install the Apache service, adjust firewall se",
+    false
+  ],
+  [
+    75,
+    "How to Join Ubuntu to Active Directory?",
+    "This article provides a straightforward, step-by-step guide on how to integrate an Ubuntu Linux machine into a Windows Active Directory (AD) domain. You will learn how to configure network settings, install the necessary realmd and SSSD packages, join th",
+    false
+  ],
+  [
+    74,
+    "How to Customize GNOME Desktop in Ubuntu?",
+    "Ubuntu's default GNOME desktop environment is highly functional, but it can also be tailored to fit your exact visual preferences and workflow needs. By leveraging built-in settings, the specialized GNOME Tweaks tool, and community extensions, you can al",
+    false
+  ],
+  [
+    73,
+    "What Is the Role of snapd in Ubuntu?",
+    "The snapd daemon is a background service in Ubuntu that automates the management of snap packages, which are self-contained software bundles designed to work across various Linux distributions. It handles the entire lifecycle of these applications, inclu",
+    false
+  ],
+  [
+    72,
+    "How to Manage Bluetooth in Ubuntu via CLI?",
+    "Managing Bluetooth devices from the command line in Ubuntu is a powerful way to troubleshoot connectivity issues, automate pairings, or manage headless server environments. This article provides a comprehensive guide to using bluetoothctl, the built-in i",
+    false
+  ],
+  [
+    71,
+    "Difference Between Ubuntu and Ubuntu Core?",
+    "This article provides a direct comparison between standard Ubuntu and Ubuntu Core, highlighting their fundamental architectural differences, target use cases, and system management styles. While standard Ubuntu is a general-purpose operating system desig",
+    false
+  ],
+  [
+    70,
+    "How to Install Build-Essential in Ubuntu",
+    "The build-essential package is a meta-package in Ubuntu that installs a comprehensive suite of development tools, including the GCC compiler, make, and other utilities necessary for compiling software from source code. This article provides a straightfor",
+    false
+  ],
+  [
+    69,
+    "How to Format a USB Drive in Ubuntu Terminal?",
+    "Formatting a USB drive using the Ubuntu terminal is a quick and efficient way to wipe data or prepare a flash drive for a new operating system. This process primarily relies on the mkfs (make filesystem) command, which allows you to format partitions int",
+    false
+  ],
+  [
+    68,
+    "How to Configure Dual Monitors on Ubuntu?",
+    "Configuring a dual monitor setup on an Ubuntu desktop is a straightforward process that can significantly boost your productivity. By utilizing the built-in system displays settings, you can easily arrange your screens, adjust resolutions, and set primar",
+    false
+  ],
+  [
+    67,
+    "What is the Purpose of Unattended-Upgrades in Ubuntu?",
+    "The unattended-upgrades package in Ubuntu is a critical tool designed to automatically install security and software updates without requiring user intervention. By handling routine maintenance in the background, it ensures that operating systems remain",
+    false
+  ],
+  [
+    66,
+    "How to Check Hardware Specs in Ubuntu?",
+    "This article provides a comprehensive guide on how to view the hardware components and specifications of an Ubuntu system. Whether you are troubleshooting performance issues, upgrading your components, or simply curious about your machine's internals, Ub",
+    false
+  ],
+  [
+    65,
+    "What Does the ufw enable Command Do in Ubuntu?",
+    "The ufw enable command in Ubuntu activates the Uncomplicated Firewall (UFW), a user-friendly frontend for managing netfilter firewall rules. When executed, this command boots up the firewall framework, ensures it automatically starts on system boot, and",
+    false
+  ],
+  [
+    64,
+    "How to Change Default Apps in Ubuntu?",
+    "Changing the default application for specific file types in Ubuntu allows you to customize your workflow and ensure your preferred software opens your files automatically. Whether you want to switch your default web browser, media player, or text editor,",
+    false
+  ],
+  [
+    63,
+    "How to View Manual Pages in Ubuntu?",
+    "To view the manual page for a specific command in Ubuntu Linux, you use the man command followed by the name of the command you want to research. This article covers how to use the man command, how to navigate through the manual interface, and how to fin",
+    false
+  ],
+  [
+    62,
+    "How to Safely Remove a PPA from Ubuntu?",
+    "Personal Package Archives (PPAs) are excellent for installing software not found in official Ubuntu repositories, but they can eventually become abandoned, cause dependency conflicts, or break system updates. Safely removing a PPA involves not just delet",
+    false
+  ],
+  [
+    61,
+    "Why Use a PPA in Ubuntu?",
+    "Personal Package Archives (PPAs) are specialized software repositories that allow developers to distribute application updates directly to Ubuntu users without waiting for official distribution cycles. This article explores how PPAs bridge the gap betwee",
+    false
+  ],
+  [
+    60,
+    "How to Restore Ubuntu From Timeshift Snapshot?",
+    "This article provides a straightforward, step-by-step guide on how to restore your Ubuntu system using a Timeshift snapshot. Whether your system recently crashed due to a faulty update, or you simply want to revert to a previous stable state, Timeshift a",
+    false
+  ],
+  [
+    59,
+    "Best Way to Backup Ubuntu User Data?",
+    "This article provides a comprehensive guide on the most effective methods for backing up user data on an Ubuntu computer. We will explore Deja Dup (Ubuntu's default backup tool) for automated GUI-based backups, Timeshift for system configuration recovery",
+    false
+  ],
+  [
+    58,
+    "Ubuntu Microphone and Webcam Test Guide",
+    "Testing your microphone and webcam in Ubuntu ensures your hardware is properly configured for video calls, streaming, or recording. This guide provides a quick walkthrough of the built-in system settings, terminal commands, and pre-installed applications",
+    false
+  ],
+  [
+    57,
+    "What Is Canonical Livepatch Service for Ubuntu?",
+    "The Canonical Livepatch Service is a powerful tool designed for Ubuntu users to apply critical Linux kernel security patches without needing to reboot the system. This service is particularly vital for enterprise environments, server administrators, and",
+    false
+  ],
+  [
+    56,
+    "How to Clear DNS Cache on Ubuntu?",
+    "Clearing the DNS cache on Ubuntu is a straightforward process that helps resolve connection errors, fixes outdated domain routing, and applies recent DNS changes immediately. Depending on your version of Ubuntu, the system uses different network manageme",
+    false
+  ],
+  [
+    55,
+    "How to Kill an Unresponsive App in Ubuntu?",
+    "When an application freezes or becomes unresponsive in Ubuntu, you can force it to close using several command-line tools. This article covers the most effective commands for terminating stubborn processes, including kill, pkill, killall, and xkill. You",
+    false
+  ],
+  [
+    54,
+    "How to Check IP Address in Ubuntu",
+    "Checking your IP address in Ubuntu is a fundamental task whether you are troubleshooting network connectivity or setting up a local server. This article provides a quick guide on how to find both your local (internal) IP address and your public (external",
+    false
+  ],
+  [
+    53,
+    "What Is the Role of systemd in Ubuntu?",
+    "This article provides an overview of systemd, the default system and service manager in Ubuntu. It explains how systemd initializes the operating system, manages background processes, and handles system logging. Readers will learn the core concepts of sy",
+    false
+  ],
+  [
+    52,
+    "How to Install Kubuntu or Xubuntu on Ubuntu?",
+    "This article provides a straightforward guide on how to install the Kubuntu (KDE Plasma) or Xubuntu (XFCE) desktop environments on an existing Ubuntu system. It covers the necessary terminal commands, explains the setup process, and details how to switch",
+    false
+  ],
+  [
+    51,
+    "What Are Ubuntu Flavors and How Do They Differ?",
+    "Ubuntu flavors are official variations of the core Ubuntu operating system that are built, maintained, and supported by members of the Linux community in partnership with Canonical. While they all share the same underlying architecture, software reposito",
+    false
+  ],
+  [
+    50,
+    "How to Disable Graphical Login in Ubuntu",
+    "This article provides a straightforward, step-by-step guide on how to disable the graphical login screen (GDM, LightDM, or SDDM) in Ubuntu and boot directly into the text-based command-line interface (CLI). It covers the standard method using systemd, ho",
+    false
+  ],
+  [
+    49,
+    "How to Configure a VPN on Ubuntu Desktop?",
+    "Configuring a Virtual Private Network (VPN) on an Ubuntu desktop enhances your online privacy and allows secure access to remote networks. This guide provides a straightforward walkthrough for setting up a VPN using the built-in Network Manager, covering",
+    false
+  ],
+  [
+    48,
+    "How to Extract tar.gz Files in Ubuntu Terminal?",
+    "Extracting a compressed .tar.gz file in Ubuntu is a fundamental skill for managing backups, installing software, and handling data archives. This article provides a quick, step-by-step guide on how to use the native terminal tools to unpack these files.",
+    false
+  ],
+  [
+    47,
+    "What is AppArmor in Ubuntu and how does it work?",
+    "AppArmor is a Linux kernel security module used in Ubuntu to restrict the capabilities of specific applications through per-program profiles. By enforcing Mandatory Access Control (MAC), it confines software to a limited set of files, network privileges,",
+    false
+  ],
+  [
+    46,
+    "How to List Installed Packages on Ubuntu?",
+    "Knowing how to check the software installed on your system is essential for package management, troubleshooting, and system auditing. This article provides a quick guide on how to list all installed packages on an Ubuntu system using various command-line",
+    false
+  ],
+  [
+    45,
+    "How Do You Upgrade an Older Ubuntu Release?",
+    "Upgrading an older Ubuntu release to a newer one involves preparing your current system, updating existing software packages, and utilizing Ubuntu's native upgrade management tools to transition safely. The standard procedure ensures data preservation wh",
+    false
+  ],
+  [
+    44,
+    "How to Securely Delete Files in Ubuntu?",
+    "When you delete a file in Ubuntu using the standard \"Trash\" or rm command, the data isn't actually erased from your storage drive; instead, the system simply marks the space as available for overwriting. This comprehensive guide explores how to permanent",
+    false
+  ],
+  [
+    43,
+    "What is the function of the dpkg command in Ubuntu?",
+    "The dpkg command is the core, low-level package management foundation of the Ubuntu Linux ecosystem, responsible for installing, building, removing, and managing individual Debian software packages (.deb files). While higher-level tools like apt and apt-",
+    false
+  ],
+  [
+    42,
+    "How to Open Terminal in Ubuntu with Keyboard Shortcut?",
+    "Opening the terminal in Ubuntu is a fundamental skill that allows you to manage your system, install software, and execute commands efficiently. This article provides a quick overview of the default keyboard shortcut used to launch the terminal instantly",
+    false
+  ],
+  [
+    41,
+    "What is the Difference Between Ubuntu Desktop and Server?",
+    "Choosing between Ubuntu Desktop and Ubuntu Server depends entirely on the intended use case for your machine. While both operating systems share the same underlying Linux architecture, package repositories, and core kernel, they are optimized for vastly",
+    false
+  ],
+  [
+    40,
+    "How to Install Proprietary Drivers in Ubuntu?",
+    "Installing proprietary graphics drivers in Ubuntu is a straightforward process that can significantly boost your system's gaming performance and hardware compatibility. This guide provides a quick overview of how to safely switch from the default open-so",
+    false
+  ],
+  [
+    39,
+    "What Are Ubuntu's Desktop Hardware Requirements?",
+    "Understanding the hardware specifications required for the newest version of Ubuntu Desktop ensures a smooth installation and optimal operating system performance. Canonical has updated the base requirements for its flagship operating system, meaning use",
+    false
+  ],
+  [
+    38,
+    "How Does Ubuntu Handle Automatic Security Updates?",
+    "This article provides a comprehensive overview of how the Ubuntu operating system manages automatic security updates to keep systems secure with minimal user intervention. It explores the underlying mechanics of the Unattended-Upgrades package, details h",
+    false
+  ],
+  [
+    37,
+    "Where is a specific file located in Ubuntu?",
+    "Finding the exact location of a file in Ubuntu can be done quickly using several built-in terminal commands, depending on whether you need a real-time search, a fast database lookup, or a tool to locate system binaries. This article covers the most effec",
+    false
+  ],
+  [
+    36,
+    "How to View System Logs in Ubuntu?",
+    "Troubleshooting an Ubuntu system often requires analyzing system logs to identify errors, hardware faults, or application crashes. This guide provides a quick overview of the essential tools and commands needed to view and monitor these logs. You will le",
+    false
+  ],
+  [
+    35,
+    "Why Does Ubuntu Need a Swap Partition or Swap File?",
+    "This article provides a quick overview of how Ubuntu utilizes swap space—via both traditional swap partitions and modern swap files—to manage system memory efficiently. You will learn how swap acts as a safety net for RAM, prevents system crashes dur",
+    false
+  ],
+  [
+    34,
+    "How to Change Ubuntu Hostname",
+    "This article provides a quick, step-by-step guide on how to change the hostname of an Ubuntu machine using both temporary and permanent methods. You will learn how to utilize the hostnamectl command, update your system configuration files, and verify tha",
+    false
+  ],
+  [
+    33,
+    "What is the Default Ubuntu Display Server?",
+    "This article provides a quick overview of the default display server protocol used in modern Ubuntu releases, tracing its transition from the legacy X11 system to the modern Wayland protocol. You will learn why Canonical made this shift, how it impacts d",
+    false
+  ],
+  [
+    32,
+    "How to Schedule Cron Jobs in Ubuntu",
+    "Automating repetitive tasks in Ubuntu is efficiently handled by Cron, a built-in time-based job scheduler in Linux operating systems. This guide provides a quick overview of how to open the crontab configuration, understand the distinct five-field time s",
+    false
+  ],
+  [
+    31,
+    "Why is the /etc/fstab File Important in Ubuntu?",
+    "The /etc/fstab (file system table) file is a crucial configuration file in Ubuntu that dictates how storage drives and partitions are automatically mounted into the system's directory tree during boot. This article explores its core purpose, explains its",
+    false
+  ],
+  [
+    30,
+    "How to Change File Permissions in Ubuntu Terminal?",
+    "Managing file permissions is a fundamental aspect of Linux security and administration. In Ubuntu, file access is controlled by three permission types (read, write, and execute) assigned to three different categories of users (the owner, the group, and o",
+    false
+  ],
+  [
+    29,
+    "How to List All Running Processes in Ubuntu?",
+    "Managing system performance and troubleshooting frozen applications in Ubuntu requires knowing how to view active tasks. This article provides a quick guide on the primary terminal commands used to list all running processes, including the standard ps co",
+    false
+  ],
+  [
+    28,
+    "How to Check Disk Space on Ubuntu?",
+    "Managing your storage is a fundamental part of maintaining a healthy Linux environment. This guide provides a quick overview of how to check the available disk space on an Ubuntu system using both the command-line interface (CLI) and the graphical user i",
+    false
+  ],
+  [
+    27,
+    "How to Configure SSH on Ubuntu",
+    "Configuring Secure Shell (SSH) on an Ubuntu machine allows you to establish a secure, encrypted connection for remote management and file transfers. This guide walks you through the essential steps of setting up an SSH server, including installation, fir",
+    false
+  ],
+  [
+    26,
+    "How to Mount an External Hard Drive in Ubuntu?",
+    "This article provides a straightforward guide on how to mount an external hard drive in Ubuntu, covering both the automatic graphical method and the manual command-line approach. Whether you are using a standard desktop environment or working entirely in",
+    false
+  ],
+  [
+    25,
+    "What Filesystem Does Ubuntu Use by Default?",
+    "When you perform a fresh installation of Ubuntu, the installer automatically selects the ext4 (Fourth Extended Filesystem) as the default filesystem for your storage drive. This article explores why Ubuntu uses ext4, its key features, and the alternative",
+    false
+  ],
+  [
+    24,
+    "Dual-Boot Ubuntu Alongside Windows?",
+    "Setting up a dual-boot system allows you to experience the open-source flexibility of Ubuntu Linux while retaining your existing Windows environment. This guide provides a step-by-step walkthrough of the entire process, including preparing your Windows d",
+    false
+  ],
+  [
+    23,
+    "What Is the Purpose of the Ubuntu GRUB Bootloader?",
+    "The Grand Unified Bootloader (GRUB) is the default software that initializes when you turn on an Ubuntu system, acting as the crucial bridge between your computer's hardware and the operating system. Its primary purpose is to load the Linux kernel into t",
+    false
+  ],
+  [
+    22,
+    "How to Monitor Ubuntu System Resources in Real-Time?",
+    "Monitoring system resource usage in real-time is essential for maintaining the health, performance, and stability of an Ubuntu system. Whether you are troubleshooting a sudden slowdown, tracking down a memory leak, or simply keeping tabs on hardware heal",
+    false
+  ],
+  [
+    21,
+    "How to Restart Ubuntu from the Terminal?",
+    "This article provides a quick overview of the commands used to reboot an Ubuntu system directly from the command line. You will learn the standard, safest commands for immediate restarts, how to schedule a reboot for a later time, and how to safely force",
+    false
+  ],
+  [
+    20,
+    "How to Add a User in Ubuntu via Command Line?",
+    "Managing users is a fundamental task in Linux administration, and Ubuntu provides straightforward command-line tools to handle this efficiently. This article provides a quick overview and step-by-step guide on how to add a new user to an Ubuntu system us",
+    false
+  ],
+  [
+    19,
+    "What is the Default Web Browser on Ubuntu Desktop?",
+    "Mozilla Firefox is the default web browser pre-installed on the Ubuntu desktop operating system. This choice has been a staple of the Ubuntu distribution for many years, providing users with a free, open-source, and privacy-focused browsing experience ri",
+    false
+  ],
+  [
+    18,
+    "How to Install a GUI on Ubuntu Server?",
+    "Installing a graphical user interface (GUI) on an Ubuntu Server transforms a command-line-only environment into a visually navigable desktop. While Ubuntu Server defaults to a lightweight text interface to maximize system resources, adding a GUI is a str",
+    false
+  ],
+  [
+    17,
+    "What is Netplan in Ubuntu networking?",
+    "Netplan is the default network configuration utility in modern Ubuntu releases, serving as an abstraction layer that simplifies how administrators manage network interfaces. Instead of directly modifying traditional, complex configuration files, users wr",
+    false
+  ],
+  [
+    16,
+    "How to Configure a Static IP on Ubuntu Server",
+    "Configuring a static IP address on an Ubuntu Server ensures your machine maintains a consistent network identity, which is essential for hosting services, SSH access, and predictable network management. Modern Ubuntu Server versions utilize Netplan, a YA",
+    false
+  ],
+  [
+    15,
+    "What is the Default Ubuntu Firewall?",
+    "This article provides a quick overview of UFW (Uncomplicated Firewall), the default firewall configuration tool used in Ubuntu. You will learn what UFW is, why it is the standard choice for Ubuntu users, and the basic commands needed to manage your syste",
+    false
+  ],
+  [
+    14,
+    "How to Reset a Forgotten Ubuntu Root Password",
+    "If you have forgotten your root or administrative password in Ubuntu, you can regain access by booting into the GRUB recovery menu and using the root shell prompt. This guide provides a straightforward, step-by-step walkthrough to safely reset your user",
+    false
+  ],
+  [
+    13,
+    "What is the Purpose of the Sudo Command in Ubuntu?",
+    "The sudo command in the Ubuntu operating system stands for \"superuser do,\" and its primary purpose is to allow permitted users to execute commands with administrative privileges. By acting as a secure gatekeeper, sudo eliminates the need to log in as the",
+    false
+  ],
+  [
+    12,
+    "How Do Snap and APT Packages Differ in Ubuntu?",
+    "Understanding the distinction between Snap packages and traditional APT (Advanced Package Tool) packages is essential for managing software efficiently in Ubuntu. While APT has been the bedrock of Debian-based Linux distributions for decades, Canonical i",
+    false
+  ],
+  [
+    11,
+    "What Package Manager Does Ubuntu Use by Default?",
+    "This article provides a quick overview of the default package management system used by the Ubuntu operating system for handling Debian-based software packages. It covers the primary command-line utilities, the underlying technology that powers them, and",
+    false
+  ],
+  [
+    10,
+    "How to Check Ubuntu Version?",
+    "Knowing the exact version of Ubuntu running on your machine is essential for installing compatible software, troubleshooting system errors, and ensuring you receive the correct security updates. This article provides a quick guide on how to verify your U",
+    false
+  ],
+  [
+    9,
+    "How to Create a Bootable Ubuntu USB Drive?",
+    "Creating a bootable USB drive is the most efficient and recommended method to install Ubuntu on a computer. This article provides a straightforward, step-by-step guide on how to flash the Ubuntu ISO file onto a USB drive using Rufus for Windows users and",
+    false
+  ],
+  [
+    8,
+    "How Does Ubuntu Differentiate Main and Universe Repositories?",
+    "When managing software on Ubuntu, users frequently encounter different package categories, most notably the Main and Universe repositories. While both serve as centralized hubs for downloading software, Ubuntu differentiates them based on two critical fa",
+    false
+  ],
+  [
+    7,
+    "How to Safely Upgrade All Packages in Ubuntu?",
+    "Upgrading your Ubuntu system ensures you have the latest security patches, bug fixes, and software improvements. While many users are familiar with basic update commands, executing a comprehensive and safe system-wide upgrade requires a specific sequence",
+    false
+  ],
+  [
+    6,
+    "How to Update Package List in Ubuntu Terminal?",
+    "Updating the system package list in Ubuntu is a fundamental maintenance task that ensures your OS knows about the latest software versions and security patches available. This quick guide covers the primary command used to refresh your package index, exp",
+    false
+  ],
+  [
+    5,
+    "What is the Default Ubuntu Desktop Environment?",
+    "This article provides a quick overview of the default desktop environment used by the standard Ubuntu Linux distribution. It explores the history of Ubuntu's user interface, details the current desktop environment, and explains how users can customize or",
+    false
+  ],
+  [
+    4,
+    "How Often Is a New Ubuntu LTS Released?",
+    "Ubuntu Long Term Support (LTS) versions are released every two years in April of even-numbered years. These predictable releases provide users, developers, and enterprises with a highly stable operating system that receives five years of standard securit",
+    false
+  ],
+  [
+    3,
+    "What Does Ubuntu Mean for the OS?",
+    "The Linux-based operating system Ubuntu derives its name from a traditional African philosophy that translates to \"humanity to others\" or \"I am because we are.\" In the context of the operating system, this term is not just a poetic moniker; it serves as",
+    false
+  ],
+  [
+    2,
+    "Who Founded Canonical, the Company Behind Ubuntu?",
+    "This article provides a quick overview of Mark Shuttleworth, the founder of Canonical Ltd., the company responsible for the popular open-source operating system Ubuntu. It covers his background as a South African entrepreneur, his early success with Thaw",
+    false
+  ],
+  [
+    1,
+    "When Was the First Version of Ubuntu Released?",
+    "The first version of Ubuntu, a groundbreaking open-source Linux operating system, was officially released on October 20, 2004. Codenamed \"Warty Warthog,\" this initial release marked the beginning of Canonical's mission to provide a free, user-friendly de",
+    false
+  ]
+]
