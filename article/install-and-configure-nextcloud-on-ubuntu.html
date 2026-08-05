@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install and Configure Nextcloud on Ubuntu - ubuntu</title>
+    <meta name="description" content="This step-by-step guide walks you through installing and configuring the Nextcloud private cloud platform on an Ubuntu server. You will learn how to set up the necessary LAMP (Linux, Apache, MySQL, PHP) stack, download and deploy Nextcloud, configure a d">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-and-configure-nextcloud-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install and Configure Nextcloud on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-and-configure-nextcloud-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This step-by-step guide walks you through installing and configuring the Nextcloud private cloud platform on an Ubuntu server. You will learn how to set up the necessary LAMP (Linux, Apache, MySQL, PHP) stack, download and deploy Nextcloud, configure a d" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="install-and-configure-nextcloud-on-ubuntu">Install and Configure
+Nextcloud on Ubuntu</h1>
+<p>This step-by-step guide walks you through installing and configuring
+the Nextcloud private cloud platform on an Ubuntu server. You will learn
+how to set up the necessary LAMP (Linux, Apache, MySQL, PHP) stack,
+download and deploy Nextcloud, configure a dedicated database, and
+secure your installation with an SSL certificate for safe remote access
+to your personal files.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting, ensure you have: * An Ubuntu server (22.04 LTS or
+newer recommended) with a non-root user possessing <code>sudo</code>
+privileges. * A domain name pointing to your server’s public IP
+address.</p>
+<h2 id="step-1-update-the-system">Step 1: Update the System</h2>
+<p>Update your local package index and upgrade existing software
+packages to ensure your system is secure and up to date.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-install-the-lamp-stack">Step 2: Install the LAMP
+Stack</h2>
+<p>Nextcloud requires a web server, a database, and PHP to function
+properly.</p>
+<ol type="1">
+<li>Install Apache, MariaDB, and required PHP modules:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install apache2 mariadb-server libapache2-mod-php php-gd php-mysql php-curl php-mbstring php-intl php-gmp php-bcmath php-xml php-curl php-zip <span class="at">-y</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Enable and start Apache and MariaDB services:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> apache2</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> mariadb</span></code></pre></div>
+<h2 id="step-3-configure-the-mariadb-database">Step 3: Configure the
+MariaDB Database</h2>
+<p>Run the secure installation script to harden your MariaDB
+deployment:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mysql_secure_installation</span></code></pre></div>
+<p>Follow the prompts to set a root password, remove anonymous users,
+disallow root login remotely, and remove the test database.</p>
+<p>Next, create a database and user for Nextcloud:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mysql <span class="at">-u</span> root <span class="at">-p</span></span></code></pre></div>
+<p>Execute the following SQL commands (replace
+<code>your_password</code> with a strong password):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">DATABASE</span> nextcloud <span class="dt">CHARACTER</span> <span class="kw">SET</span> utf8mb4 COLLATE utf8mb4_general_ci;</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">GRANT</span> <span class="kw">ALL</span> <span class="kw">ON</span> nextcloud.<span class="op">*</span> <span class="kw">TO</span> <span class="st">&#39;nextclouduser&#39;</span>@<span class="st">&#39;localhost&#39;</span> <span class="kw">IDENTIFIED</span> <span class="kw">BY</span> <span class="st">&#39;your_password&#39;</span>;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FLUSH</span> <span class="kw">PRIVILEGES</span>;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>EXIT;</span></code></pre></div>
+<h2 id="step-4-download-and-extract-nextcloud">Step 4: Download and
+Extract Nextcloud</h2>
+<ol type="1">
+<li>Download the latest version of Nextcloud from the official
+site:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://download.nextcloud.com/server/releases/latest.tar.bz2</span></code></pre></div>
+<ol start="2" type="1">
+<li>Extract the archive into the Apache web root folder:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xjvf</span> latest.tar.bz2</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv nextcloud /var/www/</span></code></pre></div>
+<ol start="3" type="1">
+<li>Set the correct directory ownership and permissions for the Apache
+web user:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> www-data:www-data /var/www/nextcloud</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod <span class="at">-R</span> 755 /var/www/nextcloud</span></code></pre></div>
+<h2 id="step-5-configure-apache-for-nextcloud">Step 5: Configure Apache
+for Nextcloud</h2>
+<p>Create an Apache virtual host configuration file for Nextcloud.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apache2/sites-available/nextcloud.conf</span></code></pre></div>
+<p>Add the following configuration (replace <code>your_domain.com</code>
+with your actual domain):</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    ServerAdmin<span class="st"> admin@your_domain.com</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/nextcloud/</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> your_domain.com</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;Directory</span><span class="at"> /var/www/nextcloud/</span><span class="fu">&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>       <span class="ex">Options</span><span class="ch"> </span><span class="kw">+FollowSymlinks</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>       <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">All</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>       Require<span class="st"> all granted</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">&lt;IfModule</span><span class="at"> mod_dav.c</span><span class="fu">&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            Dav<span class="st"> off</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>          <span class="fu">&lt;/IfModule&gt;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>       SetEnv<span class="st"> HOME /var/www/nextcloud</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>       SetEnv<span class="st"> HTTP_HOME /var/www/nextcloud</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;/Directory&gt;</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/error.log</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/access.log combined</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<p>Enable the new site configuration along with the required Apache
+modules:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2ensite nextcloud.conf</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod rewrite headers env dir mime</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<h2 id="step-6-secure-nextcloud-with-lets-encrypt-ssl">Step 6: Secure
+Nextcloud with Let’s Encrypt SSL</h2>
+<p>To secure your server with HTTPS, install Certbot and acquire an SSL
+certificate:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install certbot python3-certbot-apache <span class="at">-y</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> certbot <span class="at">--apache</span> <span class="at">-d</span> your_domain.com</span></code></pre></div>
+<p>Follow the on-screen prompts to complete the SSL setup. Certbot will
+automatically rewrite your Apache configuration to enforce HTTPS
+traffic.</p>
+<h2 id="step-7-complete-nextcloud-web-setup">Step 7: Complete Nextcloud
+Web Setup</h2>
+<ol type="1">
+<li>Open your web browser and navigate to
+<code>https://your_domain.com</code>.</li>
+<li>Create an admin account by entering a username and password.</li>
+<li>Under <strong>Data folder</strong>, leave the default path or
+specify a custom storage location.</li>
+<li>Under <strong>Database configuration</strong>, select
+<strong>MySQL/MariaDB</strong> and enter the details created earlier:
+<ul>
+<li><strong>Database user:</strong> <code>nextclouduser</code></li>
+<li><strong>Database password:</strong> <code>your_password</code></li>
+<li><strong>Database name:</strong> <code>nextcloud</code></li>
+<li><strong>Host:</strong> <code>localhost</code></li>
+</ul></li>
+<li>Click <strong>Install</strong> to finish the setup process.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

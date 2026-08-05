@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup CMake Cross-Platform Builds on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up CMake on Ubuntu for cross-platform development allows you to compile software for various target operating systems, such as Windows, macOS, or embedded ARM devices, directly from your Linux system. This guide covers installing CMake and necess">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-cmake-cross-platform-builds-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup CMake Cross-Platform Builds on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-cmake-cross-platform-builds-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up CMake on Ubuntu for cross-platform development allows you to compile software for various target operating systems, such as Windows, macOS, or embedded ARM devices, directly from your Linux system. This guide covers installing CMake and necess" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="setup-cmake-cross-platform-builds-on-ubuntu">Setup CMake
+Cross-Platform Builds on Ubuntu</h1>
+<p>Setting up CMake on Ubuntu for cross-platform development allows you
+to compile software for various target operating systems, such as
+Windows, macOS, or embedded ARM devices, directly from your Linux
+system. This guide covers installing CMake and necessary compilers,
+configuring CMake toolchain files for cross-compilation, and executing
+multi-platform builds efficiently from the Ubuntu command line.</p>
+<h2 id="step-1-install-cmake-and-core-build-tools">Step 1: Install CMake
+and Core Build Tools</h2>
+<p>Open your terminal and update the package index, then install CMake
+along with native build utilities:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cmake build-essential</span></code></pre></div>
+<p>Verify the installation by checking the installed version:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">--version</span></span></code></pre></div>
+<h2 id="step-2-install-cross-compilers">Step 2: Install
+Cross-Compilers</h2>
+<p>To build binaries for operating systems other than host Linux, you
+must install the appropriate target compilers.</p>
+<ul>
+<li><p><strong>For targeting 64-bit Windows:</strong> Install
+MinGW-w64.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gcc-mingw-w64 g++-mingw-w64</span></code></pre></div></li>
+<li><p><strong>For targeting ARM/Linux (32-bit/64-bit):</strong> Install
+the corresponding GNU toolchain.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf</span></code></pre></div></li>
+</ul>
+<h2 id="step-3-create-a-cmake-toolchain-file">Step 3: Create a CMake
+Toolchain File</h2>
+<p>CMake uses toolchain files to override default system paths and
+compiler definitions for cross-compilation. Create a file named
+<code>toolchain-windows.cmake</code> in your project root:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode cmake"><code class="sourceCode cmake"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_SYSTEM_NAME</span> Windows)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_SYSTEM_PROCESSOR</span> x86_64)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define target cross-compilers</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_C_COMPILER</span> x86_64-w64-mingw32-gcc)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_CXX_COMPILER</span> x86_64-w64-mingw32-g++)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Define root paths for the target environment</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_FIND_ROOT_PATH</span> /usr/x86_64-w64-mingw32)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Control search behaviors for libraries, includes, and programs</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_FIND_ROOT_PATH_MODE_PROGRAM</span> NEVER)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_FIND_ROOT_PATH_MODE_LIBRARY</span> ONLY)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">set</span>(<span class="dv">CMAKE_FIND_ROOT_PATH_MODE_INCLUDE</span> ONLY)</span></code></pre></div>
+<h2 id="step-4-configure-the-build-environment">Step 4: Configure the
+Build Environment</h2>
+<p>In your project directory containing the <code>CMakeLists.txt</code>
+file, generate build configurations into designated directories for each
+target platform.</p>
+<ul>
+<li><p><strong>Configure for Windows (Cross-Compilation):</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-B</span> build-win <span class="at">-S</span> . <span class="at">-DCMAKE_TOOLCHAIN_FILE</span><span class="op">=</span>toolchain-windows.cmake</span></code></pre></div></li>
+<li><p><strong>Configure for Native Linux:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-B</span> build-linux <span class="at">-S</span> .</span></code></pre></div></li>
+</ul>
+<h2 id="step-5-build-the-targets">Step 5: Build the Targets</h2>
+<p>Compile the binaries independently using CMake’s build command:</p>
+<ul>
+<li><p><strong>Compile Windows Executables
+(<code>.exe</code>):</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">--build</span> build-win</span></code></pre></div></li>
+<li><p><strong>Compile Linux Executables:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">--build</span> build-linux</span></code></pre></div></li>
+</ul>
+<p>Using dedicated build directories alongside platform-specific
+toolchain files allows you to maintain clean, reproducible
+cross-platform builds directly on Ubuntu.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

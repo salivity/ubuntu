@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure Xmonad on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for installing and configuring the Xmonad dynamic tiling window manager on Ubuntu. You will learn how to install Xmonad along with its essential dependencies, set up a minimal Haskell configuration file (xmo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-xmonad-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure Xmonad on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-xmonad-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for installing and configuring the Xmonad dynamic tiling window manager on Ubuntu. You will learn how to install Xmonad along with its essential dependencies, set up a minimal Haskell configuration file (xmo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-xmonad-on-ubuntu">How to Install
+and Configure Xmonad on Ubuntu</h1>
+<p>This guide provides a step-by-step walkthrough for installing and
+configuring the Xmonad dynamic tiling window manager on Ubuntu. You will
+learn how to install Xmonad along with its essential dependencies, set
+up a minimal Haskell configuration file (<code>xmonad.hs</code>),
+integrate tools like dmenu and XMobar, and launch your Xmonad session
+directly from the Ubuntu login screen.</p>
+<h2 id="step-1-install-xmonad-and-dependencies">Step 1: Install Xmonad
+and Dependencies</h2>
+<p>Open your terminal and update your package list. Then, install
+Xmonad, the Xmonad contrib library, compilation tools, and essential
+utilities like <code>dmenu</code> (an application launcher) and
+<code>xmobar</code> (a lightweight status bar).</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install xmonad libghc-xmonad-dev libghc-xmonad-contrib-dev dmenu xmobar build-essential</span></code></pre></div>
+<h2 id="step-2-create-the-xmonad-configuration-directory">Step 2: Create
+the Xmonad Configuration Directory</h2>
+<p>Xmonad requires a directory to store its configuration file. Create
+the configuration folder in your home directory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.config/xmonad</span></code></pre></div>
+<p>Navigate into this directory and create a file named
+<code>xmonad.hs</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.config/xmonad/xmonad.hs</span></code></pre></div>
+<h2 id="step-3-write-a-basic-xmonad.hs-configuration">Step 3: Write a
+Basic <code>xmonad.hs</code> Configuration</h2>
+<p>Paste the following starter Haskell configuration into your
+<code>xmonad.hs</code> file. This configures the Super key (Windows key)
+as the main modifier, sets <code>st</code> or
+<code>gnome-terminal</code> as the default terminal, and enables layout
+options from the <code>xmonad-contrib</code> library.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">XMonad</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">XMonad.Hooks.DynamicLog</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">XMonad.Hooks.ManageDocks</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">XMonad.Util.Run</span>(spawnPipe)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">XMonad.Util.EZConfig</span>(additionalKeys)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">System.IO</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    xmproc <span class="ot">&lt;-</span> spawnPipe <span class="st">&quot;xmobar ~/.config/xmobar/xmobarrc&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    xmonad <span class="op">$</span> docks def</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        { modMask <span class="ot">=</span> mod4Mask <span class="co">-- Set Super/Windows key as the modifier</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        , terminal <span class="ot">=</span> <span class="st">&quot;gnome-terminal&quot;</span> <span class="co">-- Set default terminal</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        , layoutHook <span class="ot">=</span> avoidStruts <span class="op">$</span> layoutHook def</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        , manageHook <span class="ot">=</span> manageDocks <span class="op">&lt;+&gt;</span> manageHook def</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        , logHook <span class="ot">=</span> dynamicLogWithPP xmobarPP</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                        { ppOutput <span class="ot">=</span> hPutStrLn xmproc</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                        , ppTitle <span class="ot">=</span> xmobarColor <span class="st">&quot;green&quot;</span> <span class="st">&quot;&quot;</span> <span class="op">.</span> shorten <span class="dv">50</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                        }</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        }</span></code></pre></div>
+<p>Save and exit the editor (Ctrl+O, Enter, Ctrl+X in nano).</p>
+<h2 id="step-4-configure-xmobar-status-bar">Step 4: Configure XMobar
+(Status Bar)</h2>
+<p>Create the configuration directory and file for XMobar:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.config/xmobar</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.config/xmobar/xmobarrc</span></code></pre></div>
+<p>Add the following minimal XMobar configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">Config</span> { font <span class="ot">=</span> <span class="st">&quot;xft:Sans:pixelsize=12&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>       , bgColor <span class="ot">=</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>       , fgColor <span class="ot">=</span> <span class="st">&quot;grey&quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>       , position <span class="ot">=</span> <span class="dt">Top</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>       , lowerOnStart <span class="ot">=</span> <span class="dt">True</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>       , commands <span class="ot">=</span> [ <span class="dt">Run</span> <span class="dt">Cpu</span> [<span class="st">&quot;-L&quot;</span>,<span class="st">&quot;3&quot;</span>,<span class="st">&quot;-H&quot;</span>,<span class="st">&quot;50&quot;</span>,<span class="st">&quot;--normal&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;--high&quot;</span>,<span class="st">&quot;red&quot;</span>] <span class="dv">10</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                    , <span class="dt">Run</span> <span class="dt">Memory</span> [<span class="st">&quot;-t&quot;</span>,<span class="st">&quot;Mem: &lt;usedratio&gt;%&quot;</span>] <span class="dv">10</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                    , <span class="dt">Run</span> <span class="dt">Date</span> <span class="st">&quot;%a %b %_d %Y %H:%M:%S&quot;</span> <span class="st">&quot;date&quot;</span> <span class="dv">10</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                    , <span class="dt">Run</span> <span class="dt">StdinReader</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>       , sepChar <span class="ot">=</span> <span class="st">&quot;%&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>       , alignSep <span class="ot">=</span> <span class="st">&quot;}{&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>       , template <span class="ot">=</span> <span class="st">&quot;%StdinReader% }{ %cpu% | %memory% | &lt;fc=#ee9a00&gt;%date%&lt;/fc&gt;&quot;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>       }</span></code></pre></div>
+<p>Save and exit the file.</p>
+<h2 id="step-5-compile-xmonad">Step 5: Compile Xmonad</h2>
+<p>Recompile Xmonad to check for any syntax errors in your Haskell
+configuration:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xmonad</span> <span class="at">--recompile</span></span></code></pre></div>
+<p>If the command executes without returning errors, your setup is
+valid.</p>
+<h2 id="step-6-log-into-xmonad">Step 6: Log into Xmonad</h2>
+<ol type="1">
+<li>Log out of your current Ubuntu session.</li>
+<li>On the Display Manager screen (login screen), click your
+username.</li>
+<li>Click the gear icon located in the bottom right corner of the
+screen.</li>
+<li>Select <strong>Xmonad</strong> from the list of sessions.</li>
+<li>Enter your password and log in.</li>
+</ol>
+<h2 id="essential-keyboard-shortcuts">Essential Keyboard Shortcuts</h2>
+<ul>
+<li><strong>Mod + Shift + Enter</strong>: Open the terminal
+(<code>gnome-terminal</code>)</li>
+<li><strong>Mod + p</strong>: Open <code>dmenu</code> to launch
+applications</li>
+<li><strong>Mod + Shift + c</strong>: Close the focused window</li>
+<li><strong>Mod + Space</strong>: Cycle through window layouts</li>
+<li><strong>Mod + j / Mod + k</strong>: Move focus to the next/previous
+window</li>
+<li><strong>Mod + Shift + j / Mod + Shift + k</strong>: Swap the focused
+window with the next/previous window</li>
+<li><strong>Mod + q</strong>: Recompile and restart Xmonad in-place</li>
+<li><strong>Mod + Shift + q</strong>: Exit Xmonad (log out)</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

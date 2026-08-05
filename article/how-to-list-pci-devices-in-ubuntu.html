@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to List PCI Devices in Ubuntu - ubuntu</title>
+    <meta name="description" content="Managing and troubleshooting hardware on an Ubuntu system often requires inspecting connected Peripheral Component Interconnect (PCI) devices, such as graphics cards, network adapters, storage controllers, and sound cards. The primary command used to dis">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-list-pci-devices-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to List PCI Devices in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-list-pci-devices-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing and troubleshooting hardware on an Ubuntu system often requires inspecting connected Peripheral Component Interconnect (PCI) devices, such as graphics cards, network adapters, storage controllers, and sound cards. The primary command used to dis" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-list-pci-devices-in-ubuntu">How to List PCI Devices in
+Ubuntu</h1>
+<p>Managing and troubleshooting hardware on an Ubuntu system often
+requires inspecting connected Peripheral Component Interconnect (PCI)
+devices, such as graphics cards, network adapters, storage controllers,
+and sound cards. The primary command used to display these devices is
+<code>lspci</code>, a built-in utility provided by the
+<code>pciutils</code> package. This article provides a straightforward
+guide on how to use the <code>lspci</code> command and its most useful
+flags to view connected PCI hardware on your Ubuntu system.</p>
+<h2 id="the-lspci-command">The <code>lspci</code> Command</h2>
+<p>The <code>lspci</code> command displays detailed information about
+all PCI buses and devices connected to your system motherboard.</p>
+<h3 id="basic-usage">Basic Usage</h3>
+<p>To list all connected PCI devices in a brief, one-line summary per
+device, open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span></span></code></pre></div>
+<p>This output displays the device domain, bus, slot, function number,
+vendor name, device type, and model name.</p>
+<h3 id="common-lspci-command-options">Common <code>lspci</code> Command
+Options</h3>
+<p>You can modify the output of <code>lspci</code> using various flags
+depending on the level of detail you need:</p>
+<ul>
+<li><p><strong>Show Kernel Drivers (<code>-k</code>):</strong> Displays
+the kernel driver currently handling each device and the kernel modules
+available for it.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-k</span></span></code></pre></div></li>
+<li><p><strong>Verbose Output (<code>-v</code>, <code>-vv</code>, or
+<code>-vvv</code>):</strong> Displays detailed information about all
+devices, including memory addresses, IRQs, and capabilities.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-v</span></span></code></pre></div></li>
+<li><p><strong>Numeric Hardware IDs (<code>-n</code>):</strong> Displays
+vendor and device codes as numbers instead of looking up their names in
+the database.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-n</span></span></code></pre></div></li>
+<li><p><strong>Tree View (<code>-t</code>):</strong> Displays a diagram
+showing the connection relationships between buses, bridges, and
+devices.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-t</span></span></code></pre></div></li>
+</ul>
+<h3 id="filtering-specific-pci-devices">Filtering Specific PCI
+Devices</h3>
+<p>If you want to find a specific piece of hardware, pipe the output
+into the <code>grep</code> command.</p>
+<ul>
+<li><p><strong>Find Graphics/Video Cards:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> vga</span></code></pre></div></li>
+<li><p><strong>Find Network Controllers (Wi-Fi/Ethernet):</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> network</span></code></pre></div>
+<p>or</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> ethernet</span></code></pre></div></li>
+<li><p><strong>Find Audio Controllers:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> audio</span></code></pre></div></li>
+</ul>
+<h2 id="installing-pciutils">Installing <code>pciutils</code></h2>
+<p>If the <code>lspci</code> command is not available on your system,
+install the <code>pciutils</code> package using <code>apt</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install pciutils</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

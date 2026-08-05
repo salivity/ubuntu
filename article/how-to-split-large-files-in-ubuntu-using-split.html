@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Split Large Files in Ubuntu Using Split - ubuntu</title>
+    <meta name="description" content="Splitting large files into smaller parts in Ubuntu is a straightforward process using the built-in split command-line utility. This guide covers how to divide files based on file size or line count, customize the output file names, and rejoin the split p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-split-large-files-in-ubuntu-using-split">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Split Large Files in Ubuntu Using Split - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-split-large-files-in-ubuntu-using-split" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Splitting large files into smaller parts in Ubuntu is a straightforward process using the built-in split command-line utility. This guide covers how to divide files based on file size or line count, customize the output file names, and rejoin the split p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-split-large-files-in-ubuntu-using-split">How to Split
+Large Files in Ubuntu Using Split</h1>
+<p>Splitting large files into smaller parts in Ubuntu is a
+straightforward process using the built-in <code>split</code>
+command-line utility. This guide covers how to divide files based on
+file size or line count, customize the output file names, and rejoin the
+split pieces back into the original file using the <code>cat</code>
+command.</p>
+<h2 id="basic-syntax">Basic Syntax</h2>
+<p>The general syntax for the <code>split</code> command is:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">split</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> filename <span class="pp">[</span><span class="ss">prefix</span><span class="pp">]</span></span></code></pre></div>
+<p>If no prefix is provided, Ubuntu defaults to using <code>x</code>
+followed by letters (e.g., <code>xaa</code>, <code>xab</code>,
+<code>xac</code>).</p>
+<h2 id="split-a-file-by-size">Split a File by Size</h2>
+<p>To split a file based on a specific size, use the <code>-b</code>
+option followed by the desired size and unit (such as <code>K</code> for
+kilobytes, <code>M</code> for megabytes, or <code>G</code> for
+gigabytes).</p>
+<p>Example (splitting a 1GB file into 200MB chunks):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">split</span> <span class="at">-b</span> 200M largefile.zip chunk_</span></code></pre></div>
+<p>This creates files named <code>chunk_aa</code>,
+<code>chunk_ab</code>, <code>chunk_ac</code>, and so on.</p>
+<h2 id="split-a-file-by-line-count">Split a File by Line Count</h2>
+<p>For text files, you can split by a specific number of lines using the
+<code>-l</code> option.</p>
+<p>Example (splitting a text file every 1,000 lines):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">split</span> <span class="at">-l</span> 1000 large_list.txt list_part_</span></code></pre></div>
+<p>This generates smaller text files containing 1,000 lines each.</p>
+<h2 id="use-numeric-suffixes">Use Numeric Suffixes</h2>
+<p>By default, <code>split</code> appends alphabetical suffixes
+(<code>aa</code>, <code>ab</code>). To use numeric suffixes
+(<code>00</code>, <code>01</code>, <code>02</code>), add the
+<code>-d</code> option.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">split</span> <span class="at">-b</span> 100M <span class="at">-d</span> largefile.iso chunk_</span></code></pre></div>
+<p>This produces files named <code>chunk_00</code>,
+<code>chunk_01</code>, <code>chunk_02</code>, etc.</p>
+<p>To specify the number of digits in the suffix, use
+<code>--additional-suffix</code> or set the length with
+<code>-a</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">split</span> <span class="at">-b</span> 100M <span class="at">-d</span> <span class="at">-a</span> 3 largefile.iso chunk_</span></code></pre></div>
+<p>This formats the output files as <code>chunk_000</code>,
+<code>chunk_001</code>, <code>chunk_002</code>.</p>
+<h2 id="rejoining-split-files">Rejoining Split Files</h2>
+<p>To combine the split pieces back into the original file, use the
+standard <code>cat</code> command:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> chunk_<span class="pp">*</span> <span class="op">&gt;</span> originalfile.iso</span></code></pre></div>
+<p>This reads all matching split files in order and merges them into
+<code>originalfile.iso</code>.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

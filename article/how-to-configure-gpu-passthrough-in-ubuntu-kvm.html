@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure GPU Passthrough in Ubuntu KVM - ubuntu</title>
+    <meta name="description" content="Configuring GPU PCI passthrough on an Ubuntu KVM (Kernel-based Virtual Machine) host grants a virtual machine direct access to a physical graphics card, achieving near-native graphical and compute performance. This process involves enabling hardware virt">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-gpu-passthrough-in-ubuntu-kvm">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure GPU Passthrough in Ubuntu KVM - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-gpu-passthrough-in-ubuntu-kvm" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring GPU PCI passthrough on an Ubuntu KVM (Kernel-based Virtual Machine) host grants a virtual machine direct access to a physical graphics card, achieving near-native graphical and compute performance. This process involves enabling hardware virt" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-gpu-passthrough-in-ubuntu-kvm">How to Configure
+GPU Passthrough in Ubuntu KVM</h1>
+<p>Configuring GPU PCI passthrough on an Ubuntu KVM (Kernel-based
+Virtual Machine) host grants a virtual machine direct access to a
+physical graphics card, achieving near-native graphical and compute
+performance. This process involves enabling hardware virtualization
+extensions in the system BIOS, configuring the IOMMU controller in
+Linux, isolating the target GPU using VFIO drivers, and attaching the
+device to your guest virtual machine using Virt-Manager or
+<code>virsh</code>.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An Intel CPU with VT-x and VT-d enabled, or an AMD CPU with AMD-V
+and AMD-Vi enabled in the BIOS/UEFI.</li>
+<li>A dedicated secondary GPU for passthrough (recommended, as the host
+needs a primary display adapter).</li>
+<li>An Ubuntu host system running KVM, QEMU, and
+<code>libvirt</code>.</li>
+</ul>
+<hr />
+<h2 id="step-1-enable-iommu-in-the-bootloader">Step 1: Enable IOMMU in
+the Bootloader</h2>
+<p>To allow the host system to isolate PCI devices, you must enable
+Input-Output Memory Management Unit (IOMMU) support in GRUB.</p>
+<ol type="1">
+<li><p>Open the GRUB configuration file for editing:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/grub</span></code></pre></div></li>
+<li><p>Locate the line beginning with
+<code>GRUB_CMDLINE_LINUX_DEFAULT</code> and append the appropriate IOMMU
+flags:</p>
+<ul>
+<li><p><strong>For Intel CPUs:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="op">=</span><span class="st">&quot;quiet splash intel_iommu=on iommu=pt&quot;</span></span></code></pre></div></li>
+<li><p><strong>For AMD CPUs:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="op">=</span><span class="st">&quot;quiet splash amd_iommu=on iommu=pt&quot;</span></span></code></pre></div></li>
+</ul></li>
+<li><p>Update GRUB and restart your system:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-grub</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+<li><p>Verify that IOMMU is enabled after rebooting:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dmesg</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">&quot;dmar|iommu&quot;</span></span></code></pre></div>
+<p>Look for logs indicating “DMAR: IOMMU enabled” or “AMD-Vi:
+Initialized”.</p></li>
+</ol>
+<hr />
+<h2 id="step-2-identify-the-gpu-and-audio-pci-ids">Step 2: Identify the
+GPU and Audio PCI IDs</h2>
+<p>You must identify the specific Vendor and Device IDs for the GPU and
+its integrated audio controller.</p>
+<ol type="1">
+<li><p>List all PCI devices and filter for your graphics card:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-nn</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">&quot;vga|3d|audio&quot;</span></span></code></pre></div></li>
+<li><p>Note the hexadecimal IDs inside the square brackets at the end of
+the line for both the video and audio devices. Example output:</p>
+<pre class="text"><code>01:00.0 VGA compatible controller [0300]: NVIDIA Corporation [10de:1b80] (rev a1)
+01:00.1 Audio device [0403]: NVIDIA Corporation [10de:10f0] (rev a1)</code></pre>
+<p>In this example, the device IDs are <code>10de:1b80</code> and
+<code>10de:10f0</code>.</p></li>
+</ol>
+<hr />
+<h2 id="step-3-configure-vfio-drivers">Step 3: Configure VFIO
+Drivers</h2>
+<p>Isolate the GPU from the host operating system by assigning it to the
+<code>vfio-pci</code> driver upon boot.</p>
+<ol type="1">
+<li><p>Create a VFIO configuration file:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/vfio.conf</span></code></pre></div></li>
+<li><p>Add your hardware IDs (replace <code>10de:1b80,10de:10f0</code>
+with your actual IDs):</p>
+<pre class="text"><code>options vfio-pci ids=10de:1b80,10de:10f0</code></pre></li>
+<li><p>Ensure VFIO modules load before host GPU drivers. Edit
+<code>/etc/modules</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modules</span></code></pre></div>
+<p>Add the following lines:</p>
+<pre class="text"><code>vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd</code></pre></li>
+<li><p>Blacklist default GPU drivers to prevent the host from claiming
+the card (optional for dedicated secondary GPUs, required for single-GPU
+setups):</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/blacklist.conf</span></code></pre></div>
+<p>Add the relevant driver (e.g., <code>nouveau</code>,
+<code>nvidia</code>, <code>amdgpu</code>, or <code>radeon</code>):</p>
+<pre class="text"><code>blacklist nouveau
+blacklist nvidia</code></pre></li>
+<li><p>Update <code>initramfs</code> and reboot:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span> <span class="at">-k</span> all</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-4-confirm-driver-binding">Step 4: Confirm Driver
+Binding</h2>
+<p>After rebooting, verify that the GPU is using the
+<code>vfio-pci</code> kernel driver:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-nnk</span> <span class="at">-d</span> 10de:</span></code></pre></div>
+<p>Check the <code>Kernel driver in use:</code> output line. It should
+display <code>vfio-pci</code> for both the VGA and Audio devices.</p>
+<hr />
+<h2 id="step-5-attach-the-gpu-to-the-guest-vm">Step 5: Attach the GPU to
+the Guest VM</h2>
+<h3 id="method-a-using-virt-manager-gui">Method A: Using Virt-Manager
+(GUI)</h3>
+<ol type="1">
+<li>Open <strong>Virtual Machine Manager</strong>
+(<code>virt-manager</code>).</li>
+<li>Open the Target VM details (Lightbulb icon).</li>
+<li>Click <strong>Add Hardware</strong> &gt; <strong>PCI Host
+Device</strong>.</li>
+<li>Select the GPU’s main PCI entry (e.g., <code>0000:01:00.0</code>)
+and click <strong>Finish</strong>.</li>
+<li>Click <strong>Add Hardware</strong> &gt; <strong>PCI Host
+Device</strong> again, and select the GPU’s companion audio device
+(e.g., <code>0000:01:00.1</code>).</li>
+<li>Start the virtual machine and install the official graphics drivers
+inside the guest operating system.</li>
+</ol>
+<h3 id="method-b-using-virsh-cli">Method B: Using Virsh (CLI)</h3>
+<ol type="1">
+<li><p>Find the host device XML name format:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> nodedev-list <span class="at">--tree</span> <span class="kw">|</span> <span class="fu">grep</span> pci</span></code></pre></div></li>
+<li><p>Attach the devices to your guest XML configuration using
+<code>virsh edit &lt;vm-name&gt;</code> under the
+<code>&lt;devices&gt;</code> section:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">hostdev</span> <span class="ot">mode=</span><span class="st">&#39;subsystem&#39;</span> <span class="ot">type=</span><span class="st">&#39;pci&#39;</span> <span class="ot">managed=</span><span class="st">&#39;yes&#39;</span>&gt;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">source</span>&gt;</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">address</span> <span class="ot">domain=</span><span class="st">&#39;0x0000&#39;</span> <span class="ot">bus=</span><span class="st">&#39;0x01&#39;</span> <span class="ot">slot=</span><span class="st">&#39;0x00&#39;</span> <span class="ot">function=</span><span class="st">&#39;0x0&#39;</span>/&gt;</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">source</span>&gt;</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">hostdev</span>&gt;</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">hostdev</span> <span class="ot">mode=</span><span class="st">&#39;subsystem&#39;</span> <span class="ot">type=</span><span class="st">&#39;pci&#39;</span> <span class="ot">managed=</span><span class="st">&#39;yes&#39;</span>&gt;</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">source</span>&gt;</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">address</span> <span class="ot">domain=</span><span class="st">&#39;0x0000&#39;</span> <span class="ot">bus=</span><span class="st">&#39;0x01&#39;</span> <span class="ot">slot=</span><span class="st">&#39;0x00&#39;</span> <span class="ot">function=</span><span class="st">&#39;0x1&#39;</span>/&gt;</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">source</span>&gt;</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">hostdev</span>&gt;</span></code></pre></div></li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

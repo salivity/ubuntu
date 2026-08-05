@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Empty Directories Recursively in Ubuntu - ubuntu</title>
+    <meta name="description" content="To permanently remove empty directories recursively in Ubuntu, the standard and most efficient tool is the find command combined with the -type d, -empty, and -delete flags. This method safely scans your target folder structure, identifies any directorie">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/remove-empty-directories-recursively-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Remove Empty Directories Recursively in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/remove-empty-directories-recursively-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="To permanently remove empty directories recursively in Ubuntu, the standard and most efficient tool is the find command combined with the -type d, -empty, and -delete flags. This method safely scans your target folder structure, identifies any directorie" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="remove-empty-directories-recursively-in-ubuntu">Remove Empty
+Directories Recursively in Ubuntu</h1>
+<p>To permanently remove empty directories recursively in Ubuntu, the
+standard and most efficient tool is the <code>find</code> command
+combined with the <code>-type d</code>, <code>-empty</code>, and
+<code>-delete</code> flags. This method safely scans your target folder
+structure, identifies any directories containing no files or
+subdirectories, and deletes them permanently without affecting any
+directories that contain data.</p>
+<h2 id="the-standard-command">The Standard Command</h2>
+<p>To delete all empty directories in your current working directory and
+all of its subdirectories, open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-type</span> d <span class="at">-empty</span> <span class="at">-delete</span></span></code></pre></div>
+<p>If you want to run this command on a specific folder path rather than
+your current directory, replace the dot (<code>.</code>) with the
+absolute or relative path to that directory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> /path/to/target_directory <span class="at">-type</span> d <span class="at">-empty</span> <span class="at">-delete</span></span></code></pre></div>
+<h2 id="command-breakdown">Command Breakdown</h2>
+<ul>
+<li><strong><code>find</code></strong>: The built-in Linux utility used
+to search for files and directories.</li>
+<li><strong><code>/path/to/target_directory</code></strong>: Specifies
+the starting directory for the recursive search.</li>
+<li><strong><code>-type d</code></strong>: Restricts the search results
+exclusively to directories (folders).</li>
+<li><strong><code>-empty</code></strong>: Filters the search to only
+match directories that are completely empty.</li>
+<li><strong><code>-delete</code></strong>: Permanently removes all
+matched empty directories. When <code>-delete</code> is used, GNU
+<code>find</code> automatically processes the directory tree in
+depth-first order (<code>-depth</code>), ensuring that nested chains of
+empty directories are completely removed in a single execution.</li>
+</ul>
+<h2 id="previewing-directories-before-deletion">Previewing Directories
+Before Deletion</h2>
+<p>Because the <code>-delete</code> action removes folders permanently
+without moving them to the Trash, it is recommended to preview which
+directories will be removed before running the deletion command.</p>
+<p>To view a list of empty directories without deleting them, run the
+command without the <code>-delete</code> flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> /path/to/target_directory <span class="at">-type</span> d <span class="at">-empty</span></span></code></pre></div>
+<p>Review the output list. If you are satisfied with the results, run
+the full command containing <code>-delete</code> to perform the
+removal.</p>
+<h2 id="alternative-method-using-rmdir-with-find">Alternative Method:
+Using <code>rmdir</code> with <code>find</code></h2>
+<p>If you prefer using the dedicated directory-removal tool
+<code>rmdir</code>, you can pipe the output of <code>find</code> to
+<code>xargs</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> /path/to/target_directory <span class="at">-type</span> d <span class="at">-empty</span> <span class="at">-print0</span> <span class="kw">|</span> <span class="fu">xargs</span> <span class="at">-0</span> rmdir <span class="at">-p</span></span></code></pre></div>
+<p>The <code>-p</code> flag tells <code>rmdir</code> to remove parent
+directories if they also become empty after their child subdirectories
+are deleted. However, using <code>find ... -delete</code> remains the
+simplest and safest option on Ubuntu.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of QEMU Guest Agent in Ubuntu VMs - ubuntu</title>
+    <meta name="description" content="The QEMU Guest Agent (qemu-guest-agent) is a background daemon installed inside an Ubuntu virtual machine (VM) that enables seamless, two-way communication between the guest operating system and the host hypervisor, such as KVM, QEMU, or Proxmox VE. It p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-qemu-guest-agent-in-ubuntu-vms">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of QEMU Guest Agent in Ubuntu VMs - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-qemu-guest-agent-in-ubuntu-vms" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The QEMU Guest Agent (qemu-guest-agent) is a background daemon installed inside an Ubuntu virtual machine (VM) that enables seamless, two-way communication between the guest operating system and the host hypervisor, such as KVM, QEMU, or Proxmox VE. It p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="role-of-qemu-guest-agent-in-ubuntu-vms">Role of QEMU Guest Agent
+in Ubuntu VMs</h1>
+<p>The QEMU Guest Agent (<code>qemu-guest-agent</code>) is a background
+daemon installed inside an Ubuntu virtual machine (VM) that enables
+seamless, two-way communication between the guest operating system and
+the host hypervisor, such as KVM, QEMU, or Proxmox VE. It passes system
+management commands and information back and forth over a dedicated
+virtio-serial channel. Installing and configuring this agent allows host
+administrators to execute graceful shutdowns, create consistent disk
+snapshots, reset user credentials, and monitor accurate real-time guest
+metrics directly from the hypervisor interface.</p>
+<h2 id="key-functions-of-qemu-guest-agent">Key Functions of QEMU Guest
+Agent</h2>
+<h3 id="graceful-shutdowns-and-restarts">1. Graceful Shutdowns and
+Restarts</h3>
+<p>Without the guest agent, a hypervisor stopping or rebooting a VM
+relies on ACPI signals, which can be ignored by the guest OS or result
+in an unclean forced power-off. The <code>qemu-guest-agent</code> allows
+the host to send direct execution requests to the Ubuntu kernel,
+ensuring all processes terminate safely and filesystems unmount properly
+before the power cuts out.</p>
+<h3 id="file-system-quiescing-freezing-for-backups">2. File System
+Quiescing (Freezing for Backups)</h3>
+<p>When creating VM snapshots or backups while the system is running,
+data written to memory or disk caches can lead to corrupted backups. The
+guest agent allows the host to issue <code>fsfreeze</code> (freeze) and
+<code>fsthaw</code> (thaw) commands. * <strong>Freeze:</strong>
+Temporarily flushes pending writes and pauses disk I/O. *
+<strong>Snapshot:</strong> The hypervisor takes a clean snapshot of the
+virtual disk. * <strong>Thaw:</strong> Disk I/O resumes immediately.</p>
+<p>This process guarantees application-consistent and crash-consistent
+backups without requiring VM downtime.</p>
+<h3 id="hypervisor-information-retrieval">3. Hypervisor Information
+Retrieval</h3>
+<p>The guest agent sends detailed runtime telemetry from the Ubuntu VM
+back to the hypervisor management web console or CLI. Key information
+gathered includes: * <strong>Network Interfaces:</strong> Real-time IPv4
+and IPv6 addresses assigned to the guest. * <strong>OS Details:</strong>
+Hostname, kernel version, and distribution release details. *
+<strong>Disk Usage:</strong> Mounted filesystems and current space
+consumption. * <strong>Active Users:</strong> Currently logged-in user
+sessions.</p>
+<h3 id="remote-command-execution-and-management">4. Remote Command
+Execution and Management</h3>
+<p>Hypervisors can run specific guest commands through the agent without
+needing active SSH connections or remote desktop access. Common
+management capabilities include: * Setting or resetting user account
+passwords. * Synchronizing the VM system clock with the host time
+(preventing time drift after suspension). * Trim/UNMAP operations on
+SSD-backed virtual disks to free up host storage space.</p>
+<hr />
+<h2 id="installing-and-enabling-the-agent-on-ubuntu">Installing and
+Enabling the Agent on Ubuntu</h2>
+<p>To take advantage of these features, the agent must be installed
+inside the Ubuntu guest, and the virtio-serial device must be enabled in
+the VM configuration on the hypervisor.</p>
+<h3 id="step-1-install-the-package">Step 1: Install the Package</h3>
+<p>Run the following commands inside your Ubuntu VM terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install qemu-guest-agent <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-enable-and-start-the-service">Step 2: Enable and Start
+the Service</h3>
+<p>Ensure the daemon starts automatically on system boot:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> qemu-guest-agent</span></code></pre></div>
+<h3 id="step-3-verify-status">Step 3: Verify Status</h3>
+<p>Check that the service is running properly:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status qemu-guest-agent</span></code></pre></div>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>The <code>qemu-guest-agent</code> bridges the operational gap between
+an Ubuntu guest OS and the underlying virtualization platform.
+Installing it improves backup reliability, ensures system stability
+during maintenance events, and gives hypervisor administrators full
+management capabilities without needing external network access or open
+SSH ports.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

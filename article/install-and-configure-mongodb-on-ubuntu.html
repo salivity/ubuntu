@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install and Configure MongoDB on Ubuntu - ubuntu</title>
+    <meta name="description" content="Installing and configuring MongoDB on an Ubuntu system allows developers to leverage a powerful, document-oriented NoSQL database for modern web applications. This guide provides a step-by-step walkthrough covering how to import the official MongoDB repo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-and-configure-mongodb-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install and Configure MongoDB on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-and-configure-mongodb-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Installing and configuring MongoDB on an Ubuntu system allows developers to leverage a powerful, document-oriented NoSQL database for modern web applications. This guide provides a step-by-step walkthrough covering how to import the official MongoDB repo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="install-and-configure-mongodb-on-ubuntu">Install and Configure
+MongoDB on Ubuntu</h1>
+<p>Installing and configuring MongoDB on an Ubuntu system allows
+developers to leverage a powerful, document-oriented NoSQL database for
+modern web applications. This guide provides a step-by-step walkthrough
+covering how to import the official MongoDB repository, install the
+database using the APT package manager, configure basic service
+settings, and secure your database instance for production use.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting, ensure you have: * An Ubuntu server (20.04 or 22.04
+LTS recommended). * A user account with <code>sudo</code>
+privileges.</p>
+<hr />
+<h2 id="step-1-import-the-mongodb-public-gpg-key">Step 1: Import the
+MongoDB Public GPG Key</h2>
+<p>To ensure the authenticity of the MongoDB packages, import the
+official MongoDB GPG key using <code>curl</code> and
+<code>gnupg</code>.</p>
+<p>Run the following commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install curl gnupg openpgp-keys-mongodb <span class="at">-y</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://www.mongodb.org/static/pgp/server-7.0.asc <span class="kw">|</span> <span class="fu">sudo</span> gpg <span class="at">--dearmor</span> <span class="at">-o</span> /usr/share/keyrings/mongodb-server-7.0.gpg</span></code></pre></div>
+<hr />
+<h2 id="step-2-add-the-mongodb-repository">Step 2: Add the MongoDB
+Repository</h2>
+<p>Add the MongoDB 7.0 repository location to your system’s sources list
+so APT knows where to download the packages.</p>
+<p>For <strong>Ubuntu 22.04 (Jammy)</strong>, run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/mongodb-org-7.0.list</span></code></pre></div>
+<p>For <strong>Ubuntu 20.04 (Focal)</strong>, replace <code>jammy</code>
+with <code>focal</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/mongodb-org-7.0.list</span></code></pre></div>
+<hr />
+<h2 id="step-3-install-mongodb">Step 3: Install MongoDB</h2>
+<p>Update the local package database to include the newly added
+repository, then install the <code>mongodb-org</code> meta-package:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> mongodb-org</span></code></pre></div>
+<p>This package installs the MongoDB server daemon
+(<code>mongod</code>), administrative scripts, shell
+(<code>mongosh</code>), and core utilities.</p>
+<hr />
+<h2 id="step-4-start-and-enable-mongodb-service">Step 4: Start and
+Enable MongoDB Service</h2>
+<p>By default, MongoDB does not start automatically after
+installation.</p>
+<ol type="1">
+<li><p>Start the MongoDB service:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start mongod</span></code></pre></div></li>
+<li><p>Enable MongoDB to launch automatically upon system boot:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable mongod</span></code></pre></div></li>
+<li><p>Verify that the service is running:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status mongod</span></code></pre></div></li>
+</ol>
+<p>You should see an output indicating that the service is
+<code>active (running)</code>.</p>
+<hr />
+<h2 id="step-5-configure-mongodb">Step 5: Configure MongoDB</h2>
+<p>MongoDB’s primary configuration file is located at
+<code>/etc/mongod.conf</code>.</p>
+<h3 id="configure-network-access-optional">Configure Network Access
+(Optional)</h3>
+<p>By default, MongoDB only listens for connections from
+<code>127.0.0.1</code> (localhost). If your application runs on a
+separate server, you need to update the binding address.</p>
+<ol type="1">
+<li><p>Open the configuration file:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/mongod.conf</span></code></pre></div></li>
+<li><p>Locate the <code>net</code> section and update
+<code>bindIp</code>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">net</span><span class="kw">:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">27017</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">bindIp</span><span class="kw">:</span><span class="at"> 127.0.0.1,YOUR_SERVER_IP</span></span></code></pre></div></li>
+<li><p>Save and close the file (<code>Ctrl+O</code>, <code>Enter</code>,
+<code>Ctrl+X</code>).</p></li>
+<li><p>Restart MongoDB to apply the changes:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart mongod</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-6-enable-authentication-and-secure-mongodb">Step 6: Enable
+Authentication and Secure MongoDB</h2>
+<p>By default, MongoDB does not require authentication. To secure your
+instance:</p>
+<ol type="1">
+<li><p>Access the MongoDB Shell:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mongosh</span></span></code></pre></div></li>
+<li><p>Switch to the <code>admin</code> database:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>use admin</span></code></pre></div></li>
+<li><p>Create a root administrator user:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="fu">createUser</span>({</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">user</span><span class="op">:</span> <span class="st">&quot;adminUser&quot;</span><span class="op">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">pwd</span><span class="op">:</span> <span class="fu">passwordPrompt</span>()<span class="op">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">roles</span><span class="op">:</span> [ { <span class="dt">role</span><span class="op">:</span> <span class="st">&quot;userAdminAnyDatabase&quot;</span><span class="op">,</span> <span class="dt">db</span><span class="op">:</span> <span class="st">&quot;admin&quot;</span> }<span class="op">,</span> <span class="st">&quot;readWriteAnyDatabase&quot;</span> ]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>Type a secure password when prompted, then exit the shell:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>exit</span></code></pre></div></li>
+<li><p>Edit <code>/etc/mongod.conf</code> to enable authorization:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/mongod.conf</span></code></pre></div></li>
+<li><p>Find the <code>security</code> section and uncomment/update it to
+match:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">security</span><span class="kw">:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">authorization</span><span class="kw">:</span><span class="at"> enabled</span></span></code></pre></div></li>
+<li><p>Restart the MongoDB service:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart mongod</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-7-test-authentication">Step 7: Test Authentication</h2>
+<p>Verify that access restrictions are working by logging in with the
+administrative credentials created earlier:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mongosh</span> <span class="at">-u</span> adminUser <span class="at">-p</span> <span class="at">--authenticationDatabase</span> admin</span></code></pre></div>
+<p>After entering your password, you will have authenticated access to
+the MongoDB server environment.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

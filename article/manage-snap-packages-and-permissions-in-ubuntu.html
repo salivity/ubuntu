@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Snap Packages and Permissions in Ubuntu - ubuntu</title>
+    <meta name="description" content="Managing Snap packages in Ubuntu allows users to easily install, update, and remove sandboxed applications, while control over package permissions ensures system security. This guide provides a clear walkthrough on using both the Command Line Interface (">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/manage-snap-packages-and-permissions-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Manage Snap Packages and Permissions in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/manage-snap-packages-and-permissions-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing Snap packages in Ubuntu allows users to easily install, update, and remove sandboxed applications, while control over package permissions ensures system security. This guide provides a clear walkthrough on using both the Command Line Interface (" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="manage-snap-packages-and-permissions-in-ubuntu">Manage Snap
+Packages and Permissions in Ubuntu</h1>
+<p>Managing Snap packages in Ubuntu allows users to easily install,
+update, and remove sandboxed applications, while control over package
+permissions ensures system security. This guide provides a clear
+walkthrough on using both the Command Line Interface (CLI) and Graphical
+User Interface (GUI) to view installed snaps, check their access
+permissions, and modify what system resources they can access.</p>
+<h2 id="managing-snap-packages-via-terminal">Managing Snap Packages via
+Terminal</h2>
+<p>The command-line interface provides the fastest way to manage your
+installed Snap packages.</p>
+<h3 id="view-installed-snaps">1. View Installed Snaps</h3>
+<p>To see a complete list of all Snap packages installed on your Ubuntu
+system, open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> list</span></code></pre></div>
+<p>This command outputs a table showing the package name, version,
+revision number, tracking channel, publisher, and notes (such as strict
+or classic confinement).</p>
+<h3 id="update-installed-snaps">2. Update Installed Snaps</h3>
+<p>Snap packages usually update automatically in the background.
+However, you can manually check for and apply updates for all packages
+using:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh</span></code></pre></div>
+<p>To update a single specific application, append its name to the
+command:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh package-name</span></code></pre></div>
+<h3 id="remove-a-snap-package">3. Remove a Snap Package</h3>
+<p>To completely remove a Snap application along with its data, use:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap remove package-name</span></code></pre></div>
+<h3 id="enable-or-disable-a-snap">4. Enable or Disable a Snap</h3>
+<p>If you want to stop an application from running without deleting its
+files, you can disable it:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap disable package-name</span></code></pre></div>
+<p>To re-enable it later, run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap enable package-name</span></code></pre></div>
+<hr />
+<h2 id="viewing-and-managing-snap-permissions-via-terminal">Viewing and
+Managing Snap Permissions via Terminal</h2>
+<p>Snaps use “interfaces” (plugs and slots) to control access to system
+hardware and features like the camera, network, home directory, or
+removable storage.</p>
+<h3 id="view-permissions-for-a-specific-snap">1. View Permissions for a
+Specific Snap</h3>
+<p>To view all available connections and permission statuses for a
+specific application, use the <code>snap connections</code> command:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> connections package-name</span></code></pre></div>
+<p>This shows three main columns: * <strong>Interface</strong>: The type
+of access requested (e.g., <code>camera</code>, <code>home</code>,
+<code>network</code>). * <strong>Plug</strong>: The application
+requesting access. * <strong>Slot</strong>: The system resource
+providing access. A blank slot means the permission is currently
+disconnected/denied.</p>
+<h3 id="grant-a-permission-connect">2. Grant a Permission (Connect)</h3>
+<p>To grant an application access to a specific system resource, connect
+the corresponding plug to its slot:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap connect package-name:plug-name</span></code></pre></div>
+<p><em>Example (Granting VLC access to removable storage):</em></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap connect vlc:removable-media</span></code></pre></div>
+<h3 id="revoke-a-permission-disconnect">3. Revoke a Permission
+(Disconnect)</h3>
+<p>To revoke a permission and block an application from accessing a
+resource, disconnect the plug:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap disconnect package-name:plug-name</span></code></pre></div>
+<p><em>Example (Revoking VLC access to removable storage):</em></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap disconnect vlc:removable-media</span></code></pre></div>
+<hr />
+<h2 id="managing-snaps-and-permissions-via-gui">Managing Snaps and
+Permissions via GUI</h2>
+<p>If you prefer a graphical interface, you can manage both packages and
+permissions through the desktop software manager.</p>
+<ol type="1">
+<li><strong>Open the Software Center</strong>: Launch the <strong>App
+Center</strong> or <strong>Ubuntu Software</strong> application from
+your app grid.</li>
+<li><strong>View Installed Apps</strong>: Click on the
+<strong>Installed</strong> tab at the top to see all installed
+applications, including Snaps.</li>
+<li><strong>Manage Permissions</strong>:
+<ul>
+<li>Click on the specific application you want to configure.</li>
+<li>Look for the <strong>Permissions</strong> button or section on the
+application details page.</li>
+<li>Toggle the switches on or off for individual access rights, such as
+access to the microphone, web camera, print system, or host files.</li>
+</ul></li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

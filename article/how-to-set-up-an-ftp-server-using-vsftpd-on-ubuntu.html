@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up an FTP Server Using vsftpd on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a secure File Transfer Protocol (FTP) server on Ubuntu is a straightforward process using Very Secure FTP Daemon (vsftpd). This guide covers the complete installation and configuration workflow for vsftpd on Ubuntu, including updating system p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-an-ftp-server-using-vsftpd-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up an FTP Server Using vsftpd on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-an-ftp-server-using-vsftpd-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a secure File Transfer Protocol (FTP) server on Ubuntu is a straightforward process using Very Secure FTP Daemon (vsftpd). This guide covers the complete installation and configuration workflow for vsftpd on Ubuntu, including updating system p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-an-ftp-server-using-vsftpd-on-ubuntu">How to Set
+Up an FTP Server Using vsftpd on Ubuntu</h1>
+<p>Setting up a secure File Transfer Protocol (FTP) server on Ubuntu is
+a straightforward process using Very Secure FTP Daemon (vsftpd). This
+guide covers the complete installation and configuration workflow for
+vsftpd on Ubuntu, including updating system packages, configuring
+firewall access, creating dedicated user directories, enforcing security
+settings, and securing connections with SSL/TLS encryption.</p>
+<h2 id="step-1-update-system-packages-and-install-vsftpd">Step 1: Update
+System Packages and Install vsftpd</h2>
+<p>Begin by updating the local package index and installing the vsftpd
+package from the official Ubuntu repositories:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install vsftpd</span></code></pre></div>
+<p>After installation finishes, verify that the vsftpd service is
+running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status vsftpd</span></code></pre></div>
+<p>If the service is not active, start and enable it to launch
+automatically at boot:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start vsftpd</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable vsftpd</span></code></pre></div>
+<h2 id="step-2-configure-the-ufw-firewall">Step 2: Configure the UFW
+Firewall</h2>
+<p>Allow FTP traffic through the Uncomplicated Firewall (UFW). You must
+open standard FTP ports along with a range for passive mode traffic.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 20/tcp</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 21/tcp</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 40000:50000/tcp</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div>
+<h2 id="step-3-create-a-dedicated-ftp-user-and-directory">Step 3: Create
+a Dedicated FTP User and Directory</h2>
+<p>Create a dedicated user account specifically for FTP connections:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser ftpuser</span></code></pre></div>
+<p>Follow the prompts to set a strong password. Next, set up the
+directory structure and ownership to isolate the user within their home
+directory:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /home/ftpuser/ftp/upload</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown nobody:nogroup /home/ftpuser/ftp</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod a-w /home/ftpuser/ftp</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown ftpuser:ftpuser /home/ftpuser/ftp/upload</span></code></pre></div>
+<p>This configuration ensures the top-level FTP directory is read-only
+for security, while the <code>upload</code> sub-folder allows writing
+files.</p>
+<h2 id="step-4-configure-vsftpd-settings">Step 4: Configure vsftpd
+Settings</h2>
+<p>Back up the original configuration file before making changes:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/vsftpd.conf /etc/vsftpd.conf.bak</span></code></pre></div>
+<p>Open <code>/etc/vsftpd.conf</code> in a text editor:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/vsftpd.conf</span></code></pre></div>
+<p>Modify or add the following directives to configure write
+permissions, user isolation (chroot jail), and passive mode
+settings:</p>
+<pre class="text"><code>listen=YES
+listen_ipv6=NO
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+user_sub_token=$USER
+local_root=/home/$USER/ftp
+pasv_min_port=40000
+pasv_max_port=50000
+userlist_enable=YES
+userlist_file=/etc/vsftpd.userlist
+userlist_deny=NO</code></pre>
+<p>Save and close the file. Then, add your new user to the allowed user
+list:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;ftpuser&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee <span class="at">-a</span> /etc/vsftpd.userlist</span></code></pre></div>
+<h2 id="step-5-secure-transmissions-with-ssltls-ftps">Step 5: Secure
+Transmissions with SSL/TLS (FTPS)</h2>
+<p>To protect credentials and data transfers from eavesdropping,
+configure explicit TLS encryption. Generate a self-signed
+certificate:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> openssl req <span class="at">-x509</span> <span class="at">-nodes</span> <span class="at">-days</span> 365 <span class="at">-newkey</span> rsa:2048 <span class="at">-keyout</span> /etc/ssl/private/vsftpd.pem <span class="at">-out</span> /etc/ssl/certs/vsftpd.pem</span></code></pre></div>
+<p>Reopen <code>/etc/vsftpd.conf</code>:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/vsftpd.conf</span></code></pre></div>
+<p>Append the following SSL settings to the end of the file:</p>
+<pre class="text"><code>rsa_cert_file=/etc/ssl/certs/vsftpd.pem
+rsa_private_key_file=/etc/ssl/private/vsftpd.pem
+ssl_enable=YES
+allow_anon_ssl=NO
+force_local_data_ssl=YES
+force_local_logins_ssl=YES
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+require_ssl_reuse=NO
+ssl_ciphers=HIGH</code></pre>
+<p>Save and close the configuration file.</p>
+<h2 id="step-6-restart-vsftpd-and-test-the-connection">Step 6: Restart
+vsftpd and Test the Connection</h2>
+<p>Restart the vsftpd daemon to apply all changes:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart vsftpd</span></code></pre></div>
+<p>Test the FTP server connection using an FTP client such as FileZilla
+or the command-line client:</p>
+<ol type="1">
+<li>Host: <code>your_server_ip</code></li>
+<li>Protocol: <code>FTP - File Transfer Protocol</code></li>
+<li>Encryption: <code>Require explicit FTP over TLS</code></li>
+<li>User: <code>ftpuser</code></li>
+<li>Password: <code>your_password</code></li>
+</ol>
+<p>Upon connecting, accept the SSL certificate prompt. You will be
+restricted to the <code>/home/ftpuser/ftp</code> directory and can
+successfully upload files into the <code>upload</code> folder.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

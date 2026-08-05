@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Check Background Service Status in Ubuntu? - ubuntu</title>
+    <meta name="description" content="Managing system services is a fundamental task for maintaining a healthy Ubuntu environment. This article provides a quick guide on how to check the status of a specific background service using the standard systemctl command, explores variations for old">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-check-background-service-status-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Check Background Service Status in Ubuntu? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-check-background-service-status-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing system services is a fundamental task for maintaining a healthy Ubuntu environment. This article provides a quick guide on how to check the status of a specific background service using the standard systemctl command, explores variations for old" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-check-background-service-status-in-ubuntu">How to Check
+Background Service Status in Ubuntu?</h1>
+<p>Managing system services is a fundamental task for maintaining a
+healthy Ubuntu environment. This article provides a quick guide on how
+to check the status of a specific background service using the standard
+<code>systemctl</code> command, explores variations for older systems,
+and explains how to interpret the output.</p>
+<hr />
+<h3 id="the-standard-command-systemctl">The Standard Command:
+systemctl</h3>
+<p>In modern versions of Ubuntu (15.04 and later),
+<strong>systemd</strong> is the default initialization system. The
+primary tool used to manage and check the status of services is
+<code>systemctl</code>.</p>
+<p>To check the status of a specific background service, use the
+following syntax:</p>
+<p><code>systemctl status service_name</code></p>
+<p>For example, if you want to check the status of the Apache web
+server, you would run:</p>
+<p><code>systemctl status apache2</code></p>
+<p>This command does not require <code>sudo</code> privileges just to
+view the status, though modifying the service (like stopping or
+restarting it) will.</p>
+<hr />
+<h3 id="understanding-the-status-output">Understanding the Status
+Output</h3>
+<p>When you run the status command, Ubuntu provides a detailed breakdown
+of the service’s current state. The most critical pieces of information
+include:</p>
+<ul>
+<li><strong>Loaded:</strong> Shows whether the service configuration
+file has been loaded into memory and the path to the service file.</li>
+<li><strong>Active:</strong> Indicates if the service is running. You
+will typically see <code>active (running)</code> in green if everything
+is fine, or <code>inactive (dead)</code> if the service is stopped.</li>
+<li><strong>Main PID:</strong> The primary Process ID of the service,
+which is useful for deep troubleshooting.</li>
+<li><strong>Tasks:</strong> The number of tasks and memory currently
+being consumed by the service.</li>
+<li><strong>Recent Logs:</strong> The last few lines of the system log
+(<code>journald</code>) specific to that service, which quickly
+highlights recent errors.</li>
+</ul>
+<hr />
+<h3 id="alternative-command-for-older-ubuntu-versions">Alternative
+Command for Older Ubuntu Versions</h3>
+<p>If you are maintaining an older legacy Ubuntu system that uses the
+<strong>SysVinit</strong> or <strong>Upstart</strong> systems (Ubuntu
+14.04 and earlier), the <code>systemctl</code> command will not work.
+Instead, you must use the <code>service</code> command:</p>
+<p><code>service service_name status</code></p>
+<p>For example:</p>
+<p><code>service mysql status</code></p>
+<p>This command will output a shorter, more simplified status message
+indicating whether the process is currently running or stopped.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

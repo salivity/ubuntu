@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Custom Resolution in Ubuntu Using xrandr - ubuntu</title>
+    <meta name="description" content="Setting a custom display resolution in Ubuntu running an X11 session allows you to use unsupported monitor modes or improve visual clarity on unique displays. By using the built-in xrandr command-line utility along with cvt, you can calculate new display">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/set-custom-resolution-in-ubuntu-using-xrandr">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Set Custom Resolution in Ubuntu Using xrandr - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/set-custom-resolution-in-ubuntu-using-xrandr" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting a custom display resolution in Ubuntu running an X11 session allows you to use unsupported monitor modes or improve visual clarity on unique displays. By using the built-in xrandr command-line utility along with cvt, you can calculate new display" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="set-custom-resolution-in-ubuntu-using-xrandr">Set Custom
+Resolution in Ubuntu Using xrandr</h1>
+<p>Setting a custom display resolution in Ubuntu running an X11 session
+allows you to use unsupported monitor modes or improve visual clarity on
+unique displays. By using the built-in <code>xrandr</code> command-line
+utility along with <code>cvt</code>, you can calculate new display
+timings, create a custom mode, attach it to your output, and apply it
+immediately. This guide explains the step-by-step process to configure
+your custom resolution and ensure it persists across reboots.</p>
+<h2 id="step-1-identify-your-display-output">Step 1: Identify Your
+Display Output</h2>
+<p>Open your terminal (<code>Ctrl+Alt+T</code>) and list your connected
+displays and active resolutions:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span></span></code></pre></div>
+<p>Look for the connected output interface in the list (such as
+<code>HDMI-1</code>, <code>eDP-1</code>, or <code>DP-1</code>). Note
+this exact output name for the following steps.</p>
+<h2 id="step-2-generate-resolution-timings">Step 2: Generate Resolution
+Timings</h2>
+<p>Use the <code>cvt</code> command followed by your desired width,
+height, and refresh rate (in Hz) to generate a modeline string. For
+example, to create a resolution of 1920x1080 at 60Hz:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cvt</span> 1920 1080 60</span></code></pre></div>
+<p>The terminal will output a line similar to this:</p>
+<pre class="text"><code># 1920x1080 59.96 Hz (CVT 2.07M9) hsync: 67.16 kHz; pclk: 173.00 MHz
+Modeline &quot;1920x1080_60.00&quot;  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync</code></pre>
+<p>Copy everything after the word <code>Modeline</code> (including the
+quotes).</p>
+<h2 id="step-3-create-the-new-display-mode">Step 3: Create the New
+Display Mode</h2>
+<p>Pass the copied modeline string to <code>xrandr</code> using the
+<code>--newmode</code> flag:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--newmode</span> <span class="st">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 <span class="at">-hsync</span> +vsync</span></code></pre></div>
+<h2 id="step-4-associate-the-new-mode-with-your-display-output">Step 4:
+Associate the New Mode with Your Display Output</h2>
+<p>Link the newly created mode to your active display interface (replace
+<code>HDMI-1</code> with your actual output name):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--addmode</span> HDMI-1 <span class="st">&quot;1920x1080_60.00&quot;</span></span></code></pre></div>
+<h2 id="step-5-apply-the-custom-resolution">Step 5: Apply the Custom
+Resolution</h2>
+<p>Switch your display to the new resolution immediately:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--output</span> HDMI-1 <span class="at">--mode</span> <span class="st">&quot;1920x1080_60.00&quot;</span></span></code></pre></div>
+<h2 id="step-6-make-the-changes-permanent">Step 6: Make the Changes
+Permanent</h2>
+<p>Changes made via <code>xrandr</code> reset when you reboot or log
+out. To automatically apply the custom resolution upon login:</p>
+<ol type="1">
+<li><p>Open or create the <code>~/.xprofile</code> file in your home
+directory:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.xprofile</span></code></pre></div></li>
+<li><p>Add the commands used in Steps 3, 4, and 5 to the file:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--newmode</span> <span class="st">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 <span class="at">-hsync</span> +vsync</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--addmode</span> HDMI-1 <span class="st">&quot;1920x1080_60.00&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">xrandr</span> <span class="at">--output</span> HDMI-1 <span class="at">--mode</span> <span class="st">&quot;1920x1080_60.00&quot;</span></span></code></pre></div></li>
+<li><p>Save and close the file (<code>Ctrl+O</code>, <code>Enter</code>,
+then <code>Ctrl+X</code>).</p></li>
+</ol>
+<p>The system will now execute these commands automatically whenever you
+log into your X11 session.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

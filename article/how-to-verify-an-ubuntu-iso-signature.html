@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Verify an Ubuntu ISO Signature - ubuntu</title>
+    <meta name="description" content="Verifying the cryptographic signature of an Ubuntu ISO ensures that the downloaded image is authentic, complete, and has not been altered by a third party. This process involves downloading the ISO alongside its checksum and signature files, importing Ub">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-verify-an-ubuntu-iso-signature">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Verify an Ubuntu ISO Signature - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-verify-an-ubuntu-iso-signature" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Verifying the cryptographic signature of an Ubuntu ISO ensures that the downloaded image is authentic, complete, and has not been altered by a third party. This process involves downloading the ISO alongside its checksum and signature files, importing Ub" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-verify-an-ubuntu-iso-signature">How to Verify an Ubuntu
+ISO Signature</h1>
+<p>Verifying the cryptographic signature of an Ubuntu ISO ensures that
+the downloaded image is authentic, complete, and has not been altered by
+a third party. This process involves downloading the ISO alongside its
+checksum and signature files, importing Ubuntu’s official GPG signing
+keys, verifying the signature of the checksum file, and finally
+validating the ISO file against that checksum.</p>
+<h2 id="step-1-download-the-required-files">Step 1: Download the
+Required Files</h2>
+<p>To complete the verification, you need three files from the official
+Ubuntu release server for your specific version: 1. The <strong>Ubuntu
+ISO file</strong> (e.g., <code>ubuntu-24.04-desktop-amd64.iso</code>) 2.
+The <strong>SHA256SUMS</strong> file 3. The
+<strong>SHA256SUMS.gpg</strong> file</p>
+<p>Ensure all three files are saved in the same directory.</p>
+<h2 id="step-2-import-ubuntu-signing-keys">Step 2: Import Ubuntu Signing
+Keys</h2>
+<p>Ubuntu signs its checksum files using specific GPG keys. Open your
+terminal, navigate to the directory containing your downloaded files,
+and import the official Ubuntu key using the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gpg</span> <span class="at">--keyid-format</span> long <span class="at">--keyserver</span> hkps://keyserver.ubuntu.com <span class="at">--recv-keys</span> 843938DF228D22F7B3742BC0D94AA3F0EFE21092 822A9F8E45499298B0F2A8EF283FF426C1CA6CBA</span></code></pre></div>
+<h2 id="step-3-verify-the-key-fingerprints">Step 3: Verify the Key
+Fingerprints</h2>
+<p>Confirm that the imported keys match Ubuntu’s official key
+fingerprints by running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gpg</span> <span class="at">--keyid-format</span> long <span class="at">--list-keys</span> 843938DF228D22F7B3742BC0D94AA3F0EFE21092 822A9F8E45499298B0F2A8EF283FF426C1CA6CBA</span></code></pre></div>
+<p>Ensure the output contains the correct key fingerprints: *
+<code>8439 38DF 228D 22F7 B374  2BC0 D94A A3F0 EFE2 1092</code> *
+<code>822A 9F8E 4549 9298 B0F2  A8EF 283F F426 C1CA 6CBA</code></p>
+<h2 id="step-4-verify-the-sha256sums-signature">Step 4: Verify the
+SHA256SUMS Signature</h2>
+<p>Next, check that the <code>SHA256SUMS</code> file was authentically
+signed by Ubuntu’s GPG key:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gpg</span> <span class="at">--verify</span> SHA256SUMS.gpg SHA256SUMS</span></code></pre></div>
+<p>Look for <strong>“Good signature”</strong> in the output. If you see
+a warning stating that the key is not certified with a trusted
+signature, this is normal unless you have manually established a web of
+trust with the Ubuntu key holder.</p>
+<h2 id="step-5-validate-the-iso-checksum">Step 5: Validate the ISO
+Checksum</h2>
+<p>Finally, generate the SHA-256 hash of your downloaded ISO file and
+compare it against the verified <code>SHA256SUMS</code> file:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sha256sum</span> <span class="at">-c</span> SHA256SUMS <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> OK</span></code></pre></div>
+<p>If the ISO is authentic and free of corruption, the terminal will
+output the name of your ISO file followed by <code>OK</code> (e.g.,
+<code>ubuntu-24.04-desktop-amd64.iso: OK</code>).</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virt-Manager's Role in Ubuntu KVM Setups - ubuntu</title>
+    <meta name="description" content="Virt-manager (Virtual Machine Manager) serves as a graphical interface for managing KVM hypervisors and virtual machines on Ubuntu Linux. This article explores the core roles of virt-manager in an Ubuntu KVM environment, detailing how it simplifies virtu">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/virt-manager-s-role-in-ubuntu-kvm-setups">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Virt-Manager's Role in Ubuntu KVM Setups - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/virt-manager-s-role-in-ubuntu-kvm-setups" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Virt-manager (Virtual Machine Manager) serves as a graphical interface for managing KVM hypervisors and virtual machines on Ubuntu Linux. This article explores the core roles of virt-manager in an Ubuntu KVM environment, detailing how it simplifies virtu" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="virt-managers-role-in-ubuntu-kvm-setups">Virt-Manager’s Role in
+Ubuntu KVM Setups</h1>
+<p>Virt-manager (Virtual Machine Manager) serves as a graphical
+interface for managing KVM hypervisors and virtual machines on Ubuntu
+Linux. This article explores the core roles of virt-manager in an Ubuntu
+KVM environment, detailing how it simplifies virtual machine creation,
+hardware resource allocation, virtual network configuration, host
+resource monitoring, and remote server management through an intuitive
+desktop application.</p>
+<h2 id="core-roles-of-virt-manager-in-ubuntu-kvm">Core Roles of
+Virt-Manager in Ubuntu KVM</h2>
+<p>KVM (Kernel-based Virtual Machine) turns the Ubuntu Linux kernel into
+a Type-1 hypervisor. While KVM can be managed entirely via the command
+line using <code>virsh</code>, virt-manager provides a user-friendly
+desktop GUI that leverages the <code>libvirt</code> API to simplify
+virtual machine administration.</p>
+<h3 id="streamlined-virtual-machine-creation">1. Streamlined Virtual
+Machine Creation</h3>
+<p>Virt-manager provides a step-by-step wizard for deploying new guest
+operating systems. Users can create virtual machines from local ISO
+images, network installs, or existing disk images without needing to
+write complex XML configuration files or verbose terminal commands.</p>
+<h3 id="graphical-console-access">2. Graphical Console Access</h3>
+<p>The application includes an integrated VNC and SPICE graphical
+console viewer. This allows users to interact directly with the display
+of guest virtual machines, performing initial operating system
+installations, graphical desktop usage, and display troubleshooting as
+if they were sitting in front of a physical monitor.</p>
+<h3 id="dynamic-hardware-allocation-and-management">3. Dynamic Hardware
+Allocation and Management</h3>
+<p>Virt-manager allows administrators to adjust virtual machine hardware
+configurations easily: * <strong>CPU and Memory:</strong> Assign or
+adjust virtual CPUs (vCPUs) and RAM allocations. * <strong>Storage
+Devices:</strong> Add, expand, or remove virtual hard disks
+(<code>.qcow2</code>, <code>raw</code>) and manage ISO images. *
+<strong>Network Interfaces:</strong> Switch between NAT networks,
+bridged networking, or isolated virtual networks. * <strong>PCI
+Passthrough:</strong> Attach physical PCI devices directly to a guest
+machine for high-performance workloads like GPU passthrough.</p>
+<h3 id="storage-and-network-provisioning">4. Storage and Network
+Provisioning</h3>
+<p>Beyond individual VMs, virt-manager oversees the underlying virtual
+infrastructure: * <strong>Storage Pools:</strong> Configure and manage
+directory-based storage, LVM volumes, or network-attached storage (NFS)
+for VM disk images. * <strong>Virtual Networks:</strong> Set up custom
+virtual network bridges, DHCP servers, and NAT rules to control inter-VM
+and external connectivity.</p>
+<h3 id="remote-host-management">5. Remote Host Management</h3>
+<p>Virt-manager supports SSH tunnel connections, allowing an
+administrator running Ubuntu on a desktop to manage KVM hypervisors on
+remote headless Ubuntu servers. The remote infrastructure appears in the
+same interface, enabling centralized management across multiple
+hypervisors.</p>
+<h3 id="real-time-resource-monitoring">6. Real-Time Resource
+Monitoring</h3>
+<p>The application displays live graphs showing CPU, memory, network,
+and disk I/O usage for both individual virtual machines and the host
+hypervisor, making it easy to identify resource bottlenecks and
+performance issues.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

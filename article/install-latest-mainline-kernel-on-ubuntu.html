@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Latest Mainline Kernel on Ubuntu - ubuntu</title>
+    <meta name="description" content="Installing the latest mainline Linux kernel on Ubuntu allows you to access new features, performance enhancements, and support for newer hardware ahead of standard distribution updates. This guide outlines the complete process for updating your system's">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-latest-mainline-kernel-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install Latest Mainline Kernel on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-latest-mainline-kernel-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Installing the latest mainline Linux kernel on Ubuntu allows you to access new features, performance enhancements, and support for newer hardware ahead of standard distribution updates. This guide outlines the complete process for updating your system's" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="install-latest-mainline-kernel-on-ubuntu">Install Latest
+Mainline Kernel on Ubuntu</h1>
+<p>Installing the latest mainline Linux kernel on Ubuntu allows you to
+access new features, performance enhancements, and support for newer
+hardware ahead of standard distribution updates. This guide outlines the
+complete process for updating your system’s kernel using both a
+user-friendly Graphical User Interface (GUI) tool and traditional
+command-line terminal methods, along with instructions on how to safely
+verify and roll back your changes.</p>
+<h2 id="important-considerations-before-upgrading">Important
+Considerations Before Upgrading</h2>
+<p>Mainline kernels are built directly from Linux source trees provided
+by kernel developers without Ubuntu-specific patches or testing. Keep
+the following in mind:</p>
+<ul>
+<li><strong>Secure Boot:</strong> Mainline kernel packages are unsigned.
+If Secure Boot is enabled in your BIOS/UEFI, you must disable it before
+booting into a mainline kernel.</li>
+<li><strong>Proprietary Drivers:</strong> Third-party modules like
+NVIDIA graphics drivers or proprietary Wi-Fi drivers may fail to build
+or load with brand-new kernel versions.</li>
+<li><strong>Backups:</strong> Always back up critical data before
+modifying core system components.</li>
+</ul>
+<h2 id="method-1-using-the-ubuntu-mainline-kernel-installer-gui">Method
+1: Using the Ubuntu Mainline Kernel Installer (GUI)</h2>
+<p>The simplest and recommended way to manage mainline kernels is using
+the <code>mainline</code> open-source tool.</p>
+<h3 id="add-the-mainline-ppa">1. Add the Mainline PPA</h3>
+<p>Open your terminal (<code>Ctrl+Alt+T</code>) and add the
+repository:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:cappelikan/ppa</span></code></pre></div>
+<h3 id="update-package-lists-and-install-the-tool">2. Update Package
+Lists and Install the Tool</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install mainline</span></code></pre></div>
+<h3 id="install-the-kernel">3. Install the Kernel</h3>
+<ol type="1">
+<li>Launch <strong>Ubuntu Mainline Kernel Installer</strong> from your
+application menu.</li>
+<li>Browse the list of available versions for the latest stable
+release.</li>
+<li>Select the desired kernel version and click
+<strong>Install</strong>.</li>
+<li>Once the installation process completes, restart your computer.</li>
+</ol>
+<h2 id="method-2-manual-installation-via-terminal-cli">Method 2: Manual
+Installation via Terminal (CLI)</h2>
+<p>If you prefer to install packages manually without third-party tools,
+download the official kernel packages directly.</p>
+<h3 id="download-kernel-packages">1. Download Kernel Packages</h3>
+<p>Navigate to the official Ubuntu Mainline PPA archive in your web
+browser (<code>kernel.ubuntu.com/~kernel-ppa/mainline/</code>), select
+the target version folder, and download the four required
+<code>.deb</code> files for your system architecture (typically
+<code>amd64</code>):</p>
+<ul>
+<li><code>linux-headers-[version]_all.deb</code></li>
+<li><code>linux-headers-[version]-generic_[version]_amd64.deb</code></li>
+<li><code>linux-image-unsigned-[version]-generic_[version]_amd64.deb</code></li>
+<li><code>linux-modules-[version]-generic_[version]_amd64.deb</code></li>
+</ul>
+<h3 id="install-the-packages">2. Install the Packages</h3>
+<p>Open a terminal, navigate to the folder containing the downloaded
+<code>.deb</code> files, and run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">-i</span> <span class="pp">*</span>.deb</span></code></pre></div>
+<h3 id="reboot-your-system">3. Reboot Your System</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<h2 id="verifying-the-kernel-update">Verifying the Kernel Update</h2>
+<p>After rebooting, confirm that the system is running the new kernel by
+executing:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uname</span> <span class="at">-r</span></span></code></pre></div>
+<p>The terminal output should reflect the newly installed kernel version
+number.</p>
+<h2 id="reverting-to-the-default-kernel">Reverting to the Default
+Kernel</h2>
+<p>If you experience hardware instability or driver failures:</p>
+<ol type="1">
+<li>Restart your machine and hold the <code>Shift</code> key (or press
+<code>Esc</code>) during startup to display the GRUB boot menu.</li>
+<li>Select <strong>Advanced options for Ubuntu</strong>.</li>
+<li>Choose to boot into your original, standard Ubuntu kernel.</li>
+<li>Once logged in, launch the <strong>Ubuntu Mainline Kernel
+Installer</strong> tool to uninstall the mainline kernel, or remove it
+manually via
+<code>sudo apt remove linux-image-[version]-generic</code>.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

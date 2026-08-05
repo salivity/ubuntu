@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to View Command History in Ubuntu Terminal - ubuntu</title>
+    <meta name="description" content="Viewing the command history in the Ubuntu terminal allows you to track past actions, reuse complex commands, and audit system administration tasks. This guide covers the essential methods for displaying, searching, and managing your bash command history">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-view-command-history-in-ubuntu-terminal">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to View Command History in Ubuntu Terminal - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-view-command-history-in-ubuntu-terminal" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Viewing the command history in the Ubuntu terminal allows you to track past actions, reuse complex commands, and audit system administration tasks. This guide covers the essential methods for displaying, searching, and managing your bash command history" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-view-command-history-in-ubuntu-terminal">How to View
+Command History in Ubuntu Terminal</h1>
+<p>Viewing the command history in the Ubuntu terminal allows you to
+track past actions, reuse complex commands, and audit system
+administration tasks. This guide covers the essential methods for
+displaying, searching, and managing your bash command history using the
+built-in <code>history</code> tool, keyboard shortcuts, and history
+files.</p>
+<h2 id="using-the-history-command">1. Using the <code>history</code>
+Command</h2>
+<p>The fastest way to see your previous commands is by using the
+<code>history</code> command itself.</p>
+<p>Open your terminal (<code>Ctrl</code> + <code>Alt</code> +
+<code>T</code>) and type:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">history</span></span></code></pre></div>
+<p>This displays a numbered list of all recently executed commands
+stored in your current session’s memory and history file.</p>
+<h3 id="limit-the-number-of-output-lines">Limit the Number of Output
+Lines</h3>
+<p>To view only the last few commands, append a number to the command.
+For example, to view the last 10 commands:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">history</span> 10</span></code></pre></div>
+<h3 id="page-through-long-lists">Page Through Long Lists</h3>
+<p>If your history list is long, pipe the output into <code>less</code>
+to scroll through it easily:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">history</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Press <code>Enter</code> to scroll down line by line,
+<code>Space</code> to move down by page, and <code>q</code> to exit.</p>
+<hr />
+<h2 id="searching-your-command-history">2. Searching Your Command
+History</h2>
+<p>Instead of scrolling through hundreds of lines, you can search for
+specific commands.</p>
+<h3 id="search-using-grep">Search Using <code>grep</code></h3>
+<p>Filter your command history for a specific keyword or program
+name:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">history</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;apt&quot;</span></span></code></pre></div>
+<p>This returns every line in your history that contains the word
+“apt”.</p>
+<h3 id="interactive-reverse-search-ctrl-r">Interactive Reverse Search
+(<code>Ctrl</code> + <code>R</code>)</h3>
+<p>Use the reverse-i-search feature to search interactively while
+typing:</p>
+<ol type="1">
+<li>Press <code>Ctrl</code> + <code>R</code> in the terminal.</li>
+<li>Start typing any part of the command you want to find.</li>
+<li>Press <code>Ctrl</code> + <code>R</code> repeatedly to cycle through
+matching older commands.</li>
+<li>Press <code>Enter</code> to run the found command, or press the
+<code>Right Arrow</code> key to edit it.</li>
+</ol>
+<hr />
+<h2 id="viewing-the-history-file-directly">3. Viewing the History File
+Directly</h2>
+<p>Ubuntu saves your terminal session history in a hidden text file
+located in your home directory.</p>
+<p>To view the raw history file, run:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.bash_history</span></code></pre></div>
+<p>You can also open this file in a text editor like
+<code>nano</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.bash_history</span></code></pre></div>
+<p><em>Note: Commands executed in the current active terminal session
+are written to <code>~/.bash_history</code> only after the session is
+closed.</em></p>
+<hr />
+<h2 id="re-executing-commands-from-history">4. Re-executing Commands
+from History</h2>
+<p>You can run previous commands directly without retyping them:</p>
+<ul>
+<li><p><strong>Run the very last command:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!!</span></span></code></pre></div></li>
+<li><p><strong>Run a command by its line number:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!150</span></span></code></pre></div>
+<p><em>(Replaces <code>150</code> with the line number shown in the
+<code>history</code> output).</em></p></li>
+<li><p><strong>Run the last command starting with specific
+letters:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!sudo</span></span></code></pre></div>
+<p><em>(Runs the most recent command that started with
+<code>sudo</code>).</em></p></li>
+</ul>
+<hr />
+<h2 id="clearing-command-history">5. Clearing Command History</h2>
+<p>If you need to delete your command history:</p>
+<ul>
+<li><p><strong>Clear current session history:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">history</span> <span class="at">-c</span></span></code></pre></div></li>
+<li><p><strong>Clear the history file completely:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /dev/null <span class="op">&gt;</span> ~/.bash_history</span></code></pre></div></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Safely Reboot Ubuntu Using Magic SysRq Keys - ubuntu</title>
+    <meta name="description" content="When an Ubuntu system becomes completely unresponsive, performing a hard reset by holding down the power button can lead to data loss or filesystem corruption. The Linux kernel includes a built-in safety feature known as the Magic SysRq key combination,">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-safely-reboot-ubuntu-using-magic-sysrq-keys">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Safely Reboot Ubuntu Using Magic SysRq Keys - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-safely-reboot-ubuntu-using-magic-sysrq-keys" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When an Ubuntu system becomes completely unresponsive, performing a hard reset by holding down the power button can lead to data loss or filesystem corruption. The Linux kernel includes a built-in safety feature known as the Magic SysRq key combination," />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-safely-reboot-ubuntu-using-magic-sysrq-keys">How to
+Safely Reboot Ubuntu Using Magic SysRq Keys</h1>
+<p>When an Ubuntu system becomes completely unresponsive, performing a
+hard reset by holding down the power button can lead to data loss or
+filesystem corruption. The Linux kernel includes a built-in safety
+feature known as the Magic SysRq key combination, which communicates
+directly with the kernel regardless of the system state. By using the
+mnemonic sequence <strong>REISUB</strong>, you can safely close
+processes, write unsaved data to disk, unmount your drives, and cleanly
+restart your computer.</p>
+<h2 id="step-1-enable-the-magic-sysrq-feature">Step 1: Enable the Magic
+SysRq Feature</h2>
+<p>By default, Ubuntu enables only partial SysRq functionality for
+security reasons. To ensure full functionality during a system freeze,
+you must enable it in your system settings.</p>
+<ol type="1">
+<li><p>Open your terminal and check the current SysRq status:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/sys/kernel/sysrq</span></code></pre></div>
+<ul>
+<li>If the output is <code>1</code>, SysRq is fully enabled.</li>
+<li>If the output is anything else (such as <code>176</code> or
+<code>438</code>), full functionality is restricted.</li>
+</ul></li>
+<li><p>To enable all SysRq functions permanently, open the SysRq
+configuration file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.d/10-magic-sysrq.conf</span></code></pre></div></li>
+<li><p>Find or add the following line:</p>
+<pre class="text"><code>kernel.sysrq = 1</code></pre></li>
+<li><p>Save the file (<code>Ctrl + O</code>, then <code>Enter</code>)
+and exit (<code>Ctrl + X</code>).</p></li>
+<li><p>Apply the changes immediately without restarting:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span> /etc/sysctl.d/10-magic-sysrq.conf</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-2-perform-the-reisub-safe-reboot-sequence">Step 2: Perform
+the REISUB Safe Reboot Sequence</h2>
+<p>When your computer freezes, press and hold the
+<strong><code>Alt</code></strong> and
+<strong><code>Print Screen</code></strong> (SysRq) keys together. While
+holding these two keys down, slowly type the letters <strong>R - E - I -
+S - U - B</strong>, pausing for a few seconds between each
+keystroke.</p>
+<blockquote>
+<p><strong>Note on keyboard layout:</strong> On many keyboards, the
+<code>Print Screen</code> key serves as the <code>SysRq</code> key. On
+laptops, you may need to hold the <code>Fn</code> key as well (e.g.,
+<code>Alt</code> + <code>Fn</code> + <code>PrtScn</code>).</p>
+</blockquote>
+<h3 id="the-meaning-of-the-reisub-sequence">The Meaning of the REISUB
+Sequence</h3>
+<p>Each letter in the sequence performs a specific, ordered action:</p>
+<ul>
+<li><strong>R (unRaw):</strong> Takes keyboard control away from the X
+Server/Wayland display server and returns it to the Linux kernel
+interface.</li>
+<li><strong>E (tErminate):</strong> Sends the <code>SIGTERM</code>
+signal to all running processes (except init), allowing applications to
+save state and terminate gracefully.</li>
+<li><strong>I (kIll):</strong> Sends the <code>SIGKILL</code> signal to
+any remaining processes that failed to terminate after the
+<code>SIGTERM</code> signal.</li>
+<li><strong>S (Sync):</strong> Flushes all unsaved data from RAM caches
+onto the hard drive to prevent data loss. <em>(Wait 2–5 seconds after
+pressing this key to ensure the drives finish writing).</em></li>
+<li><strong>U (Umount):</strong> Remounts all connected filesystems as
+read-only. This prevents disk errors and filesystem checks upon
+rebooting.</li>
+<li><strong>B (reBoot):</strong> Immediately reboots the system
+safely.</li>
+</ul>
+<hr />
+<h2 id="recommended-timing-between-keys">Recommended Timing Between
+Keys</h2>
+<p>Do not type the sequence rapidly. Give the kernel time to execute
+each step:</p>
+<ol type="1">
+<li>Hold <strong><code>Alt</code> + <code>SysRq</code></strong>.</li>
+<li>Press <strong><code>R</code></strong>, wait 2 seconds.</li>
+<li>Press <strong><code>E</code></strong>, wait 2 seconds.</li>
+<li>Press <strong><code>I</code></strong>, wait 2 seconds.</li>
+<li>Press <strong><code>S</code></strong>, wait 5 seconds (allows disk
+synchronization to complete).</li>
+<li>Press <strong><code>U</code></strong>, wait 3 seconds (allows
+filesystems to remount as read-only).</li>
+<li>Press <strong><code>B</code></strong>. Your system will restart
+immediately.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

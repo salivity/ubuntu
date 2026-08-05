@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Anycast IP on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="Configuring an Anycast IP address on an Ubuntu server involves assigning a shared IP address to a local loopback interface and using a Border Gateway Protocol (BGP) routing daemon to advertise that address to your upstream network provider. This guide ou">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-anycast-ip-on-ubuntu-server">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Anycast IP on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-anycast-ip-on-ubuntu-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring an Anycast IP address on an Ubuntu server involves assigning a shared IP address to a local loopback interface and using a Border Gateway Protocol (BGP) routing daemon to advertise that address to your upstream network provider. This guide ou" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-anycast-ip-on-ubuntu-server">How to Configure
+Anycast IP on Ubuntu Server</h1>
+<p>Configuring an Anycast IP address on an Ubuntu server involves
+assigning a shared IP address to a local loopback interface and using a
+Border Gateway Protocol (BGP) routing daemon to advertise that address
+to your upstream network provider. This guide outlines the essential
+steps to prepare your Ubuntu system, configure a dummy interface for the
+Anycast IP, install and set up FRRouting (FRR) for BGP peering, and
+verify that traffic routes correctly to your server.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting, ensure you have: * An Ubuntu server (20.04 LTS or
+newer recommended) with root or sudo access. * A public IP address block
+designated for Anycast routing. * BGP session details from your data
+center or ISP (your ASN, neighbor IP, and neighbor ASN).</p>
+<h2 id="step-1-create-a-dummy-interface-for-the-anycast-ip">Step 1:
+Create a Dummy Interface for the Anycast IP</h2>
+<p>To prevent network conflicts, the Anycast IP address must be bound to
+a virtual loopback or dummy interface rather than your primary physical
+interface.</p>
+<ol type="1">
+<li><p>Load the <code>dummy</code> kernel module:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe dummy</span></code></pre></div></li>
+<li><p>Ensure the module loads automatically on boot:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;dummy&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee <span class="at">-a</span> /etc/modules</span></code></pre></div></li>
+<li><p>Configure Netplan to persist the dummy interface and assign the
+Anycast IP. Open your Netplan configuration file (typically located in
+<code>/etc/netplan/</code>):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/netplan/01-netcfg.yaml</span></code></pre></div></li>
+<li><p>Add the <code>dummy0</code> interface definition:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">network</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ethernets</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">eth0</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">      # Your standard primary interface config remains here</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp4</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">dummies</span><span class="kw">:</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">dummy0</span><span class="kw">:</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">addresses</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> YOUR_ANYCAST_IP/32</span></span></code></pre></div></li>
+<li><p>Apply the configuration:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netplan apply</span></code></pre></div></li>
+</ol>
+<h2 id="step-2-install-frrouting-frr">Step 2: Install FRRouting
+(FRR)</h2>
+<p>FRR is a high-performance routing protocol suite that handles BGP
+peerings on Linux.</p>
+<ol type="1">
+<li><p>Update package lists and install FRR:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> frr frr-pythontools</span></code></pre></div></li>
+<li><p>Enable the BGP daemon by editing
+<code>/etc/frr/daemons</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/frr/daemons</span></code></pre></div>
+<p>Change <code>bgpd=no</code> to <code>bgpd=yes</code>.</p></li>
+<li><p>Restart the FRR service:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart frr</span></code></pre></div></li>
+</ol>
+<h2 id="step-3-configure-bgp-to-advertise-the-anycast-ip">Step 3:
+Configure BGP to Advertise the Anycast IP</h2>
+<p>Use <code>vtysh</code>, the integrated shell for FRR, to configure
+BGP peering with your upstream provider.</p>
+<ol type="1">
+<li><p>Enter the FRR shell:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vtysh</span></code></pre></div></li>
+<li><p>Enter configuration mode:</p>
+<pre class="text"><code>configure terminal</code></pre></li>
+<li><p>Set up the BGP process using your Autonomous System Number
+(ASN):</p>
+<pre class="text"><code>router bgp YOUR_LOCAL_ASN
+  bgp router-id YOUR_PRIMARY_SERVER_IP
+  neighbor UPSTREAM_NEIGHBOR_IP remote-as UPSTREAM_NEIGHBOR_ASN
+
+  address-family ipv4 unicast
+    network YOUR_ANYCAST_IP/32
+    neighbor UPSTREAM_NEIGHBOR_IP activate
+  exit-address-family
+exit</code></pre></li>
+<li><p>Save the configuration and exit:</p>
+<pre class="text"><code>write memory
+exit</code></pre></li>
+</ol>
+<h2 id="step-4-enable-ip-forwarding">Step 4: Enable IP Forwarding</h2>
+<p>Ensure the Linux kernel is configured to forward packets
+properly:</p>
+<ol type="1">
+<li><p>Open <code>/etc/sysctl.conf</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div></li>
+<li><p>Uncomment or add the following line:</p>
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre></li>
+<li><p>Apply changes:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div></li>
+</ol>
+<h2 id="step-5-verify-the-anycast-configuration">Step 5: Verify the
+Anycast Configuration</h2>
+<ol type="1">
+<li><p><strong>Check Interface Status:</strong> Verify that
+<code>dummy0</code> is active and holds the Anycast IP:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> addr show dummy0</span></code></pre></div></li>
+<li><p><strong>Check BGP Neighbor Status:</strong> Open
+<code>vtysh</code> and check if the BGP session with your ISP is
+established:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vtysh <span class="at">-c</span> <span class="st">&quot;show bgp summary&quot;</span></span></code></pre></div>
+<p>The state for your neighbor should show a number under
+<code>MsgRcvd</code>/<code>MsgSent</code> rather than
+<code>Active</code> or <code>Idle</code>.</p></li>
+<li><p><strong>Check Advertised Routes:</strong> Confirm that your
+Anycast IP is actively being announced:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vtysh <span class="at">-c</span> <span class="st">&quot;show bgp ipv4 unicast neighbors UPSTREAM_NEIGHBOR_IP advertised-routes&quot;</span></span></code></pre></div></li>
+</ol>
+<p>Once established, traffic sent to your Anycast IP address will
+automatically route to the nearest active server running this
+configuration.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

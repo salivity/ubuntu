@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Create an LVM Snapshot Backup in Ubuntu - ubuntu</title>
+    <meta name="description" content="Logical Volume Manager (LVM) snapshots allow you to create a point-in-time copy of a logical volume without taking your system or services offline. This article provides a step-by-step guide on how to safely create, mount, back up, and remove an LVM snap">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-create-an-lvm-snapshot-backup-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Create an LVM Snapshot Backup in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-create-an-lvm-snapshot-backup-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Logical Volume Manager (LVM) snapshots allow you to create a point-in-time copy of a logical volume without taking your system or services offline. This article provides a step-by-step guide on how to safely create, mount, back up, and remove an LVM snap" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-create-an-lvm-snapshot-backup-in-ubuntu">How to Create an
+LVM Snapshot Backup in Ubuntu</h1>
+<p>Logical Volume Manager (LVM) snapshots allow you to create a
+point-in-time copy of a logical volume without taking your system or
+services offline. This article provides a step-by-step guide on how to
+safely create, mount, back up, and remove an LVM snapshot in Ubuntu. By
+leveraging snapshots, you can perform consistent backups of active
+systems, such as database servers or web hosts, with minimal downtime
+and zero data corruption risks.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before creating an LVM snapshot, ensure you have: * An operational
+Ubuntu system with LVM configured. * Root or <code>sudo</code> access. *
+Available free space in the Volume Group (VG) hosting your target
+Logical Volume (LV).</p>
+<hr />
+<h2 id="step-1-check-available-space-in-the-volume-group">Step 1: Check
+Available Space in the Volume Group</h2>
+<p>An LVM snapshot requires free space in the Volume Group to store
+changes made to the original volume while the snapshot exists.</p>
+<p>Run the following command to check your Volume Group’s unallocated
+space:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vgs</span></code></pre></div>
+<p>Look at the <strong>VFree</strong> column. Make sure you have enough
+unallocated space to handle the changes expected during the backup
+process.</p>
+<hr />
+<h2 id="step-2-create-the-lvm-snapshot">Step 2: Create the LVM
+Snapshot</h2>
+<p>To create a snapshot, use the <code>lvcreate</code> command with the
+<code>-s</code> (or <code>--snapshot</code>) flag.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lvcreate <span class="at">--size</span> 5G <span class="at">--snapshot</span> <span class="at">--name</span> myvol_snapshot /dev/vg_name/lv_name</span></code></pre></div>
+<ul>
+<li>Replace <code>5G</code> with the size you want to allocate for
+snapshot changes.</li>
+<li>Replace <code>myvol_snapshot</code> with your preferred snapshot
+name.</li>
+<li>Replace <code>/dev/vg_name/lv_name</code> with the path to your
+target logical volume.</li>
+</ul>
+<hr />
+<h2 id="step-3-mount-the-lvm-snapshot">Step 3: Mount the LVM
+Snapshot</h2>
+<p>Once created, mount the snapshot to access its files and perform the
+backup.</p>
+<ol type="1">
+<li><p>Create a mount point directory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /mnt/snapshot</span></code></pre></div></li>
+<li><p>Mount the snapshot volume:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/vg_name/myvol_snapshot /mnt/snapshot</span></code></pre></div></li>
+</ol>
+<p><em>Note for XFS filesystems:</em> If your volume uses the XFS
+filesystem, add the <code>-o nouuid</code> flag to avoid UUID conflict
+errors:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">-o</span> nouuid /dev/vg_name/myvol_snapshot /mnt/snapshot</span></code></pre></div>
+<hr />
+<h2 id="step-4-back-up-the-data">Step 4: Back Up the Data</h2>
+<p>With the snapshot mounted at <code>/mnt/snapshot</code>, you can
+safely copy the point-in-time data to an external drive, remote server,
+or backup directory using tools like <code>tar</code> or
+<code>rsync</code>.</p>
+<p>Example using <code>tar</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tar <span class="at">-czvf</span> /backups/system_backup.tar.gz <span class="at">-C</span> /mnt/snapshot .</span></code></pre></div>
+<p>Example using <code>rsync</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rsync <span class="at">-aAXv</span> /mnt/snapshot/ /path/to/backup/destination/</span></code></pre></div>
+<hr />
+<h2 id="step-5-unmount-and-remove-the-snapshot">Step 5: Unmount and
+Remove the Snapshot</h2>
+<p>After completing the backup, unmount and remove the snapshot. Keeping
+snapshots indefinitely is not recommended, as filling up the snapshot
+space will corrupt the snapshot and degrade system performance.</p>
+<ol type="1">
+<li><p>Unmount the snapshot directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount /mnt/snapshot</span></code></pre></div></li>
+<li><p>Delete the snapshot volume:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lvremove /dev/vg_name/myvol_snapshot</span></code></pre></div></li>
+<li><p>Confirm the removal when prompted by typing
+<code>y</code>.</p></li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

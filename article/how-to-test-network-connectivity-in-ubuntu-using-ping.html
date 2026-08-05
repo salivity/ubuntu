@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Test Network Connectivity in Ubuntu Using Ping - ubuntu</title>
+    <meta name="description" content="Testing network connectivity in Ubuntu is primarily done using the ping command-line utility. This built-in tool sends ICMP (Internet Control Message Protocol) ECHOREQUEST packets to a specified IP address or domain name to verify if a remote host is rea">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-test-network-connectivity-in-ubuntu-using-ping">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Test Network Connectivity in Ubuntu Using Ping - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-test-network-connectivity-in-ubuntu-using-ping" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Testing network connectivity in Ubuntu is primarily done using the ping command-line utility. This built-in tool sends ICMP (Internet Control Message Protocol) ECHOREQUEST packets to a specified IP address or domain name to verify if a remote host is rea" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-test-network-connectivity-in-ubuntu-using-ping">How to
+Test Network Connectivity in Ubuntu Using Ping</h1>
+<p>Testing network connectivity in Ubuntu is primarily done using the
+<code>ping</code> command-line utility. This built-in tool sends ICMP
+(Internet Control Message Protocol) ECHO_REQUEST packets to a specified
+IP address or domain name to verify if a remote host is reachable and to
+measure round-trip response times. Understanding how to use the
+<code>ping</code> command helps system administrators and users quickly
+diagnose connection issues, monitor latency, and verify local network
+status.</p>
+<h2 id="the-basic-ping-command">The Basic Ping Command</h2>
+<p>To test network connectivity in Ubuntu, open the terminal
+(<code>Ctrl + Alt + T</code>) and run the <code>ping</code> command
+followed by an IP address or domain name.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> google.com</span></code></pre></div>
+<p>Or using an IP address:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> 8.8.8.8</span></code></pre></div>
+<p>In Ubuntu and other Linux distributions, the <code>ping</code>
+command will run continuously until you manually stop it. Press
+<strong>Ctrl + C</strong> to terminate the process and display the
+summary statistics.</p>
+<h2 id="useful-ping-options-and-examples">Useful Ping Options and
+Examples</h2>
+<h3 id="limit-the-number-of-pings">Limit the Number of Pings</h3>
+<p>To send a specific number of ECHO_REQUEST packets and automatically
+stop, use the <code>-c</code> flag followed by the desired count.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-c</span> 4 google.com</span></code></pre></div>
+<h3 id="change-the-interval-between-packets">Change the Interval Between
+Packets</h3>
+<p>By default, <code>ping</code> waits one second between sending each
+packet. You can modify this interval using the <code>-i</code> flag.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-i</span> 2 google.com</span></code></pre></div>
+<h3 id="set-a-timeout-limit">Set a Timeout Limit</h3>
+<p>To stop sending pings after a specific duration (in seconds),
+regardless of how many packets have been sent or received, use the
+<code>-w</code> flag.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-w</span> 10 google.com</span></code></pre></div>
+<h3 id="ping-ipv6-addresses">Ping IPv6 Addresses</h3>
+<p>To explicitly test IPv6 connectivity, use the <code>-6</code> option
+or the <code>ping6</code> command.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-6</span> google.com</span></code></pre></div>
+<h2 id="understanding-the-ping-output">Understanding the Ping
+Output</h2>
+<p>When you run a ping test, each line of output provides details about
+the network response:</p>
+<ul>
+<li><strong>bytes from</strong>: Indicates the target host responded and
+shows the packet size.</li>
+<li><strong>icmp_seq</strong>: The sequence number of the packet
+sent.</li>
+<li><strong>ttl</strong>: Time to Live, which prevents packets from
+circulating endlessly.</li>
+<li><strong>time</strong>: The round-trip response time measured in
+milliseconds (ms).</li>
+</ul>
+<p>The summary printed at the end shows packet transmission statistics,
+including total packets sent, received, percentage of packet loss, and
+average round-trip times.</p>
+<h2 id="troubleshooting-common-issues">Troubleshooting Common
+Issues</h2>
+<ul>
+<li><strong>Destination Host Unreachable</strong>: Indicates your
+computer cannot find a route to the target network. Check your local IP
+address and network gateway.</li>
+<li><strong>Request Timed Out / 100% Packet Loss</strong>: Means the
+target host is offline, experiencing heavy network congestion, or a
+firewall is blocking ICMP packets.</li>
+<li><strong>Ping: Command Not Found</strong>: If the utility is missing
+on a minimal Ubuntu installation, install it via
+<code>sudo apt update &amp;&amp; sudo apt install iputils-ping</code>.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnose Memory Leaks with Top Command in Ubuntu - ubuntu</title>
+    <meta name="description" content="Diagnosing memory leaks in Ubuntu using the top command involves monitoring system-level memory metrics and tracking process-specific resource consumption over time. A memory leak occurs when an application continuously allocates RAM without releasing it">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/diagnose-memory-leaks-with-top-command-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Diagnose Memory Leaks with Top Command in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/diagnose-memory-leaks-with-top-command-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Diagnosing memory leaks in Ubuntu using the top command involves monitoring system-level memory metrics and tracking process-specific resource consumption over time. A memory leak occurs when an application continuously allocates RAM without releasing it" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="diagnose-memory-leaks-with-top-command-in-ubuntu">Diagnose
+Memory Leaks with Top Command in Ubuntu</h1>
+<p>Diagnosing memory leaks in Ubuntu using the <code>top</code> command
+involves monitoring system-level memory metrics and tracking
+process-specific resource consumption over time. A memory leak occurs
+when an application continuously allocates RAM without releasing it,
+causing available system memory to decrease steadily. By configuring
+<code>top</code> to sort processes by resident memory usage and tracking
+changes in memory metrics, system administrators can quickly identify
+problematic processes before they trigger Out-Of-Memory (OOM)
+errors.</p>
+<h2 id="step-1-launch-and-sort-top-by-memory-usage">Step 1: Launch and
+Sort <code>top</code> by Memory Usage</h2>
+<p>By default, the <code>top</code> command sorts active processes by
+CPU usage. To identify memory-heavy applications, you must sort the
+display by memory consumption.</p>
+<ol type="1">
+<li><p>Open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">top</span></span></code></pre></div></li>
+<li><p>Press <strong><code>Shift + M</code></strong> (or <code>M</code>
+depending on your version) to sort the process list by memory usage in
+descending order. The process using the highest percentage of RAM will
+appear at the top.</p></li>
+</ol>
+<h2 id="step-2-key-metrics-for-detecting-memory-leaks">Step 2: Key
+Metrics for Detecting Memory Leaks</h2>
+<p>Focus on the following columns in the <code>top</code> output to
+evaluate process memory consumption:</p>
+<ul>
+<li><strong>VIRT (Virtual Memory):</strong> The total amount of virtual
+memory allocated by the process, including shared libraries, mapped
+files, and uncommitted memory. A high VIRT value is common and does not
+necessarily indicate a leak.</li>
+<li><strong>RES (Resident Set Size):</strong> The actual, non-swapped
+physical memory (RAM) consumed by the process. <strong>This is the
+primary metric for detecting memory leaks.</strong></li>
+<li><strong>SHR (Shared Memory):</strong> The portion of memory shared
+with other processes.</li>
+<li><strong>%MEM:</strong> The percentage of available physical RAM
+occupied by the process’s RES memory.</li>
+</ul>
+<p>At the top of the interface, observe the summary rows: * <strong>MiB
+Mem:</strong> Shows total, free, used, and buffer/cache physical memory.
+* <strong>MiB Swap:</strong> Shows total, free, and used swap space.</p>
+<h2 id="step-3-identify-the-memory-leak-pattern">Step 3: Identify the
+Memory Leak Pattern</h2>
+<p>A process operating normally will request memory, perform work, and
+release unused memory, causing its <code>RES</code> value to fluctuate
+and stabilize.</p>
+<p>A process with a <strong>memory leak</strong> demonstrates the
+following patterns over time:</p>
+<ol type="1">
+<li><strong>Continuous RES Growth:</strong> The <code>RES</code> value
+steadily increases without ever decreasing or leveling off, even during
+idle periods.</li>
+<li><strong>Depletion of System Free Memory:</strong> The global
+<code>MiB Mem: free</code> and <code>buff/cache</code> values
+continuously decline while <code>used</code> increases.</li>
+<li><strong>Increasing Swap Usage:</strong> As physical RAM fills up,
+the system begins paging memory to swap, leading to an increase in
+<code>MiB Swap: used</code> and a degradation in overall system
+performance.</li>
+</ol>
+<h2 id="step-4-track-process-memory-over-time">Step 4: Track Process
+Memory Over Time</h2>
+<p>To confirm a memory leak, monitor a suspected Process ID (PID) over a
+set period.</p>
+<h3 id="interactive-tracking">Interactive Tracking</h3>
+<p>Run <code>top</code> scoped directly to the suspect PID:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">top</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span></code></pre></div>
+<p>Observe whether the <code>RES</code> column increases consistently
+every few seconds.</p>
+<h3 id="automated-logging">Automated Logging</h3>
+<p>To collect long-term data, run <code>top</code> in batch mode using a
+shell script or cron job to output stats to a log file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">top</span> <span class="at">-b</span> <span class="at">-n</span> 1 <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> <span class="op">&gt;&gt;</span> memory_log.txt</span></code></pre></div>
+<p>Analyze <code>memory_log.txt</code> over several hours. If the
+<code>RES</code> column shows an uninterrupted upward trend, the process
+is leaking memory.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of ltrace Command in Ubuntu - ubuntu</title>
+    <meta name="description" content="The ltrace command in Ubuntu is a specialized debugging and diagnostic tool used to intercept and record dynamic library calls made by a running process. This article provides a clear overview of the primary purpose of ltrace, explains how it functions w">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-ltrace-command-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of ltrace Command in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-ltrace-command-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The ltrace command in Ubuntu is a specialized debugging and diagnostic tool used to intercept and record dynamic library calls made by a running process. This article provides a clear overview of the primary purpose of ltrace, explains how it functions w" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="purpose-of-ltrace-command-in-ubuntu">Purpose of ltrace Command
+in Ubuntu</h1>
+<p>The <code>ltrace</code> command in Ubuntu is a specialized debugging
+and diagnostic tool used to intercept and record dynamic library calls
+made by a running process. This article provides a clear overview of the
+primary purpose of <code>ltrace</code>, explains how it functions within
+the Linux environment, highlights how it differs from similar tools like
+<code>strace</code>, and outlines common practical use cases for
+developers and system administrators.</p>
+<h2 id="what-is-ltrace">What is <code>ltrace</code>?</h2>
+<p><code>ltrace</code> stands for “Library Trace.” It is a command-line
+utility in Ubuntu and other Linux distributions that tracks a program’s
+execution by intercepting user-space calls to dynamically linked shared
+libraries (such as <code>libc.so</code>, <code>libpthread.so</code>, or
+custom <code>.so</code> files). When a executable calls a library
+function, <code>ltrace</code> prints the name of the called function,
+the arguments passed to it, and the value it returns.</p>
+<h2 id="primary-purpose-of-intercepting-dynamic-library-calls">Primary
+Purpose of Intercepting Dynamic Library Calls</h2>
+<p>The main purpose of using <code>ltrace</code> to intercept library
+calls is to gain visibility into an application’s behavior at the
+user-space level without needing to modify or recompile the source code.
+Its key objectives include:</p>
+<ul>
+<li><strong>Debugging Application Logic:</strong> Developers can verify
+whether a program is passing the correct arguments to library functions
+(e.g., <code>malloc</code>, <code>free</code>, <code>printf</code>,
+<code>strcpy</code>) and receiving expected return values.</li>
+<li><strong>Analyzing Unfamiliar or Closed-Source Binaries:</strong>
+When source code is unavailable, <code>ltrace</code> helps engineers
+understand how a compiled binary interacts with external dependencies
+and shared libraries.</li>
+<li><strong>Identifying Memory and Resource Issues:</strong> By tracking
+functions like <code>malloc</code> and <code>free</code>, users can
+identify memory leaks, unallocated memory access, or failure to release
+shared resources.</li>
+<li><strong>Profiling and Performance Analysis:</strong>
+<code>ltrace</code> can measure the time spent inside individual library
+calls, helping pinpoint performance bottlenecks in user code.</li>
+</ul>
+<h2 id="how-ltrace-differs-from-strace">How <code>ltrace</code> Differs
+from <code>strace</code></h2>
+<p>While both tools are used for debugging, they operate at different
+levels of the system:</p>
+<ul>
+<li><strong><code>ltrace</code> (Library Trace):</strong> Intercepts
+calls made between the executable and shared libraries in <strong>user
+space</strong> (e.g., string manipulation, memory allocation, standard
+I/O calls).</li>
+<li><strong><code>strace</code> (System Trace):</strong> Intercepts
+calls made by the process to the Linux <strong>kernel</strong> (e.g.,
+<code>read</code>, <code>write</code>, <code>open</code>,
+<code>fork</code>).</li>
+</ul>
+<p>In many cases, a single user-space library call intercepted by
+<code>ltrace</code> (such as <code>fopen</code>) will trigger one or
+more kernel system calls intercepted by <code>strace</code> (such as
+<code>openat</code>).</p>
+<h2 id="how-ltrace-works-under-the-hood">How <code>ltrace</code> Works
+Under the Hood</h2>
+<p><code>ltrace</code> achieves call interception using the
+<code>ptrace</code> system call. When a binary is executed dynamically,
+calls to external shared libraries pass through a lookup mechanism known
+as the Procedure Linkage Table (PLT). <code>ltrace</code> temporarily
+replaces the instructions in the PLT with breakpoints. When the
+executable attempts to call a library function, control is passed to
+<code>ltrace</code>, which logs the function name, arguments, and return
+value before resuming program execution.</p>
+<h2 id="common-command-examples">Common Command Examples</h2>
+<ul>
+<li><p><strong>Trace a command:</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ltrace</span> ./my_program</span></code></pre></div></li>
+<li><p><strong>Attach to a running process by PID:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ltrace</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span></code></pre></div></li>
+<li><p><strong>Filter for specific library functions:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ltrace</span> <span class="at">-e</span> malloc+free ./my_program</span></code></pre></div></li>
+<li><p><strong>Count and time calls to show a summary:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ltrace</span> <span class="at">-c</span> ./my_program</span></code></pre></div></li>
+</ul>
+<p>By providing real-time visibility into dynamic library operations,
+<code>ltrace</code> serves as an essential tool for troubleshooting,
+analyzing, and reverse-engineering applications running on Ubuntu.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

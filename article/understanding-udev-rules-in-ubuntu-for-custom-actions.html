@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding udev Rules in Ubuntu for Custom Actions - ubuntu</title>
+    <meta name="description" content="In Ubuntu, udev is the Linux kernel's dynamic device manager responsible for handling device nodes in the /dev directory. The primary purpose of udev rules is to give system administrators and users fine-grained control over how the operating system resp">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/understanding-udev-rules-in-ubuntu-for-custom-actions">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Understanding udev Rules in Ubuntu for Custom Actions - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/understanding-udev-rules-in-ubuntu-for-custom-actions" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In Ubuntu, udev is the Linux kernel's dynamic device manager responsible for handling device nodes in the /dev directory. The primary purpose of udev rules is to give system administrators and users fine-grained control over how the operating system resp" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="understanding-udev-rules-in-ubuntu-for-custom-actions">Understanding
+udev Rules in Ubuntu for Custom Actions</h1>
+<p>In Ubuntu, <code>udev</code> is the Linux kernel’s dynamic device
+manager responsible for handling device nodes in the <code>/dev</code>
+directory. The primary purpose of <code>udev</code> rules is to give
+system administrators and users fine-grained control over how the
+operating system responds to hardware events, such as plugging in or
+removing a USB drive, network card, or serial device. By writing custom
+<code>udev</code> rules, you can automate task execution, enforce
+consistent device naming, modify access permissions, and seamlessly
+integrate new hardware into system workflows.</p>
+<h2 id="core-purposes-of-udev-rules">Core Purposes of udev Rules</h2>
+<p>When a new device is connected to an Ubuntu system, the kernel
+detects it and generates a <code>uevent</code>. The <code>udev</code>
+daemon processes this event by evaluating defined rules against the
+device’s attributes. Its main functions include:</p>
+<h3 id="assigning-persistent-device-names">1. Assigning Persistent
+Device Names</h3>
+<p>By default, Ubuntu assigns names to connected devices dynamically
+(such as <code>/dev/sdb1</code> or <code>/dev/ttyUSB0</code>). These
+names can change across reboots depending on the order devices are
+plugged in. Custom <code>udev</code> rules allow you to create fixed
+symbolic links (symlinks) based on unique hardware attributes like
+vendor IDs, product IDs, or serial numbers. This guarantees that your
+scripts always reference the correct hardware.</p>
+<h3 id="automating-custom-scripts-and-commands">2. Automating Custom
+Scripts and Commands</h3>
+<p><code>udev</code> rules can trigger external scripts or commands
+immediately upon device detection or removal using the <code>RUN</code>
+key. For example, plugging in an external backup drive can automatically
+launch a backup script, or attaching a specific peripheral can start a
+background daemon.</p>
+<h3 id="managing-access-permissions-and-ownership">3. Managing Access
+Permissions and Ownership</h3>
+<p>Certain hardware devices (such as microcontrollers, specialized USB
+tools, or custom peripherals) require root privileges to access by
+default. Using <code>udev</code> rules, you can set custom file
+permissions (<code>MODE</code>), user ownership (<code>OWNER</code>), or
+group access (<code>GROUP</code>) so that unprivileged users can
+interact with specific hardware without using <code>sudo</code>.</p>
+<h3 id="setting-custom-device-attributes-and-environment-variables">4.
+Setting Custom Device Attributes and Environment Variables</h3>
+<p>Rules can set environment variables for system service managers like
+<code>systemd</code>. This allows plugged-in devices to trigger
+<code>systemd</code> services, enable power management settings, or
+alter kernel parameters specifically for that hardware.</p>
+<h2 id="how-udev-rules-function-in-ubuntu">How udev Rules Function in
+Ubuntu</h2>
+<p>Rule files are stored in designated directories, evaluated in lexical
+order: * <code>/etc/udev/rules.d/</code> (User-defined custom rules,
+prioritized highest) * <code>/run/udev/rules.d/</code>
+(Runtime-generated rules) * <code>/lib/udev/rules.d/</code> (System
+default rules)</p>
+<h3 id="basic-rule-structure">Basic Rule Structure</h3>
+<p>A <code>udev</code> rule consists of <strong>match keys</strong> (to
+identify the device) and <strong>assignment keys</strong> (to specify
+actions):</p>
+<ul>
+<li><strong>Match Keys:</strong> Attributes like <code>SUBSYSTEM</code>,
+<code>ATTRS{idVendor}</code>, <code>ATTRS{idProduct}</code>, or
+<code>KERNEL</code>.</li>
+<li><strong>Assignment Keys:</strong> Directives like
+<code>SYMLINK</code>, <code>MODE</code>, <code>OWNER</code>,
+<code>GROUP</code>, or <code>RUN</code>.</li>
+</ul>
+<h4 id="example-scenario">Example Scenario</h4>
+<p>To automatically assign a persistent symlink named
+<code>/dev/my_sensor</code> and execute a script when a specific
+USB-to-Serial adapter is plugged in, a rule inside
+<code>/etc/udev/rules.d/99-custom-sensor.rules</code> would look like
+this:</p>
+<pre class="text"><code>SUBSYSTEM==&quot;tty&quot;, ATTRS{idVendor}==&quot;0403&quot;, ATTRS{idProduct}==&quot;6001&quot;, SYMLINK+=&quot;my_sensor&quot;, RUN+=&quot;/usr/local/bin/notify_plugin.sh&quot;</code></pre>
+<p>Whenever the device matching vendor ID <code>0403</code> and product
+ID <code>6001</code> connects: 1. <code>udev</code> verifies the match
+conditions. 2. A symbolic link pointing to the device node is created at
+<code>/dev/my_sensor</code>. 3. The script
+<code>/usr/local/bin/notify_plugin.sh</code> runs automatically in the
+background.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

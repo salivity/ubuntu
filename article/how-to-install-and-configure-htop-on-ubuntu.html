@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure htop on Ubuntu - ubuntu</title>
+    <meta name="description" content="The htop utility is an interactive, real-time process monitoring tool for Linux systems that provides a color-coded, user-friendly alternative to the default top command. This guide walks you through the steps to install htop on Ubuntu using the standard">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-htop-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure htop on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-htop-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The htop utility is an interactive, real-time process monitoring tool for Linux systems that provides a color-coded, user-friendly alternative to the default top command. This guide walks you through the steps to install htop on Ubuntu using the standard" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-htop-on-ubuntu">How to Install and
+Configure htop on Ubuntu</h1>
+<p>The <code>htop</code> utility is an interactive, real-time process
+monitoring tool for Linux systems that provides a color-coded,
+user-friendly alternative to the default <code>top</code> command. This
+guide walks you through the steps to install <code>htop</code> on Ubuntu
+using the standard APT package manager, launch the application, and
+configure its layout, color schemes, and display options to optimize
+your system resource management.</p>
+<h2 id="step-1-update-system-packages-and-install-htop">Step 1: Update
+System Packages and Install htop</h2>
+<p>Open your terminal and refresh your system’s package list to ensure
+you pull the latest version from the official Ubuntu repositories:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<p>Next, install <code>htop</code> by running the following command:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install htop <span class="at">-y</span></span></code></pre></div>
+<p>Once the installation process completes, verify that
+<code>htop</code> is installed properly by checking its version:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">htop</span> <span class="at">--version</span></span></code></pre></div>
+<h2 id="step-2-launch-htop">Step 2: Launch htop</h2>
+<p>To start the process monitor, type:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">htop</span></span></code></pre></div>
+<p>The terminal interface will display three main sections: *
+<strong>Header (Top):</strong> Displays per-core CPU usage, RAM usage,
+Swap usage, tasks, load average, and uptime. * <strong>Body
+(Middle):</strong> Shows the active process list, including Process ID
+(PID), User, CPU percentage, Memory percentage, and the executing
+Command. * <strong>Footer (Bottom):</strong> Displays function key
+shortcuts (<code>F1</code> through <code>F10</code>) for quick
+actions.</p>
+<h2 id="step-3-configure-htop-settings">Step 3: Configure htop
+Settings</h2>
+<p>Customizing <code>htop</code> allows you to tailor the interface to
+your specific monitoring needs.</p>
+<ol type="1">
+<li>Press <strong>F2</strong> (or <code>Shift + C</code>) on your
+keyboard to enter the <strong>Setup</strong> menu.</li>
+<li>Use the <strong>Arrow keys</strong> to navigate through the four
+configuration columns:</li>
+</ol>
+<h3 id="display-options">Display Options</h3>
+<p>Under the <strong>Display Options</strong> column, you can toggle key
+settings using the <strong>Spacebar</strong>: * <strong>Hide kernel
+threads:</strong> Keeps background system threads from cluttering your
+process list. * <strong>Hide userland process threads:</strong> Groups
+sub-threads under their main parent process. * <strong>Display process
+tree by default:</strong> Organizes running tasks into a parent-child
+visual hierarchy. * <strong>Show custom thread names:</strong> Displays
+distinct names for individual process threads.</p>
+<h3 id="meters-customization">Meters Customization</h3>
+<p>The <strong>Meters</strong> section allows you to change how CPU,
+Memory, and Swap data are displayed in the top header. 1. Select
+<strong>Meters</strong> in the Setup menu. 2. Choose between
+<strong>Left column</strong> or <strong>Right column</strong>. 3. Scroll
+to the bottom list, select a meter (e.g., Memory, Hostname, Clock), and
+press <strong>F5</strong> to add it, or <strong>F6</strong> to change
+its style (Bar, Text, Graph, or LED).</p>
+<h3 id="colors">Colors</h3>
+<p>Navigate to <strong>Colors</strong> in the Setup menu to select from
+predefined visual themes, such as <em>Default</em>, <em>Monochrome</em>,
+<em>Black on White</em>, or <em>Night</em>.</p>
+<p>After configuring your preferences, press <strong>F10</strong> or
+<strong>Esc</strong> to save your changes and exit the Setup menu.
+Settings are saved to <code>~/.config/htop/htoprc</code>.</p>
+<h2 id="step-4-essential-keyboard-shortcuts-for-managing-processes">Step
+4: Essential Keyboard Shortcuts for Managing Processes</h2>
+<ul>
+<li><strong>F3 (or /):</strong> Search for a specific process by
+name.</li>
+<li><strong>F4 (or ):</strong> Filter processes dynamically based on
+typed criteria.</li>
+<li><strong>F5 (or t):</strong> Toggle between standard list view and
+tree view.</li>
+<li><strong>F6 (or &gt;):</strong> Sort processes by specific columns
+like <code>CPU%</code>, <code>MEM%</code>, or <code>PID</code>.</li>
+<li><strong>F9 (or k):</strong> Send a signal to a selected process.
+Select the process, press <code>F9</code>, choose a signal (such as
+<code>15 SIGTERM</code> or <code>9 SIGKILL</code>), and press
+<code>Enter</code> to terminate it.</li>
+<li><strong>Space:</strong> Tag individual processes to apply actions to
+multiple tasks at once.</li>
+<li><strong>U:</strong> Filter processes by a specific system user.</li>
+<li><strong>F10 (or q):</strong> Quit <code>htop</code> and return to
+the command prompt.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

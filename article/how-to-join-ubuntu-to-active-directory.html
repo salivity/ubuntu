@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Join Ubuntu to Active Directory? - ubuntu</title>
+    <meta name="description" content="This article provides a straightforward, step-by-step guide on how to integrate an Ubuntu Linux machine into a Windows Active Directory (AD) domain. You will learn how to configure network settings, install the necessary realmd and SSSD packages, join th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-join-ubuntu-to-active-directory">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Join Ubuntu to Active Directory? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-join-ubuntu-to-active-directory" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a straightforward, step-by-step guide on how to integrate an Ubuntu Linux machine into a Windows Active Directory (AD) domain. You will learn how to configure network settings, install the necessary realmd and SSSD packages, join th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-join-ubuntu-to-active-directory">How to Join Ubuntu to
+Active Directory?</h1>
+<p>This article provides a straightforward, step-by-step guide on how to
+integrate an Ubuntu Linux machine into a Windows Active Directory (AD)
+domain. You will learn how to configure network settings, install the
+necessary realmd and SSSD packages, join the domain, and enable home
+directory creation for AD users. By the end of this guide, users will be
+able to log into the Ubuntu system using their Active Directory
+credentials.</p>
+<h3 id="prerequisites-and-network-configuration">Prerequisites and
+Network Configuration</h3>
+<p>Before initiating the domain join process, ensure your Ubuntu system
+can resolve the Active Directory domain controller. This requires
+setting your DNS server to point directly to your AD DNS server.</p>
+<ol type="1">
+<li><strong>Configure DNS:</strong> Update your netplan configuration
+file (usually found in <code>/etc/netplan/</code>) to ensure the
+<code>nameservers</code> section points to your AD Domain Controller IP
+address.</li>
+<li><strong>Verify Hostname:</strong> Ensure your local hostname is
+correctly set by running
+<code>hostnamectl set-hostname ubuntu-node.yourdomain.com</code>.</li>
+<li><strong>Test Resolution:</strong> Verify that you can ping the
+domain using <code>ping yourdomain.com</code>.</li>
+</ol>
+<h3 id="installing-required-packages">Installing Required Packages</h3>
+<p>Ubuntu utilizes <code>realmd</code> to discover and join Active
+Directory domains, while <code>sssd</code> (System Security Services
+Daemon) handles the actual authentication and caching. Run the following
+commands to install the required software suite:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin packagekit</span></code></pre></div>
+<h3 id="discovering-and-joining-the-active-directory-domain">Discovering
+and Joining the Active Directory Domain</h3>
+<p>Once the packages are installed, you can discover your domain to
+ensure the Ubuntu machine can see the Active Directory environment
+properly.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">realm</span> discover yourdomain.com</span></code></pre></div>
+<p>If the discovery is successful, you will see output detailing the
+required software and the domain capabilities. Next, join the domain
+using an Active Directory user account that has permissions to add
+computers to the domain (such as a Domain Administrator):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> realm join <span class="at">--user</span><span class="op">=</span>Administrator yourdomain.com</span></code></pre></div>
+<p>You will be prompted to enter the password for the specified Active
+Directory user. If the command returns no errors, the system has
+successfully joined the domain.</p>
+<h3
+id="configuring-pam-for-automatic-home-directory-creation">Configuring
+PAM for Automatic Home Directory Creation</h3>
+<p>By default, Ubuntu will not create a local home directory when an
+Active Directory user logs in for the first time. To automate this
+process, you must enable the PAM module for home directory creation.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pam-auth-update <span class="at">--enable</span> mkhomedir</span></code></pre></div>
+<p>Alternatively, you can manually add the following line to the end of
+the <code>/etc/pam.d/common-session</code> file:</p>
+<pre class="text"><code>session required pam_mkhomedir.so skel=/etc/skel/ umask=0077
+</code></pre>
+<h3 id="verifying-the-connection-and-logging-in">Verifying the
+Connection and Logging In</h3>
+<p>To ensure that the Active Directory integration is working correctly,
+you can query user information directly from the AD controller using the
+<code>id</code> command:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">id</span> username@yourdomain.com</span></code></pre></div>
+<p>If the system returns the user ID and group associations from Active
+Directory, the configuration is successful. Users can now log into the
+Ubuntu machine via SSH or the graphical login screen by using their full
+domain credentials format, such as
+<code>username@yourdomain.com</code>.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

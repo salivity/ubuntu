@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable USB Mass Storage Auto Mounting in Ubuntu - ubuntu</title>
+    <meta name="description" content="Disabling automatic USB mass storage mounting in Ubuntu is an essential step for improving system security, preventing unauthorized data transfers, and managing external drives efficiently. This guide provides clear, step-by-step methods to stop USB driv">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/disable-usb-mass-storage-auto-mounting-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Disable USB Mass Storage Auto Mounting in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/disable-usb-mass-storage-auto-mounting-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Disabling automatic USB mass storage mounting in Ubuntu is an essential step for improving system security, preventing unauthorized data transfers, and managing external drives efficiently. This guide provides clear, step-by-step methods to stop USB driv" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="disable-usb-mass-storage-auto-mounting-in-ubuntu">Disable USB
+Mass Storage Auto Mounting in Ubuntu</h1>
+<p>Disabling automatic USB mass storage mounting in Ubuntu is an
+essential step for improving system security, preventing unauthorized
+data transfers, and managing external drives efficiently. This guide
+provides clear, step-by-step methods to stop USB drives from
+auto-mounting, covering desktop-level settings via GNOME, system-wide
+rules using Udev, and complete driver restriction via kernel module
+blacklisting.</p>
+<h2 id="method-1-disable-automount-via-gnome-desktop-settings">Method 1:
+Disable Automount via GNOME Desktop Settings</h2>
+<p>If you are using the default Ubuntu GNOME desktop environment, you
+can prevent plugged-in USB drives from mounting automatically while
+still allowing users to mount them manually when needed.</p>
+<h3 id="using-the-terminal">Using the Terminal</h3>
+<p>Run the following commands in your terminal to disable automounting
+and auto-opening of removable media:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gsettings</span> set org.gnome.desktop.media-handling automount false</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gsettings</span> set org.gnome.desktop.media-handling automount-open false</span></code></pre></div>
+<p>To re-enable automounting in the future, set the values back to
+<code>true</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gsettings</span> set org.gnome.desktop.media-handling automount true</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gsettings</span> set org.gnome.desktop.media-handling automount-open true</span></code></pre></div>
+<h3 id="using-dconf-editor-gui">Using Dconf Editor (GUI)</h3>
+<ol type="1">
+<li><p>Install Dconf Editor:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install dconf-editor <span class="at">-y</span></span></code></pre></div></li>
+<li><p>Open <strong>dconf Editor</strong> from your applications
+menu.</p></li>
+<li><p>Navigate to
+<code>/org/gnome/desktop/media-handling/</code>.</p></li>
+<li><p>Turn off the switches for <strong>automount</strong> and
+<strong>automount-open</strong>.</p></li>
+</ol>
+<hr />
+<h2 id="method-2-disable-automount-system-wide-using-udev-rules">Method
+2: Disable Automount System-Wide Using Udev Rules</h2>
+<p>To prevent Udisks from automatically mounting USB storage devices
+across the entire operating system, you can create a custom
+<code>udev</code> rule.</p>
+<ol type="1">
+<li><p>Create a new Udev rule file:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/udev/rules.d/99-prevent-automount.rules</span></code></pre></div></li>
+<li><p>Add the following line to the file:</p>
+<pre class="text"><code>SUBSYSTEM==&quot;block&quot;, ACTION==&quot;add&quot;, ENV{ID_BUS}==&quot;usb&quot;, ENV{UDISKS_AUTO}=&quot;0&quot;</code></pre></li>
+<li><p>Save and close the file (press <code>Ctrl+O</code>,
+<code>Enter</code>, then <code>Ctrl+X</code>).</p></li>
+<li><p>Reload the Udev rules:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> udevadm control <span class="at">--reload-rules</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> udevadm trigger</span></code></pre></div></li>
+</ol>
+<p>This configuration flags inserted USB drives so Udisks ignores them
+for auto-mounting, but users can still mount them manually via command
+line or file manager.</p>
+<hr />
+<h2 id="method-3-blacklist-the-usb-mass-storage-kernel-module">Method 3:
+Blacklist the USB Mass Storage Kernel Module</h2>
+<p>For high-security environments where USB storage devices must be
+completely disabled, you can blacklist the <code>usb-storage</code>
+kernel module. This prevents Ubuntu from recognizing USB mass storage
+devices entirely.</p>
+<ol type="1">
+<li><p>Open the blacklist configuration file in a text editor:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/blacklist-usbstorage.conf</span></code></pre></div></li>
+<li><p>Add the following line to the file:</p>
+<pre class="text"><code>blacklist usb-storage</code></pre></li>
+<li><p>Save and exit the file.</p></li>
+<li><p>Apply the changes by updating the initial RAM filesystem:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span></span></code></pre></div></li>
+<li><p>Reboot your computer for the changes to take full effect:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+</ol>
+<p>Once rebooted, inserted USB mass storage drives will not be read or
+mounted by the system. USB keyboards, mice, and other non-storage
+peripherals will continue to work normally.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

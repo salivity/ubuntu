@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure auditd on Ubuntu - ubuntu</title>
+    <meta name="description" content="The Linux Audit Daemon (auditd) is a vital tool for tracking security-relevant events, monitoring file changes, and auditing system calls on Ubuntu systems. This guide provides a step-by-step walk-through on installing the auditd package, configuring ess">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-auditd-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure auditd on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-auditd-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Linux Audit Daemon (auditd) is a vital tool for tracking security-relevant events, monitoring file changes, and auditing system calls on Ubuntu systems. This guide provides a step-by-step walk-through on installing the auditd package, configuring ess" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-auditd-on-ubuntu">How to Install
+and Configure auditd on Ubuntu</h1>
+<p>The Linux Audit Daemon (<code>auditd</code>) is a vital tool for
+tracking security-relevant events, monitoring file changes, and auditing
+system calls on Ubuntu systems. This guide provides a step-by-step
+walk-through on installing the <code>auditd</code> package, configuring
+essential auditing rules, managing the service, and analyzing log files
+using built-in utilities like <code>ausearch</code> and
+<code>aureport</code>.</p>
+<h2 id="step-1-install-auditd">Step 1: Install auditd</h2>
+<p>Update your local package index and install <code>auditd</code> along
+with its plugin library using the <code>apt</code> package manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install auditd audispd-plugins <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-start-and-enable-the-service">Step 2: Start and Enable
+the Service</h2>
+<p>Once installed, enable the service to ensure it starts automatically
+upon system boot, then start the daemon:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable auditd</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start auditd</span></code></pre></div>
+<p>Verify that the service is active and running:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status auditd</span></code></pre></div>
+<h2 id="step-3-understand-the-configuration-files">Step 3: Understand
+the Configuration Files</h2>
+<p>The behavior of <code>auditd</code> is managed primarily through two
+locations:</p>
+<ul>
+<li><strong><code>/etc/audit/auditd.conf</code></strong>: Configures
+daemon-specific operational parameters, such as log file locations, log
+rotation policies, disk space limits, and security actions.</li>
+<li><strong><code>/etc/audit/rules.d/</code></strong>: Contains rule
+files (such as <code>audit.rules</code>) that define what events, files,
+and system calls <code>auditd</code> should monitor.</li>
+</ul>
+<p>To edit general performance or logging limits, modify
+<code>/etc/audit/auditd.conf</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/audit/auditd.conf</span></code></pre></div>
+<p>Key directives to review include: * <code>log_file</code>: The
+default storage path (<code>/var/log/audit/audit.log</code>). *
+<code>max_log_file</code>: Maximum log size in megabytes before
+rotating. * <code>max_log_file_action</code>: Action taken when the log
+size limit is reached (e.g., <code>ROTATE</code>).</p>
+<h2 id="step-4-configure-audit-rules">Step 4: Configure Audit Rules</h2>
+<p>Audit rules dictate what gets logged. Rules should be added to files
+inside the <code>/etc/audit/rules.d/</code> directory.</p>
+<p>Open the default rules file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/audit/rules.d/audit.rules</span></code></pre></div>
+<h3 id="file-monitoring-examples">File Monitoring Examples</h3>
+<p>To log write and attribute changes (<code>wa</code>) to sensitive
+system files, append lines using the following syntax:</p>
+<pre class="text"><code># Monitor changes to the user password database
+-w /etc/passwd -p wa -k identity_changes
+
+# Monitor changes to the sudoers file
+-w /etc/sudoers -p wa -k sudoers_changes</code></pre>
+<ul>
+<li><code>-w</code>: Specifies the file or directory to watch.</li>
+<li><code>-p</code>: Specifies permissions to trigger on
+(<code>r</code>=read, <code>w</code>=write, <code>e</code>=execute,
+<code>a</code>=attribute change).</li>
+<li><code>-k</code>: Assigns a key (label) to the log entry for easier
+searching later.</li>
+</ul>
+<h3 id="system-call-monitoring-example">System Call Monitoring
+Example</h3>
+<p>To log command executions by users with specific execution calls:</p>
+<pre class="text"><code># Log execution of commands for 64-bit systems
+-a always,exit -F arch=b64 -S execve -k command_execution</code></pre>
+<h2 id="step-5-apply-the-audit-rules">Step 5: Apply the Audit Rules</h2>
+<p>After saving your custom rules, load them into the running audit
+framework:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> augenrules <span class="at">--load</span></span></code></pre></div>
+<p>To view all currently loaded active rules, run:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> auditctl <span class="at">-l</span></span></code></pre></div>
+<h2 id="step-6-query-and-analyze-audit-logs">Step 6: Query and Analyze
+Audit Logs</h2>
+<p>Raw logs located in <code>/var/log/audit/audit.log</code> can be
+difficult to read. Use the following utilities to process the
+output:</p>
+<h3 id="using-ausearch">Using <code>ausearch</code></h3>
+<p>Search for logs matching a specific key defined in your rules:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ausearch <span class="at">-k</span> identity_changes</span></code></pre></div>
+<p>Search for events triggered by a specific executable:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ausearch <span class="at">-x</span> /usr/bin/sudo</span></code></pre></div>
+<h3 id="using-aureport">Using <code>aureport</code></h3>
+<p>Generate a summary report of system security events:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> aureport <span class="at">--summary</span></span></code></pre></div>
+<p>Generate a report focused on failed authentication events:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> aureport <span class="at">--auth</span> <span class="at">--failed</span></span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

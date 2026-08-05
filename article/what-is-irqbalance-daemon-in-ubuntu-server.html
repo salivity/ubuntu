@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is irqbalance Daemon in Ubuntu Server? - ubuntu</title>
+    <meta name="description" content="The irqbalance daemon plays a critical role in optimizing Ubuntu server performance by dynamically distributing hardware interrupt requests (IRQs) across available CPU cores. On multi-core systems, unhandled interrupts often default to a single core—ty">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/what-is-irqbalance-daemon-in-ubuntu-server">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What is irqbalance Daemon in Ubuntu Server? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/what-is-irqbalance-daemon-in-ubuntu-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The irqbalance daemon plays a critical role in optimizing Ubuntu server performance by dynamically distributing hardware interrupt requests (IRQs) across available CPU cores. On multi-core systems, unhandled interrupts often default to a single core—ty" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-irqbalance-daemon-in-ubuntu-server">What is irqbalance
+Daemon in Ubuntu Server?</h1>
+<p>The <code>irqbalance</code> daemon plays a critical role in
+optimizing Ubuntu server performance by dynamically distributing
+hardware interrupt requests (IRQs) across available CPU cores. On
+multi-core systems, unhandled interrupts often default to a single
+core—typically CPU0—creating a system bottleneck. This article explains
+how <code>irqbalance</code> functions, its direct impact on server
+throughput and latency, and best practices for managing or configuring
+it for specific server workloads.</p>
+<h2
+id="understanding-hardware-interrupts-and-cpu-bottlenecks">Understanding
+Hardware Interrupts and CPU Bottlenecks</h2>
+<p>When hardware devices—such as network interface cards (NICs), storage
+controllers (NVMe/SATA), or graphics processors—need attention from the
+operating system, they generate a hardware interrupt (IRQ). The Linux
+kernel pauses current CPU tasks briefly to handle these requests.</p>
+<p>Without an active balancing daemon, the operating system frequently
+assigns these interrupts to the first logical processor (CPU0). On
+modern multi-core servers handling heavy I/O, such as high-traffic web
+servers or database nodes, CPU0 can become saturated with interrupt
+processing while other cores remain underutilized. This imbalance leads
+to packet loss, increased system latency, and degraded overall
+performance.</p>
+<h2 id="how-the-irqbalance-daemon-works">How the irqbalance Daemon
+Works</h2>
+<p>The <code>irqbalance</code> daemon runs as a background service in
+Ubuntu. It continuously monitors interrupt loads across the system and
+periodically adjusts CPU affinity—the mapping of specific IRQs to
+specific CPU cores—to ensure balanced resource usage.</p>
+<h3 id="key-operational-features">Key Operational Features:</h3>
+<ul>
+<li><strong>Dynamic Load Monitoring:</strong> It tracks which hardware
+devices are generating high volumes of interrupts and measures current
+CPU workloads.</li>
+<li><strong>Cache-Aware Placement:</strong> The daemon groups related
+IRQs on cores that share L2 or L3 cache when appropriate, minimizing
+costly CPU cache misses.</li>
+<li><strong>Power and Performance Tuning:</strong> It balances the
+trade-off between spreading load to maximize throughput and keeping
+interrupts localized to optimize power usage or cache locality.</li>
+</ul>
+<h2 id="performance-impact-on-ubuntu-servers">Performance Impact on
+Ubuntu Servers</h2>
+<p>For most general-purpose Ubuntu server installations,
+<code>irqbalance</code> provides several tangible performance
+benefits:</p>
+<ul>
+<li><strong>Improved Network Throughput:</strong> On servers processing
+high volumes of network traffic, spreading network card interrupts
+across multiple cores prevents network stack queues from
+overflowing.</li>
+<li><strong>Reduced I/O Latency:</strong> High-speed NVMe drives
+generate thousands of IOPS. Distributing storage interrupts across
+available cores keeps storage I/O response times low.</li>
+<li><strong>Enhanced Multi-Core Efficiency:</strong> By offloading
+device management from CPU0, all cores remain available to process
+application-level threads (such as Web servers, Docker containers, or
+database engines).</li>
+</ul>
+<h2 id="when-to-keep-or-disable-irqbalance">When to Keep or Disable
+irqbalance</h2>
+<p>While <code>irqbalance</code> is enabled by default in Ubuntu Server
+and is beneficial for most workloads, specific use cases require custom
+configurations or disabling the service entirely.</p>
+<h3 id="keep-enabled-for">Keep Enabled For:</h3>
+<ul>
+<li>General-purpose web, application, and database servers.</li>
+<li>Virtualization hosts running a wide variety of mixed workloads.</li>
+<li>Servers with high network bandwidth utilization across multiple NIC
+queues.</li>
+</ul>
+<h3 id="consider-disabling-or-tuning-for">Consider Disabling or Tuning
+For:</h3>
+<ul>
+<li><strong>Ultra-Low Latency Environments:</strong> Financial trading
+platforms or real-time media streaming where deterministic latency is
+required.</li>
+<li><strong>CPU Pinning/Affinity Tuning:</strong> Virtualization hosts
+(KVM/QEMU) or dedicated database nodes where specific CPU cores are
+explicitly pinned to specific virtual machines or processes using manual
+<code>smp_affinity</code> settings. <code>irqbalance</code> can
+overwrite manual IRQ affinity rules if left unconfigured.</li>
+</ul>
+<h2 id="managing-irqbalance-in-ubuntu">Managing irqbalance in
+Ubuntu</h2>
+<p>You can manage the <code>irqbalance</code> service in Ubuntu using
+standard system commands.</p>
+<p>To check if <code>irqbalance</code> is running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status irqbalance</span></code></pre></div>
+<p>To stop and disable the service for manual IRQ binding:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop irqbalance</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable irqbalance</span></code></pre></div>
+<p>To configure <code>irqbalance</code> behavior (such as isolating
+specific CPU cores from handling interrupts), edit its configuration
+file at <code>/etc/default/irqbalance</code> and add excluded CPUs using
+the <code>IRQBALANCE_BANNED_CPUS</code> variable before restarting the
+daemon.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure OBS Studio on Ubuntu - ubuntu</title>
+    <meta name="description" content="OBS Studio is a powerful, free, and open-source software for video recording and live streaming. This guide provides a step-by-step walkthrough for installing OBS Studio on Ubuntu Linux using the official PPA repository, followed by essential configurati">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-obs-studio-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure OBS Studio on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-obs-studio-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="OBS Studio is a powerful, free, and open-source software for video recording and live streaming. This guide provides a step-by-step walkthrough for installing OBS Studio on Ubuntu Linux using the official PPA repository, followed by essential configurati" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-obs-studio-on-ubuntu">How to
+Install and Configure OBS Studio on Ubuntu</h1>
+<p>OBS Studio is a powerful, free, and open-source software for video
+recording and live streaming. This guide provides a step-by-step
+walkthrough for installing OBS Studio on Ubuntu Linux using the official
+PPA repository, followed by essential configuration settings for optimal
+video, audio, and encoding performance.</p>
+<h2 id="step-1-install-obs-studio-on-ubuntu">Step 1: Install OBS Studio
+on Ubuntu</h2>
+<p>Before installing OBS Studio, ensure your system has FFmpeg
+installed, as OBS relies on it for audio and video encoding.</p>
+<ol type="1">
+<li><p>Open your terminal (<code>Ctrl+Alt+T</code>).</p></li>
+<li><p>Update your package list and install FFmpeg by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ffmpeg</span></code></pre></div></li>
+<li><p>Add the official OBS Studio PPA to your system:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:obsproject/obs-studio</span></code></pre></div></li>
+<li><p>Press <code>Enter</code> to confirm adding the
+repository.</p></li>
+<li><p>Update your system package index and install OBS Studio:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install obs-studio</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-2-initial-setup-with-the-auto-configuration-wizard">Step 2:
+Initial Setup with the Auto-Configuration Wizard</h2>
+<ol type="1">
+<li>Launch <strong>OBS Studio</strong> from your application menu.</li>
+<li>On the first launch, the <strong>Auto-Configuration Wizard</strong>
+will appear.</li>
+<li>Choose your primary usage mode:
+<ul>
+<li><strong>Optimize for streaming, recording is secondary</strong>:
+Best if you plan to broadcast live on Twitch, YouTube, etc.</li>
+<li><strong>Optimize just for recording, I will not be
+streaming</strong>: Best for video tutorials, gameplay recording, or
+local recording.</li>
+</ul></li>
+<li>Select your preferred base canvas resolution (typically
+<strong>1920x1080</strong>) and frame rate (usually <strong>60</strong>
+or <strong>30 FPS</strong>).</li>
+<li>Click <strong>Apply Settings</strong>.</li>
+</ol>
+<hr />
+<h2 id="step-3-configure-video-and-output-settings">Step 3: Configure
+Video and Output Settings</h2>
+<p>To fine-tune performance and quality manually, open
+<strong>Settings</strong> from the bottom right panel.</p>
+<h3 id="video-settings">Video Settings</h3>
+<ul>
+<li>Navigate to the <strong>Video</strong> tab.</li>
+<li><strong>Base (Canvas) Resolution</strong>: Set this to your
+monitor’s native resolution (e.g., <code>1920x1080</code>).</li>
+<li><strong>Output (Scaled) Resolution</strong>: Set the final output
+resolution. If your hardware is less powerful, downscale to
+<code>1280x720</code> to reduce CPU/GPU load.</li>
+<li><strong>Common FPS Values</strong>: Set to <strong>60</strong> for
+smooth motion or <strong>30</strong> for standard video and lower
+resource usage.</li>
+</ul>
+<h3 id="output-settings">Output Settings</h3>
+<ul>
+<li>Navigate to the <strong>Output</strong> tab and change
+<strong>Output Mode</strong> to <strong>Advanced</strong>.</li>
+<li>Under the <strong>Recording</strong> tab:
+<ul>
+<li><strong>Recording Path</strong>: Choose the folder where your videos
+will save.</li>
+<li><strong>Recording Format</strong>: Change to <code>mkv</code> or
+<code>mp4</code> (MKV is safer against crashes).</li>
+<li><strong>Encoder</strong>: Select <strong>x264</strong> for CPU
+encoding, or <strong>NVENC</strong> (NVIDIA) / <strong>VAAPI</strong>
+(AMD/Intel) for hardware-accelerated encoding.</li>
+<li><strong>Rate Control</strong>: Select <strong>CBR</strong> for
+streaming or <strong>CQP / CRF</strong> for local recording.</li>
+<li><strong>Bitrate</strong>: Set between <strong>4000 Kbps</strong> and
+<strong>6000 Kbps</strong> for 1080p 60fps video.</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="step-4-configure-audio-devices">Step 4: Configure Audio
+Devices</h2>
+<ol type="1">
+<li>Go to <strong>Settings</strong> &gt; <strong>Audio</strong>.</li>
+<li><strong>Desktop Audio</strong>: Select <strong>Default</strong> or
+your specific sound output device to record system sounds.</li>
+<li><strong>Mic/Auxiliary Audio</strong>: Select your external or
+built-in microphone.</li>
+<li>Click <strong>Apply</strong> and <strong>OK</strong>.</li>
+</ol>
+<hr />
+<h2 id="step-5-add-scenes-and-capture-sources">Step 5: Add Scenes and
+Capture Sources</h2>
+<ol type="1">
+<li>Look at the <strong>Scenes</strong> panel at the bottom left and
+click the <strong>+</strong> button to create a new scene.</li>
+<li>In the <strong>Sources</strong> panel next to it, click the
+<strong>+</strong> button to add a capture input:
+<ul>
+<li><strong>Screen Capture (PipeWire)</strong>: Ideal if running Ubuntu
+on the default Wayland display server.</li>
+<li><strong>Screen Capture (XSHM)</strong>: Ideal if running Ubuntu on
+an X11 session.</li>
+<li><strong>Window Capture</strong>: Captures a single application
+window.</li>
+<li><strong>Audio Input Capture</strong>: Adds a specific microphone
+source.</li>
+</ul></li>
+<li>Adjust the captured box size in the preview window to fit your
+canvas.</li>
+</ol>
+<p>Click <strong>Start Recording</strong> or <strong>Start
+Streaming</strong> in the lower right controls panel to begin.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

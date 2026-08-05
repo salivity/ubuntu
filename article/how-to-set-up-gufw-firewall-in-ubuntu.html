@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up Gufw Firewall in Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a firewall on Ubuntu is one of the most effective ways to secure your system from unauthorized network access. While Ubuntu includes Uncomplicated Firewall (UFW) by default, managing it through the command line can be intimidating for some use">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-gufw-firewall-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up Gufw Firewall in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-gufw-firewall-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a firewall on Ubuntu is one of the most effective ways to secure your system from unauthorized network access. While Ubuntu includes Uncomplicated Firewall (UFW) by default, managing it through the command line can be intimidating for some use" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-gufw-firewall-in-ubuntu">How to Set Up Gufw
+Firewall in Ubuntu</h1>
+<p>Setting up a firewall on Ubuntu is one of the most effective ways to
+secure your system from unauthorized network access. While Ubuntu
+includes Uncomplicated Firewall (UFW) by default, managing it through
+the command line can be intimidating for some users. This guide
+demonstrates how to install, configure, and manage your network security
+effortlessly using <strong>Gufw</strong>, a graphical user interface
+(GUI) designed for UFW.</p>
+<h2 id="what-is-gufw">What is Gufw?</h2>
+<p>Gufw stands for Graphical Uncomplicated Firewall. It provides an
+intuitive interface to control UFW, allowing you to turn the firewall on
+or off, select pre-set security profiles, and create custom rules for
+allowing or blocking specific traffic without typing terminal
+commands.</p>
+<hr />
+<h2 id="step-1-install-gufw-on-ubuntu">Step 1: Install Gufw on
+Ubuntu</h2>
+<p>Gufw is available in the standard Ubuntu repositories and can be
+installed via the terminal or the Ubuntu Software Center.</p>
+<h3 id="option-a-using-the-terminal">Option A: Using the Terminal</h3>
+<ol type="1">
+<li><p>Open your terminal (<code>Ctrl</code> + <code>Alt</code> +
+<code>T</code>).</p></li>
+<li><p>Update your package list:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></li>
+<li><p>Install Gufw:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gufw</span></code></pre></div></li>
+</ol>
+<h3 id="option-b-using-ubuntu-software-center">Option B: Using Ubuntu
+Software Center</h3>
+<ol type="1">
+<li>Open the <strong>Ubuntu Software</strong> app.</li>
+<li>Search for <strong>Gufw</strong> or <strong>Firewall
+Configuration</strong>.</li>
+<li>Click <strong>Install</strong> and enter your administrative
+password.</li>
+</ol>
+<hr />
+<h2 id="step-2-launch-gufw">Step 2: Launch Gufw</h2>
+<ol type="1">
+<li>Open your applications menu by clicking <strong>Activities</strong>
+or pressing the <strong>Super</strong> (Windows) key.</li>
+<li>Search for <strong>Firewall Configuration</strong>.</li>
+<li>Click the icon to launch the application.</li>
+<li>Enter your system password when prompted to grant administrative
+privileges.</li>
+</ol>
+<hr />
+<h2 id="step-3-enable-the-firewall">Step 3: Enable the Firewall</h2>
+<p>By default, Ubuntu’s firewall is disabled. To activate it in
+Gufw:</p>
+<ol type="1">
+<li>Locate the <strong>Status</strong> toggle switch near the top left
+of the window.</li>
+<li>Click the toggle switch to change the status from
+<strong>OFF</strong> to <strong>ON</strong>.</li>
+</ol>
+<p>Once enabled, the shield icon will change color, indicating that your
+system is actively protected.</p>
+<hr />
+<h2 id="step-4-choose-a-profile-and-set-default-rules">Step 4: Choose a
+Profile and Set Default Rules</h2>
+<p>Gufw offers built-in profiles tailored for different network
+environments:</p>
+<ul>
+<li><strong>Home:</strong> Allows outgoing connections and blocks
+incoming connections by default.</li>
+<li><strong>Work:</strong> Similar to Home, tailored for office
+environments.</li>
+<li><strong>Public:</strong> Stricter rules intended for untrusted
+networks like public Wi-Fi.</li>
+</ul>
+<h3 id="default-policies">Default Policies</h3>
+<p>Below the profile selection, you can adjust the default behavior for
+incoming and outgoing connections: * <strong>Incoming:</strong> Set to
+<strong>Reject</strong> or <strong>Deny</strong> (Deny silently drops
+traffic, while Reject sends an error response back). *
+<strong>Outgoing:</strong> Set to <strong>Allow</strong> so your web
+browsing and normal application traffic work without interruption.</p>
+<hr />
+<h2 id="step-5-add-custom-rules">Step 5: Add Custom Rules</h2>
+<p>If you need to allow specific services (like a web server or SSH) or
+block certain IP addresses, you can create custom rules.</p>
+<ol type="1">
+<li>Click the <strong>Rules</strong> tab at the top of the
+interface.</li>
+<li>Click the <strong><code>+</code> (Plus)</strong> button at the
+bottom left to open the “Add a Firewall Rule” window.</li>
+</ol>
+<p>You will see three tabs for adding rules:</p>
+<h3 id="preconfigured-tab">1. Preconfigured Tab</h3>
+<p>This is the easiest option for common services and applications. *
+<strong>Allow/Deny:</strong> Select whether to allow or block traffic. *
+<strong>Category:</strong> Choose a category (e.g., Network, Service,
+Game). * <strong>Subcategory &amp; Application:</strong> Select the
+specific app (e.g., SSH, Transmission, Plex). * Click
+<strong>Add</strong>.</p>
+<h3 id="simple-tab">2. Simple Tab</h3>
+<p>Use this tab if you know the port number or protocol. *
+<strong>Name:</strong> Enter a custom label for the rule. *
+<strong>Action:</strong> Select <strong>Allow</strong>,
+<strong>Deny</strong>, <strong>Reject</strong>, or
+<strong>Limit</strong>. * <strong>Protocol:</strong> Choose
+<strong>TCP</strong>, <strong>UDP</strong>, or <strong>Both</strong>. *
+<strong>Port:</strong> Enter the port number (e.g., port <code>80</code>
+for HTTP or <code>22</code> for SSH). * Click <strong>Add</strong>.</p>
+<h3 id="advanced-tab">3. Advanced Tab</h3>
+<p>Use this tab for complex configurations, such as filtering by
+specific IP addresses or subnet ranges. * Set the <strong>From</strong>
+IP address (source) and <strong>To</strong> IP address (destination). *
+Specify custom ports and protocols as needed. * Click
+<strong>Add</strong>.</p>
+<hr />
+<h2 id="step-6-managing-and-deleting-rules">Step 6: Managing and
+Deleting Rules</h2>
+<ol type="1">
+<li>Go to the <strong>Rules</strong> tab in the main Gufw window.</li>
+<li>Click on the rule you wish to modify or remove.</li>
+<li>Click the <strong><code>-</code> (Minus)</strong> button at the
+bottom to delete the selected rule.</li>
+<li>Click the <strong>Gear</strong> icon to edit an existing rule.</li>
+</ol>
+<hr />
+<h2 id="step-7-viewing-logs-and-active-connections">Step 7: Viewing Logs
+and Active Connections</h2>
+<p>Gufw allows you to monitor network activity directly within the
+application:</p>
+<ul>
+<li><strong>Log Tab:</strong> View blocked or allowed traffic attempts
+in real time. This is useful for troubleshooting network issues.</li>
+<li><strong>Listening Report Tab:</strong> See which applications and
+ports are currently listening for network connections on your
+system.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

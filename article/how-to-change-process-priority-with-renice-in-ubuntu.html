@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Change Process Priority with Renice in Ubuntu - ubuntu</title>
+    <meta name="description" content="The renice command in Ubuntu allows users and system administrators to modify the scheduling priority of already running processes. By altering a process's "nice" value, you can dynamically adjust how much CPU time the kernel allocates to it without rest">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-change-process-priority-with-renice-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Change Process Priority with Renice in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-change-process-priority-with-renice-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The renice command in Ubuntu allows users and system administrators to modify the scheduling priority of already running processes. By altering a process's "nice" value, you can dynamically adjust how much CPU time the kernel allocates to it without rest" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-change-process-priority-with-renice-in-ubuntu">How to
+Change Process Priority with Renice in Ubuntu</h1>
+<p>The <code>renice</code> command in Ubuntu allows users and system
+administrators to modify the scheduling priority of already running
+processes. By altering a process’s “nice” value, you can dynamically
+adjust how much CPU time the kernel allocates to it without restarting
+the application. This guide covers the fundamentals of process priority
+in Linux, the syntax of the <code>renice</code> command, and practical
+examples for changing priorities by Process ID (PID), user, or process
+group.</p>
+<h2 id="understanding-nice-values">Understanding Nice Values</h2>
+<p>In Ubuntu and other Linux distributions, process priority is
+represented by a “nice” value ranging from <strong>-20 to
+19</strong>:</p>
+<ul>
+<li><strong>-20</strong>: Highest priority (the process gets the most
+CPU time).</li>
+<li><strong>0</strong>: Default priority for newly launched
+processes.</li>
+<li><strong>19</strong>: Lowest priority (the process yields CPU time to
+other tasks).</li>
+</ul>
+<p><em>Note: Regular users can only lower a process’s priority (increase
+its nice value). Assigning a higher priority (a lower or negative nice
+value) requires root privileges using <code>sudo</code>.</em></p>
+<h2 id="step-1-find-the-process-id-pid">Step 1: Find the Process ID
+(PID)</h2>
+<p>Before changing a process’s priority, you need its PID. You can find
+running processes using tools like <code>ps</code>, <code>pgrep</code>,
+or <code>top</code>.</p>
+<p>To find the PID of a specific program (e.g., <code>firefox</code>),
+run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pgrep</span> firefox</span></code></pre></div>
+<p>Alternatively, list all running processes with their current nice
+values (NI column):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-eo</span> pid,ni,comm <span class="kw">|</span> <span class="fu">grep</span> firefox</span></code></pre></div>
+<h2 id="step-2-use-the-renice-command">Step 2: Use the Renice
+Command</h2>
+<p>The basic syntax for the <code>renice</code> command is:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">renice</span> <span class="pp">[</span><span class="ss">priority_value</span><span class="pp">]</span> <span class="at">-p</span> <span class="pp">[</span><span class="ss">PID</span><span class="pp">]</span></span></code></pre></div>
+<h3 id="example-1-lower-process-priority-increase-nice-value">Example 1:
+Lower Process Priority (Increase Nice Value)</h3>
+<p>To set the nice value of PID <code>1234</code> to <code>10</code>
+(making it less of a CPU priority):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">renice</span> 10 <span class="at">-p</span> 1234</span></code></pre></div>
+<h3 id="example-2-raise-process-priority-decrease-nice-value">Example 2:
+Raise Process Priority (Decrease Nice Value)</h3>
+<p>To give a process higher CPU priority (e.g., setting the nice value
+to <code>-5</code>), use <code>sudo</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> renice <span class="at">-5</span> <span class="at">-p</span> 1234</span></code></pre></div>
+<h2 id="advanced-usage-of-renice">Advanced Usage of Renice</h2>
+<h3 id="change-priority-for-all-processes-of-a-specific-user">Change
+Priority for All Processes of a Specific User</h3>
+<p>To change the priority of every process owned by a specific user, use
+the <code>-u</code> flag:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> renice 5 <span class="at">-u</span> username</span></code></pre></div>
+<h3 id="change-priority-for-a-process-group">Change Priority for a
+Process Group</h3>
+<p>To alter the priority for an entire process group ID (PGID), use the
+<code>-g</code> flag:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> renice 5 <span class="at">-g</span> 5678</span></code></pre></div>
+<h2 id="verifying-the-priority-change">Verifying the Priority
+Change</h2>
+<p>To confirm that the priority has been successfully updated, check the
+process status again:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-o</span> pid,ni,cmd <span class="at">-p</span> 1234</span></code></pre></div>
+<p>The output will display the updated nice value in the <code>NI</code>
+column.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

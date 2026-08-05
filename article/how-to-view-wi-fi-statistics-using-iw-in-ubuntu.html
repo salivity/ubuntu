@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to View Wi-Fi Statistics Using iw in Ubuntu - ubuntu</title>
+    <meta name="description" content="This article provides a quick guide on how to view detailed Wi-Fi connection statistics in Ubuntu using the iw command-line tool. By using the standard wireless utility, you can easily inspect link status, signal strength, transmit bitrates, connected ac">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-view-wi-fi-statistics-using-iw-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to View Wi-Fi Statistics Using iw in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-view-wi-fi-statistics-using-iw-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a quick guide on how to view detailed Wi-Fi connection statistics in Ubuntu using the iw command-line tool. By using the standard wireless utility, you can easily inspect link status, signal strength, transmit bitrates, connected ac" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-view-wi-fi-statistics-using-iw-in-ubuntu">How to View
+Wi-Fi Statistics Using iw in Ubuntu</h1>
+<p>This article provides a quick guide on how to view detailed Wi-Fi
+connection statistics in Ubuntu using the <code>iw</code> command-line
+tool. By using the standard wireless utility, you can easily inspect
+link status, signal strength, transmit bitrates, connected access point
+details, and operating frequencies directly from your terminal.</p>
+<h2 id="the-command-for-detailed-wi-fi-link-statistics">The Command for
+Detailed Wi-Fi Link Statistics</h2>
+<p>The primary command to view detailed Wi-Fi connection statistics for
+an active link using <code>iw</code> is:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iw dev <span class="op">&lt;</span>interface<span class="op">&gt;</span> link</span></code></pre></div>
+<p>Replace <code>&lt;interface&gt;</code> with the name of your wireless
+network adapter (such as <code>wlan0</code> or <code>wlp3s0</code>).</p>
+<h2 id="how-to-check-your-wi-fi-statistics-step-by-step">How to Check
+Your Wi-Fi Statistics Step-by-Step</h2>
+<h3 id="identify-your-wireless-interface-name">1. Identify Your Wireless
+Interface Name</h3>
+<p>If you do not know your wireless interface name, list all available
+wireless devices by running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iw</span> dev</span></code></pre></div>
+<p>Look for the line starting with <code>Interface</code>. For example,
+your interface might be named <code>wlan0</code> or
+<code>wlp2s0</code>.</p>
+<h3 id="execute-the-link-command">2. Execute the Link Command</h3>
+<p>Once you know your interface name, run the link command to fetch
+active connection metrics:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iw dev wlan0 link</span></code></pre></div>
+<h3 id="analyze-the-command-output">3. Analyze the Command Output</h3>
+<p>The command returns comprehensive data about your current wireless
+link:</p>
+<ul>
+<li><strong>Connected to:</strong> The MAC address (BSSID) of the Access
+Point.</li>
+<li><strong>SSID:</strong> The name of the Wi-Fi network you are
+connected to.</li>
+<li><strong>freq:</strong> The current operating frequency in MHz (e.g.,
+5180 MHz for 5 GHz Wi-Fi).</li>
+<li><strong>RX/TX bytes:</strong> Total bytes received and transmitted
+over the link.</li>
+<li><strong>signal:</strong> The current signal strength expressed in
+dBm (e.g., <code>-50 dBm</code>). Values closer to 0 represent a
+stronger signal.</li>
+<li><strong>tx bitrate:</strong> The current transmission rate,
+including channel width, Modulation and Coding Scheme (MCS) index, and
+theoretical throughput speed.</li>
+</ul>
+<h2 id="viewing-advanced-station-statistics">Viewing Advanced Station
+Statistics</h2>
+<p>For even deeper connection metrics—such as packet loss, retransmits,
+inactive time, and signal strength per antenna chain—use the
+<code>station dump</code> command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iw dev wlan0 station dump</span></code></pre></div>
+<p>This output provides low-level diagnostic data useful for
+troubleshooting unstable Wi-Fi connections or monitoring real-time
+network performance on Ubuntu.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

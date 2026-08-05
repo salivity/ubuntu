@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up a Tmux Split Pane Workflow in Ubuntu - ubuntu</title>
+    <meta name="description" content="Managing multiple terminal sessions efficiently is crucial for productivity in Linux. This guide demonstrates how to install tmux on Ubuntu, create custom split-pane layouts, navigate between panes seamlessly, and manage your sessions. By mastering these">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-a-tmux-split-pane-workflow-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up a Tmux Split Pane Workflow in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-a-tmux-split-pane-workflow-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing multiple terminal sessions efficiently is crucial for productivity in Linux. This guide demonstrates how to install tmux on Ubuntu, create custom split-pane layouts, navigate between panes seamlessly, and manage your sessions. By mastering these" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-a-tmux-split-pane-workflow-in-ubuntu">How to Set
+Up a Tmux Split Pane Workflow in Ubuntu</h1>
+<p>Managing multiple terminal sessions efficiently is crucial for
+productivity in Linux. This guide demonstrates how to install
+<code>tmux</code> on Ubuntu, create custom split-pane layouts, navigate
+between panes seamlessly, and manage your sessions. By mastering these
+core <code>tmux</code> commands, you can transform a single Ubuntu
+terminal window into a powerful, multi-pane workspace without relying on
+a graphical user interface.</p>
+<h2 id="step-1-install-tmux-on-ubuntu">Step 1: Install Tmux on
+Ubuntu</h2>
+<p>Open your terminal and update your package list, then install
+<code>tmux</code> using <code>apt</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tmux <span class="at">-y</span></span></code></pre></div>
+<p>Verify the installation by checking the version:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> <span class="at">-V</span></span></code></pre></div>
+<h2 id="step-2-start-a-named-tmux-session">Step 2: Start a Named Tmux
+Session</h2>
+<p>Starting a named session makes it easy to identify and reattach to
+your workspace later.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> new <span class="at">-s</span> dev_workspace</span></code></pre></div>
+<p>You will now see a green status bar at the bottom of your terminal
+screen, indicating that <code>tmux</code> is active.</p>
+<h2 id="step-3-split-the-terminal-into-panes">Step 3: Split the Terminal
+into Panes</h2>
+<p>In <code>tmux</code>, all default keybindings begin with the prefix
+key combination: <strong><code>Ctrl + b</code></strong>.</p>
+<ul>
+<li><strong>Split Vertically (Left / Right):</strong> Press
+<code>Ctrl + b</code>, release, and then press <code>%</code>
+(<code>Shift + 5</code>).</li>
+<li><strong>Split Horizontally (Top / Bottom):</strong> Press
+<code>Ctrl + b</code>, release, and then press <code>"</code>
+(<code>Shift + '</code>).</li>
+</ul>
+<p>You can repeat these commands inside any active pane to create
+complex layout grids tailored to your workflow.</p>
+<h2 id="step-4-navigate-between-panes">Step 4: Navigate Between
+Panes</h2>
+<p>To switch focus between active split panes:</p>
+<ol type="1">
+<li>Press <code>Ctrl + b</code>.</li>
+<li>Press the <strong>Up</strong>, <strong>Down</strong>,
+<strong>Left</strong>, or <strong>Right</strong> arrow key corresponding
+to the pane you want to select.</li>
+</ol>
+<p>To jump to the next pane sequentially, press <code>Ctrl + b</code>
+followed by <code>o</code>.</p>
+<h2 id="step-5-resize-panes">Step 5: Resize Panes</h2>
+<p>If a pane requires more screen real estate:</p>
+<ol type="1">
+<li>Press <code>Ctrl + b</code>.</li>
+<li>Hold down the <code>Ctrl</code> key and press any <strong>Arrow
+key</strong> to adjust the border in that direction.</li>
+</ol>
+<p>Alternatively, enter command mode by pressing <code>Ctrl + b</code>,
+typing <code>:</code>, and executing:</p>
+<pre class="text"><code>resize-pane -D 10   # Resizes down by 10 cells
+resize-pane -U 10   # Resizes up by 10 cells
+resize-pane -L 10   # Resizes left by 10 cells
+resize-pane -R 10   # Resizes right by 10 cells</code></pre>
+<h2 id="step-6-detach-and-reattach-sessions">Step 6: Detach and Reattach
+Sessions</h2>
+<p>One of <code>tmux</code>’s biggest advantages is running background
+processes that persist even if you close the terminal window.</p>
+<ul>
+<li><p><strong>Detach from the session:</strong> Press
+<code>Ctrl + b</code>, then press <code>d</code>.</p></li>
+<li><p><strong>List active sessions:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> ls</span></code></pre></div></li>
+<li><p><strong>Reattach to your session:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> attach <span class="at">-t</span> dev_workspace</span></code></pre></div></li>
+</ul>
+<p>To close an individual pane, simply type <code>exit</code> inside
+that pane or press <code>Ctrl + d</code>. Once the last pane in a
+session is closed, the session terminates automatically.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

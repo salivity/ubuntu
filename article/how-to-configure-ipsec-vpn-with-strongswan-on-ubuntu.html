@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure IPsec VPN with strongSwan on Ubuntu - ubuntu</title>
+    <meta name="description" content="Configuring an IPsec VPN using strongSwan on Ubuntu creates a secure, encrypted tunnel for network traffic, ideal for remote workers or connecting distant networks. This guide walks you through the step-by-step process of installing strongSwan, setting u">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-ipsec-vpn-with-strongswan-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure IPsec VPN with strongSwan on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-ipsec-vpn-with-strongswan-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring an IPsec VPN using strongSwan on Ubuntu creates a secure, encrypted tunnel for network traffic, ideal for remote workers or connecting distant networks. This guide walks you through the step-by-step process of installing strongSwan, setting u" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-ipsec-vpn-with-strongswan-on-ubuntu">How to
+Configure IPsec VPN with strongSwan on Ubuntu</h1>
+<p>Configuring an IPsec VPN using strongSwan on Ubuntu creates a secure,
+encrypted tunnel for network traffic, ideal for remote workers or
+connecting distant networks. This guide walks you through the
+step-by-step process of installing strongSwan, setting up a Public Key
+Infrastructure (PKI) with X.509 certificates, configuring the VPN server
+settings, enabling IP forwarding, and starting the IPsec service.</p>
+<h2 id="step-1-update-system-packages-and-install-strongswan">Step 1:
+Update System Packages and Install strongSwan</h2>
+<p>First, update your package list and install strongSwan along with its
+PKI tools and additional plugins.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install strongswan strongswan-pki libcharon-extra-plugins libcharon-ext-auth-plugins <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-create-a-certificate-authority-ca">Step 2: Create a
+Certificate Authority (CA)</h2>
+<p>strongSwan uses certificates to authenticate the server and clients.
+Begin by creating a directory to store the certificates and generating a
+private key for the CA.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/pki/cacerts ~/pki/certs ~/pki/private</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 ~/pki</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the CA private key</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">ipsec</span> pki <span class="at">--gen</span> <span class="at">--type</span> rsa <span class="at">--size</span> 4096 <span class="at">--outform</span> pem <span class="op">&gt;</span> ~/pki/private/ca-key.pem</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the self-signed CA certificate</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">ipsec</span> pki <span class="at">--self</span> <span class="at">--ca</span> <span class="at">--lifetime</span> 3650 <span class="at">--in</span> ~/pki/private/ca-key.pem <span class="at">--type</span> rsa <span class="at">--dn</span> <span class="st">&quot;CN=VPN CA&quot;</span> <span class="at">--outform</span> pem <span class="op">&gt;</span> ~/pki/cacerts/ca-cert.pem</span></code></pre></div>
+<h2 id="step-3-generate-the-server-certificate">Step 3: Generate the
+Server Certificate</h2>
+<p>Next, create the server’s private key and issue a certificate signed
+by your new CA. Replace <code>your_server_domain_or_IP</code> with your
+server’s actual IP address or domain name.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate server private key</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ipsec</span> pki <span class="at">--gen</span> <span class="at">--type</span> rsa <span class="at">--size</span> 4096 <span class="at">--outform</span> pem <span class="op">&gt;</span> ~/pki/private/server-key.pem</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Issue server certificate</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">ipsec</span> pki <span class="at">--issue</span> <span class="at">--lifetime</span> 1825 <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--cacert</span> ~/pki/cacerts/ca-cert.pem <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--cakey</span> ~/pki/private/ca-key.pem <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--in</span> ~/pki/private/server-key.pem <span class="dt">\</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--dn</span> <span class="st">&quot;CN=your_server_domain_or_IP&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--san</span> <span class="st">&quot;your_server_domain_or_IP&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--flag</span> serverAuth <span class="at">--flag</span> ikeIntermediate <span class="dt">\</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outform</span> pem <span class="op">&gt;</span> ~/pki/certs/server-cert.pem</span></code></pre></div>
+<p>Copy the generated certificates to the system-wide strongSwan
+directory:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ~/pki/cacerts/ca-cert.pem /etc/ipsec.d/cacerts/</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ~/pki/certs/server-cert.pem /etc/ipsec.d/certs/</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ~/pki/private/server-key.pem /etc/ipsec.d/private/</span></code></pre></div>
+<h2 id="step-4-configure-strongswan-ipsec.conf">Step 4: Configure
+strongSwan (<code>ipsec.conf</code>)</h2>
+<p>Back up the default configuration file and open
+<code>/etc/ipsec.conf</code> in a text editor.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv /etc/ipsec.conf /etc/ipsec.conf.bak</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ipsec.conf</span></code></pre></div>
+<p>Add the following configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">config setup</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    charondebug</span><span class="ot">=</span><span class="st">&quot;ike 1, knl 1, cfg 0&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    uniqueids</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">conn %default</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dt">    keyexchange</span><span class="ot">=</span><span class="st">ikev2</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="dt">    ike</span><span class="ot">=</span><span class="st">aes256-sha256-modp3072!</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dt">    esp</span><span class="ot">=</span><span class="st">aes256-sha256!</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">    dpdaction</span><span class="ot">=</span><span class="st">clear</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="dt">    dpddelay</span><span class="ot">=</span><span class="st">300s</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="dt">    rekey</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="dt">conn ikev2-vpn</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="dt">    auto</span><span class="ot">=</span><span class="st">add</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="dt">    compress</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="dt">    type</span><span class="ot">=</span><span class="st">tunnel</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="dt">    left</span><span class="ot">=</span><span class="st">%any</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="dt">    leftid</span><span class="ot">=</span><span class="st">@your_server_domain_or_IP</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="dt">    leftcert</span><span class="ot">=</span><span class="st">server-cert.pem</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="dt">    leftsendcert</span><span class="ot">=</span><span class="st">always</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="dt">    leftsubnet</span><span class="ot">=</span><span class="st">0.0.0.0/0</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="dt">    right</span><span class="ot">=</span><span class="st">%any</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="dt">    rightid</span><span class="ot">=</span><span class="st">%any</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="dt">    rightauth</span><span class="ot">=</span><span class="st">eap-mschapv2</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="dt">    rightsourceip</span><span class="ot">=</span><span class="st">10.10.10.0/24</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="dt">    rightdns</span><span class="ot">=</span><span class="st">8.8.8.8,8.8.4.4</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="dt">    eap_identity</span><span class="ot">=</span><span class="st">%identity</span></span></code></pre></div>
+<h2 id="step-5-configure-authentication-ipsec.secrets">Step 5: Configure
+Authentication (<code>ipsec.secrets</code>)</h2>
+<p>Edit the <code>/etc/ipsec.secrets</code> file to link the server
+private key and define user credentials for client connections.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ipsec.secrets</span></code></pre></div>
+<p>Add the server private key reference and user credentials:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">: RSA server-key.pem</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">vpnuser : EAP &quot;YourSecurePasswordHere&quot;</span></span></code></pre></div>
+<h2 id="step-6-enable-packet-forwarding-and-firewall-nat">Step 6: Enable
+Packet Forwarding and Firewall NAT</h2>
+<p>To allow connected clients to route traffic through the server,
+enable IPv4 packet forwarding.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div>
+<p>Uncomment or add this line:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv4.ip_forward</span><span class="ot">=</span><span class="dv">1</span></span></code></pre></div>
+<p>Apply the changes:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div>
+<p>Configure UFW (Uncomplicated Firewall) to allow IPsec traffic and
+handle NAT routing:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 500/udp</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 4500/udp</span></code></pre></div>
+<p>Identify your public network interface using
+<code>ip route show default</code> (e.g., <code>eth0</code>), then edit
+<code>/etc/ufw/before.rules</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ufw/before.rules</span></code></pre></div>
+<p>Add the following lines at the top of the file before the
+<code>*filter</code> block (replace <code>eth0</code> with your actual
+network interface):</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">*nat</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">:POSTROUTING ACCEPT </span><span class="kw">[0:0]</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">-A POSTROUTING -s 10.10.10.0/24 -o eth0 -j MASQUERADE</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="dt">COMMIT</span></span></code></pre></div>
+<p>Restart UFW to apply the rules:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw disable</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw enable</span></code></pre></div>
+<h2 id="step-7-restart-strongswan-service">Step 7: Restart strongSwan
+Service</h2>
+<p>Restart strongSwan to load all new configurations and
+certificates:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart strongswan-starter</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable strongswan-starter</span></code></pre></div>
+<p>Verify that the service is active and running:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ipsec status</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

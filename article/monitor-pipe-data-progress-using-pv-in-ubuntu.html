@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Pipe Data Progress Using PV in Ubuntu - ubuntu</title>
+    <meta name="description" content="The pv (Pipe Viewer) command-line utility allows users to monitor the progress of data passing through a pipe on Ubuntu Linux. It provides a visual display showing elapsed time, percentage completed, current throughput rate, total data transferred, and e">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/monitor-pipe-data-progress-using-pv-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Monitor Pipe Data Progress Using PV in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/monitor-pipe-data-progress-using-pv-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The pv (Pipe Viewer) command-line utility allows users to monitor the progress of data passing through a pipe on Ubuntu Linux. It provides a visual display showing elapsed time, percentage completed, current throughput rate, total data transferred, and e" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="monitor-pipe-data-progress-using-pv-in-ubuntu">Monitor Pipe Data
+Progress Using PV in Ubuntu</h1>
+<p>The <code>pv</code> (Pipe Viewer) command-line utility allows users
+to monitor the progress of data passing through a pipe on Ubuntu Linux.
+It provides a visual display showing elapsed time, percentage completed,
+current throughput rate, total data transferred, and estimated
+completion time (ETA). This guide covers how to install <code>pv</code>
+and use it to monitor file transfers, compression tasks, and streamed
+data pipelines effectively.</p>
+<h2 id="installing-pv-on-ubuntu">Installing PV on Ubuntu</h2>
+<p>Install <code>pv</code> using the standard <code>apt</code> package
+manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install pv</span></code></pre></div>
+<h2 id="basic-command-syntax">Basic Command Syntax</h2>
+<p>The <code>pv</code> tool is placed between two commands in a pipeline
+or wrapped around a file stream:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">command1</span> <span class="kw">|</span> <span class="ex">pv</span> <span class="kw">|</span> <span class="ex">command2</span></span></code></pre></div>
+<h2 id="common-usage-examples">Common Usage Examples</h2>
+<h3 id="monitor-file-copy-operations">1. Monitor File Copy
+Operations</h3>
+<p>To see progress while copying a file from one location to
+another:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pv</span> source_file.iso <span class="op">&gt;</span> destination_file.iso</span></code></pre></div>
+<h3 id="monitor-data-compression">2. Monitor Data Compression</h3>
+<p>Insert <code>pv</code> into a compression pipeline to track progress
+in real time:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> raw_data.log <span class="kw">|</span> <span class="ex">pv</span> <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> raw_data.log.gz</span></code></pre></div>
+<h3 id="specify-total-file-size-for-accurate-eta">3. Specify Total File
+Size for Accurate ETA</h3>
+<p>When piping data where <code>pv</code> cannot automatically calculate
+the total size, use the <code>-s</code> option to enable accurate
+progress bars and ETAs:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> large_file.txt <span class="kw">|</span> <span class="ex">pv</span> <span class="at">-s</span> 2G <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> large_file.txt.gz</span></code></pre></div>
+<h3 id="monitor-directory-archiving">4. Monitor Directory Archiving</h3>
+<p>Track progress when creating a compressed tar archive:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-cf</span> <span class="at">-</span> /path/to/directory <span class="kw">|</span> <span class="ex">pv</span> <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> backup.tar.gz</span></code></pre></div>
+<h3 id="limit-data-transfer-speed">5. Limit Data Transfer Speed</h3>
+<p>Use the <code>-L</code> flag to throttle the data throughput rate
+(e.g., limit rate to 2 megabytes per second):</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pv</span> <span class="at">-L</span> 2M source_file.zip <span class="op">&gt;</span> destination_file.zip</span></code></pre></div>
+<h2 id="useful-pv-options">Useful PV Options</h2>
+<ul>
+<li><code>-p</code> (<code>--progress</code>): Enables the progress
+bar.</li>
+<li><code>-t</code> (<code>--timer</code>): Shows the total elapsed
+time.</li>
+<li><code>-e</code> (<code>--eta</code>): Shows the estimated time
+remaining.</li>
+<li><code>-r</code> (<code>--rate</code>): Displays the current transfer
+rate.</li>
+<li><code>-b</code> (<code>--bytes</code>): Displays the total bytes
+transferred.</li>
+<li><code>-s</code> (<code>--size</code>): Sets expected size (accepts
+<code>K</code>, <code>M</code>, <code>G</code>, <code>T</code>
+suffixes).</li>
+<li><code>-L</code> (<code>--rate-limit</code>): Limits throughput rate
+in bytes per second.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
