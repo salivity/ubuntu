@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up an OpenVPN Server on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up an OpenVPN server on an Ubuntu machine allows you to route your internet traffic securely through an encrypted tunnel, protecting your data on public networks and granting remote access to your private local network. This guide provides a dire">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-an-openvpn-server-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up an OpenVPN Server on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-an-openvpn-server-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up an OpenVPN server on an Ubuntu machine allows you to route your internet traffic securely through an encrypted tunnel, protecting your data on public networks and granting remote access to your private local network. This guide provides a dire" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-an-openvpn-server-on-ubuntu">How to Set Up an
+OpenVPN Server on Ubuntu</h1>
+<p>Setting up an OpenVPN server on an Ubuntu machine allows you to route
+your internet traffic securely through an encrypted tunnel, protecting
+your data on public networks and granting remote access to your private
+local network. This guide provides a direct, step-by-step procedure to
+install OpenVPN, configure a Certificate Authority (CA) using Easy-RSA,
+build the necessary encryption keys, and start the VPN service on
+Ubuntu.</p>
+<h2 id="step-1-update-the-system-and-install-openvpn">Step 1: Update the
+System and Install OpenVPN</h2>
+<p>First, update your package lists and install OpenVPN along with
+Easy-RSA, a tool used to manage your Public Key Infrastructure (PKI)
+certificates.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install openvpn easy-rsa <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-set-up-the-pki-environment">Step 2: Set Up the PKI
+Environment</h2>
+<p>Create a directory for Easy-RSA to manage your Certificate Authority
+certificates.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">make-cadir</span> ~/openvpn-ca</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/openvpn-ca</span></code></pre></div>
+<p>Initialize the Public Key Infrastructure (PKI) and build the
+Certificate Authority (CA).</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> init-pki</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> build-ca nopass</span></code></pre></div>
+<p>Follow the prompts to enter a common name for your CA.</p>
+<h2 id="step-3-generate-server-certificates-and-keys">Step 3: Generate
+Server Certificates and Keys</h2>
+<p>Generate the server key pair and certificate request, then sign the
+request using your CA.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> gen-req server nopass</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> sign-req server server</span></code></pre></div>
+<p>Generate Diffie-Hellman parameters for key exchange and a TLS-Auth
+signature to mitigate DoS attacks and port scanning.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> gen-dh</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openvpn</span> <span class="at">--genkey</span> secret ta.key</span></code></pre></div>
+<h2 id="step-4-configure-the-openvpn-service">Step 4: Configure the
+OpenVPN Service</h2>
+<p>Copy all the generated keys and certificates to the OpenVPN
+configuration directory.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp pki/ca.crt pki/issued/server.crt pki/private/server.key pki/dh.pem ta.key /etc/openvpn/server/</span></code></pre></div>
+<p>Copy and extract the sample OpenVPN server configuration file to set
+up your server rules.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/openvpn/server/server.conf <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>Edit <code>/etc/openvpn/server/server.conf</code> using your
+preferred text editor to ensure the key and certificate file paths match
+where you placed them:</p>
+<ul>
+<li><code>ca ca.crt</code></li>
+<li><code>cert server.crt</code></li>
+<li><code>key server.key</code></li>
+<li><code>dh dh.pem</code></li>
+<li><code>tls-auth ta.key 0</code></li>
+</ul>
+<p>Ensure the <code>tls-auth</code> line uses <code>0</code> for the
+server configuration.</p>
+<h2 id="step-5-enable-ip-forwarding-and-configure-firewall-rules">Step
+5: Enable IP Forwarding and Configure Firewall Rules</h2>
+<p>Enable network traffic routing on the Ubuntu server by editing
+<code>/etc/sysctl.conf</code>.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div>
+<p>Uncomment the following line:</p>
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre>
+<p>Apply the changes:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div>
+<p>Next, configure UFW (Uncomplicated Firewall) to allow OpenVPN traffic
+and route it properly. Find your primary network interface using
+<code>ip route</code>. Then, edit <code>/etc/ufw/before.rules</code> and
+add the following lines at the top of the file (replace
+<code>eth0</code> with your actual network interface name):</p>
+<pre class="text"><code># START OPENVPN RULES
+*nat
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+COMMIT
+# END OPENVPN RULES</code></pre>
+<p>Allow UDP traffic on port 1194 and reload UFW:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 1194/udp</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow OpenSSH</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw disable</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw enable</span></code></pre></div>
+<h2 id="step-6-start-and-enable-the-openvpn-server">Step 6: Start and
+Enable the OpenVPN Server</h2>
+<p>Start the OpenVPN service pointing to your <code>server.conf</code>
+configuration file and enable it to run at boot.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start openvpn-server@server</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable openvpn-server@server</span></code></pre></div>
+<p>Verify that the service is running:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status openvpn-server@server</span></code></pre></div>
+<h2 id="step-7-generate-client-certificates">Step 7: Generate Client
+Certificates</h2>
+<p>To connect a device to the server, generate a client certificate and
+key inside your <code>~/openvpn-ca</code> directory:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/openvpn-ca</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> gen-req client1 nopass</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./easyrsa</span> sign-req client client1</span></code></pre></div>
+<p>Combine <code>ca.crt</code>, <code>client1.crt</code>,
+<code>client1.key</code>, and <code>ta.key</code> (with
+<code>key-direction 1</code>) into a single <code>.ovpn</code> profile
+file to import into your client application.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

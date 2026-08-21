@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up CoovaChilli Captive Portal on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a captive portal is an effective way to authenticate and manage users on a public or corporate Wi-Fi network. This guide provides a step-by-step walkthrough for installing, configuring, and deploying CoovaChilli—an open-source access control">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-coovachilli-captive-portal-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up CoovaChilli Captive Portal on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-coovachilli-captive-portal-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a captive portal is an effective way to authenticate and manage users on a public or corporate Wi-Fi network. This guide provides a step-by-step walkthrough for installing, configuring, and deploying CoovaChilli—an open-source access control" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-coovachilli-captive-portal-on-ubuntu">How to Set
+Up CoovaChilli Captive Portal on Ubuntu</h1>
+<p>Setting up a captive portal is an effective way to authenticate and
+manage users on a public or corporate Wi-Fi network. This guide provides
+a step-by-step walkthrough for installing, configuring, and deploying
+CoovaChilli—an open-source access controller—on an Ubuntu gateway server
+to route traffic and manage guest network access seamlessly.</p>
+<hr />
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before beginning, ensure your system meets the following
+requirements:</p>
+<ul>
+<li>An Ubuntu Server installation (Ubuntu 20.04 or 22.04
+recommended).</li>
+<li>Two network interfaces:
+<ul>
+<li><strong>WAN Interface (<code>eth0</code>):</strong> Connected to the
+internet.</li>
+<li><strong>LAN Interface (<code>eth1</code>):</strong> Connected to the
+access point or client network.</li>
+</ul></li>
+<li>Root or <code>sudo</code> access.</li>
+</ul>
+<hr />
+<h3 id="step-1-install-required-packages">Step 1: Install Required
+Packages</h3>
+<p>Update your package repositories and install the necessary build
+tools and dependencies.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> build-essential libssl-dev libcurl4-openssl-dev gengetopt libcoova-dev devscripts debhelper iptables git</span></code></pre></div>
+<hr />
+<h3 id="step-2-download-compile-and-install-coovachilli">Step 2:
+Download, Compile, and Install CoovaChilli</h3>
+<ol type="1">
+<li>Clone the official CoovaChilli repository from GitHub:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/coovachilli/coova-chilli.git</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> coova-chilli</span></code></pre></div>
+<ol start="2" type="1">
+<li>Generate the configuration scripts and build the binary:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./bootstrap</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./configure</span> <span class="at">--prefix</span><span class="op">=</span>/usr <span class="at">--sysconfdir</span><span class="op">=</span>/etc <span class="at">--localstatedir</span><span class="op">=</span>/var</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> make install</span></code></pre></div>
+<hr />
+<h3 id="step-3-configure-coovachilli">Step 3: Configure CoovaChilli</h3>
+<p>CoovaChilli uses a central configuration file located at
+<code>/etc/chilli/config</code>.</p>
+<ol type="1">
+<li>Open the configuration file in a text editor:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/chilli/config</span></code></pre></div>
+<ol start="2" type="1">
+<li>Modify the core parameters to match your network topology:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Network Interfaces</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">HS_WANIF</span><span class="op">=</span>eth0           <span class="co"># Internet-facing interface</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="va">HS_LANIF</span><span class="op">=</span>eth1           <span class="co"># Interface connected to internal clients</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Subnet Configurations</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="va">HS_NETWORK</span><span class="op">=</span>10.1.0.0     <span class="co"># Internal network IP range</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">HS_NETMASK</span><span class="op">=</span>255.255.255.0</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="va">HS_UAMLISTEN</span><span class="op">=</span>10.1.0.1   <span class="co"># IP address assigned to CoovaChilli gateway</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># RADIUS / Authentication Server Settings</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="va">HS_RADIUS</span><span class="op">=</span>127.0.0.1</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="va">HS_RADIUS2</span><span class="op">=</span>127.0.0.1</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="va">HS_RADSECRET</span><span class="op">=</span>testing123</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Portal Redirection Settings</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="va">HS_UAMSERVER</span><span class="op">=</span>http://10.1.0.1/www/login.chi</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="va">HS_UAMHOMEPAGE</span><span class="op">=</span>http://10.1.0.1/www/coovachilli.html</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="va">HS_UAMSECRET</span><span class="op">=</span>uamsecret</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Allowed domains/IPs before authentication (Walled Garden)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="va">HS_UAMALLOW</span><span class="op">=</span><span class="st">&quot;www.example.com&quot;</span></span></code></pre></div>
+<ol start="3" type="1">
+<li>Save and close the file.</li>
+</ol>
+<hr />
+<h3 id="step-4-enable-ip-forwarding">Step 4: Enable IP Forwarding</h3>
+<p>To allow authenticated users to pass traffic through the gateway to
+the internet, enable IPv4 packet forwarding.</p>
+<ol type="1">
+<li>Edit <code>/etc/sysctl.conf</code>:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div>
+<ol start="2" type="1">
+<li>Uncomment or add the following line:</li>
+</ol>
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre>
+<ol start="3" type="1">
+<li>Apply the changes immediately:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div>
+<hr />
+<h3 id="step-5-configure-nat-with-iptables">Step 5: Configure NAT with
+IPTables</h3>
+<p>Set up Network Address Translation (NAT) to route traffic from the
+internal interface (<code>eth1</code>) through the external interface
+(<code>eth0</code>).</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables <span class="at">-t</span> nat <span class="at">-A</span> POSTROUTING <span class="at">-o</span> eth0 <span class="at">-j</span> MASQUERADE</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables-save <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/iptables/rules.v4</span></code></pre></div>
+<hr />
+<h3 id="step-6-start-and-test-coovachilli">Step 6: Start and Test
+CoovaChilli</h3>
+<ol type="1">
+<li>Enable and start the CoovaChilli service:</li>
+</ol>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable chilli</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start chilli</span></code></pre></div>
+<ol start="2" type="1">
+<li>Verify that the service is running and the <code>tun0</code>
+interface has been created:</li>
+</ol>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> addr show tun0</span></code></pre></div>
+<ol start="3" type="1">
+<li>Connect a device to the network interface assigned to
+<code>HS_LANIF</code> (<code>eth1</code>). Obtain an IP address via DHCP
+from CoovaChilli (in the <code>10.1.0.0/24</code> subnet), open a web
+browser, and attempt to visit any website. You should automatically be
+redirected to the captive portal login screen specified in
+<code>HS_UAMSERVER</code>.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

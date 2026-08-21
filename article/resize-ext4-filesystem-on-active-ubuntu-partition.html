@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resize ext4 Filesystem on Active Ubuntu Partition - ubuntu</title>
+    <meta name="description" content="Resizing an ext4 filesystem on an active, mounted Ubuntu partition allows you to expand your available disk space without experiencing system downtime. While Linux supports online expansion (growing a mounted ext4 filesystem), it is important to note tha">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/resize-ext4-filesystem-on-active-ubuntu-partition">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Resize ext4 Filesystem on Active Ubuntu Partition - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/resize-ext4-filesystem-on-active-ubuntu-partition" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Resizing an ext4 filesystem on an active, mounted Ubuntu partition allows you to expand your available disk space without experiencing system downtime. While Linux supports online expansion (growing a mounted ext4 filesystem), it is important to note tha" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="resize-ext4-filesystem-on-active-ubuntu-partition">Resize ext4
+Filesystem on Active Ubuntu Partition</h1>
+<p>Resizing an ext4 filesystem on an active, mounted Ubuntu partition
+allows you to expand your available disk space without experiencing
+system downtime. While Linux supports online expansion (growing a
+mounted ext4 filesystem), it is important to note that shrinking an ext4
+partition cannot be done online and requires unmounting the drive. This
+guide outlines the safe, step-by-step process to expand an active ext4
+partition on Ubuntu using standard command-line utilities.</p>
+<h2 id="step-1-back-up-your-data">Step 1: Back Up Your Data</h2>
+<p>Before modifying partition tables or filesystems, create a full
+backup of critical data. Although online expansion of ext4 filesystems
+is highly reliable, hardware failures or accidental command errors can
+cause data loss.</p>
+<h2 id="step-2-check-current-disk-usage-and-layout">Step 2: Check
+Current Disk Usage and Layout</h2>
+<p>Identify the target partition, its filesystem type, and whether it
+uses standard partitions or Logical Volume Management (LVM).</p>
+<p>Run the following command to check mounted filesystems:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-hT</span></span></code></pre></div>
+<p>To view the disk structure and block devices, run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>Note the device name (e.g., <code>/dev/sda3</code> or
+<code>/dev/mapper/ubuntu--vg-ubuntu--lv</code>) and the mount point
+(usually <code>/</code>).</p>
+<h2 id="step-3-expand-the-underlying-storage">Step 3: Expand the
+Underlying Storage</h2>
+<p>Depending on whether your system uses standard disk partitions or
+LVM, follow the appropriate method below.</p>
+<h3 id="option-a-standard-disk-partitioning">Option A: Standard Disk
+Partitioning</h3>
+<p>If you expanded a virtual disk or added unallocated space right after
+your active partition, use <code>growpart</code> to expand the partition
+boundary.</p>
+<ol type="1">
+<li>Install the cloud-guest-utils package if <code>growpart</code> is
+not present:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install <span class="at">-y</span> cloud-guest-utils</span></code></pre></div></li>
+<li>Resize the partition (replace <code>/dev/sda</code> and
+<code>3</code> with your specific disk and partition number):
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> growpart /dev/sda 3</span></code></pre></div></li>
+</ol>
+<h3 id="option-b-lvm-logical-volume-manager">Option B: LVM (Logical
+Volume Manager)</h3>
+<p>If your Ubuntu installation uses LVM, you can extend the volume group
+and logical volume.</p>
+<ol type="1">
+<li>If you added a new physical disk, initialize it and add it to your
+Volume Group:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pvcreate /dev/sdb</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vgextend ubuntu-vg /dev/sdb</span></code></pre></div></li>
+<li>Extend the Logical Volume to fill all remaining free space:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lvextend <span class="at">-l</span> +100%FREE /dev/ubuntu-vg/ubuntu-lv</span></code></pre></div></li>
+</ol>
+<h2 id="step-4-resize-the-ext4-filesystem-online">Step 4: Resize the
+ext4 Filesystem Online</h2>
+<p>Once the partition or logical volume has been enlarged, expand the
+ext4 filesystem to occupy the newly available space.</p>
+<p>If using standard partitioning or separate <code>lvextend</code>
+steps, run <code>resize2fs</code> directly on the mounted partition:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> resize2fs /dev/sda3</span></code></pre></div>
+<p><em>(For LVM users, you can also pass the <code>-r</code> flag during
+<code>lvextend</code> to automatically resize the underlying ext4
+filesystem in one command:
+<code>sudo lvextend -r -l +100%FREE /dev/ubuntu-vg/ubuntu-lv</code>).</em></p>
+<p>The <code>resize2fs</code> tool automatically detects that the ext4
+filesystem is mounted and performs an online expansion safely while the
+operating system remains fully active.</p>
+<h2 id="step-5-verify-the-new-filesystem-size">Step 5: Verify the New
+Filesystem Size</h2>
+<p>Confirm that the new storage space is available by checking the disk
+space again:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-hT</span> /</span></code></pre></div>
+<p>The output should now reflect the increased total capacity of your
+active ext4 partition.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

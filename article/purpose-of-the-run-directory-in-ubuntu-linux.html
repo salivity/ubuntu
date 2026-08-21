@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of the /run Directory in Ubuntu Linux - ubuntu</title>
+    <meta name="description" content="The /run directory in modern Ubuntu and Linux distributions is a temporary, volatile filesystem (tmpfs) used to store system state data that accumulates during runtime. Introduced to solve early-boot storage conflicts and standardize scattered temporary">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-the-run-directory-in-ubuntu-linux">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of the /run Directory in Ubuntu Linux - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-the-run-directory-in-ubuntu-linux" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /run directory in modern Ubuntu and Linux distributions is a temporary, volatile filesystem (tmpfs) used to store system state data that accumulates during runtime. Introduced to solve early-boot storage conflicts and standardize scattered temporary" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="purpose-of-the-run-directory-in-ubuntu-linux">Purpose of the
+/run Directory in Ubuntu Linux</h1>
+<p>The <code>/run</code> directory in modern Ubuntu and Linux
+distributions is a temporary, volatile filesystem (<code>tmpfs</code>)
+used to store system state data that accumulates during runtime.
+Introduced to solve early-boot storage conflicts and standardize
+scattered temporary files like <code>/var/run</code> and
+<code>/var/lock</code>, <code>/run</code> holds critical live data such
+as process IDs, socket files, and lock files. Because it exists entirely
+in system memory (RAM), all contents in <code>/run</code> are
+automatically cleared when the system reboots or shuts down.</p>
+<h2 id="why-the-run-directory-was-created">Why the <code>/run</code>
+Directory Was Created</h2>
+<p>Before the introduction of <code>/run</code>, Linux systems stored
+runtime data in <code>/var/run</code> and lock files in
+<code>/var/lock</code>. This setup created a fundamental problem during
+the boot process:</p>
+<ul>
+<li><strong>The Early-Boot Problem:</strong> System daemons and services
+starting early in the boot sequence needed a place to write process IDs
+and temporary state files. However, <code>/var</code> was frequently
+located on a separate drive partition that might not yet be mounted as
+read-write when these early processes started.</li>
+<li><strong>The Solution:</strong> The <code>/run</code> directory was
+placed on the root filesystem and mounted very early in the boot process
+as a <code>tmpfs</code> (RAM-backed filesystem). This ensured that a
+writable, temporary storage location was available to system services
+from the very beginning of boot.</li>
+</ul>
+<p>To maintain backward compatibility with older software, modern Ubuntu
+releases use symbolic links (symlinks):</p>
+<ul>
+<li><code>/var/run</code> points to <code>/run</code></li>
+<li><code>/var/lock</code> points to <code>/run/lock</code></li>
+</ul>
+<h2 id="key-functions-and-contents-of-run">Key Functions and Contents of
+<code>/run</code></h2>
+<p>The <code>/run</code> directory serves several critical functions for
+system services, background daemons, and user sessions:</p>
+<h3 id="1-process-id-files-pid">1. Process ID Files (.pid)</h3>
+<p>When background services (daemons) start up, they write their process
+ID (PID) to files inside <code>/run</code>. These <code>.pid</code>
+files allow the system and administrative scripts to identify, monitor,
+and manage specific running services. For example, a web server like
+Nginx or an SSH daemon stores its PID in <code>/run</code> to signal
+that it is currently active.</p>
+<h3 id="2-socket-files-sock">2. Socket Files (.sock)</h3>
+<p><code>/run</code> is heavily used for Inter-Process Communication
+(IPC). Programs write socket files to <code>/run</code> so that separate
+processes can communicate with one another quickly. Examples
+include:</p>
+<ul>
+<li>System service sockets (like <code>systemd</code> sockets)</li>
+<li>Container runtime sockets (such as Docker or Containerd)</li>
+<li>Display server sockets (such as Wayland or X11)</li>
+</ul>
+<h3 id="3-lock-files-runlock">3. Lock Files
+(<code>/run/lock</code>)</h3>
+<p>The <code>/run/lock</code> subdirectory prevents multiple software
+applications or system tasks from accessing the same hardware device,
+file, or resource simultaneously. If an application opens a device, it
+creates a lock file in <code>/run/lock</code>. Other applications check
+for this file before attempting to access the same resource to avoid
+data corruption.</p>
+<h3 id="4-per-user-runtime-directories-runuseruid">4. Per-User Runtime
+Directories (<code>/run/user/&lt;UID&gt;</code>)</h3>
+<p>Modern Ubuntu systems using <code>systemd</code> create a specific
+directory for every logged-in user under
+<code>/run/user/&lt;UID&gt;</code> (where <code>&lt;UID&gt;</code> is
+the user's numerical ID, such as <code>1000</code>). This directory acts
+as a secure, RAM-backed space for user-specific runtime files, such as
+audio daemon sockets (PipeWire/PulseAudio), desktop environment session
+files, and temporary user environment variables.</p>
+<h2 id="main-advantages-of-run">Main Advantages of
+<code>/run</code></h2>
+<ul>
+<li><strong>High Performance:</strong> Because <code>/run</code> is
+mounted in RAM as a <code>tmpfs</code> filesystem, reading and writing
+runtime data is virtually instantaneous.</li>
+<li><strong>Automatic Cleanup:</strong> Since RAM loses its contents
+when unpowered, files in <code>/run</code> are automatically wiped upon
+reboot, preventing stale state files or orphaned PID files from
+persisting across system restarts.</li>
+<li><strong>Reduced Disk Wear:</strong> Writing temporary status updates
+to RAM avoids constant write operations to physical solid-state drives
+(SSDs) or hard drives (HDDs).</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

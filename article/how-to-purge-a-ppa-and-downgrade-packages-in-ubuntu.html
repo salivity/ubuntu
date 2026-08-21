@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Purge a PPA and Downgrade Packages in Ubuntu - ubuntu</title>
+    <meta name="description" content="When you add a Personal Package Archive (PPA) to Ubuntu, it often installs newer or experimental versions of software packages over the stock versions provided by the official distribution. Removing a PPA using standard management commands only deletes t">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-purge-a-ppa-and-downgrade-packages-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Purge a PPA and Downgrade Packages in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-purge-a-ppa-and-downgrade-packages-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When you add a Personal Package Archive (PPA) to Ubuntu, it often installs newer or experimental versions of software packages over the stock versions provided by the official distribution. Removing a PPA using standard management commands only deletes t" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-purge-a-ppa-and-downgrade-packages-in-ubuntu">How to
+Purge a PPA and Downgrade Packages in Ubuntu</h1>
+<p>When you add a Personal Package Archive (PPA) to Ubuntu, it often
+installs newer or experimental versions of software packages over the
+stock versions provided by the official distribution. Removing a PPA
+using standard management commands only deletes the repository link,
+leaving the upgraded packages installed on your system. This guide
+demonstrates how to use <code>ppa-purge</code> to safely remove a PPA,
+clean up its repository files, and automatically downgrade all affected
+packages back to the default versions available in the official Ubuntu
+repositories.</p>
+<h2 id="why-use-ppa-purge">Why Use ppa-purge?</h2>
+<p>Using <code>add-apt-repository --remove</code> or deleting a PPA from
+your software sources only stops future updates from that PPA. It does
+not uninstall the packages installed from it, nor does it revert
+upgraded system packages to their original versions.</p>
+<p><code>ppa-purge</code> solves this problem by:</p>
+<ol type="1">
+<li>Disabling the specified PPA repository.</li>
+<li>Checking every package installed from that PPA.</li>
+<li>Downgrading those packages to the latest versions present in your
+active, official Ubuntu repositories.</li>
+</ol>
+<h2 id="step-1-install-ppa-purge">Step 1: Install ppa-purge</h2>
+<p><code>ppa-purge</code> is available in the official Ubuntu universe
+repository. Open your terminal and run the following commands to install
+it:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ppa-purge</span></code></pre></div>
+<h2 id="step-2-identify-the-target-ppa">Step 2: Identify the Target
+PPA</h2>
+<p>To purge a PPA, you need its exact name. If you do not remember the
+full name of the PPA you want to remove, list all PPAs currently added
+to your system by checking the <code>/etc/apt/sources.list.d/</code>
+directory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> /etc/apt/sources.list.d/</span></code></pre></div>
+<p>Look for files ending in <code>.list</code> or <code>.sources</code>
+that correspond to the PPA name (for example,
+<code>graphics-drivers-ubuntu-ppa-lunar.list</code>).</p>
+<h2 id="step-3-purge-the-ppa-and-downgrade-packages">Step 3: Purge the
+PPA and Downgrade Packages</h2>
+<p>Once you have the PPA name, run <code>ppa-purge</code> followed by
+the PPA identifier using the <code>ppa:owner/name</code> format:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ppa-purge ppa:owner/ppa-name</span></code></pre></div>
+<h3 id="example">Example:</h3>
+<p>To remove the Graphics Drivers PPA and downgrade all graphics drivers
+back to official Ubuntu versions, run:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ppa-purge ppa:graphics-drivers/ppa</span></code></pre></div>
+<h3 id="what-happens-during-the-process">What Happens During the
+Process:</h3>
+<ol type="1">
+<li><code>ppa-purge</code> fetches the package list from the specified
+PPA.</li>
+<li>It cross-references installed packages against official
+repositories.</li>
+<li>It prompts you to confirm the removal and downgrade process.</li>
+<li>Press <code>Y</code> and hit <code>Enter</code> to allow the system
+to download the older stock packages and replace the PPA versions.</li>
+</ol>
+<h2 id="alternative-syntax-options">Alternative Syntax Options</h2>
+<p>If you added a PPA using a full URL instead of the <code>ppa:</code>
+shorthand, you can specify the line directly with the <code>-o</code>
+flag:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ppa-purge <span class="at">-o</span> ppa-owner-name <span class="at">-p</span> ppa-name</span></code></pre></div>
+<p>If you are removing a PPA that was added for a different Ubuntu
+release branch, specify the release code name using the <code>-d</code>
+flag:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ppa-purge <span class="at">-d</span> jammy ppa:owner/ppa-name</span></code></pre></div>
+<h2 id="step-4-verify-the-downgrade">Step 4: Verify the Downgrade</h2>
+<p>After the process finishes, update your local package index to ensure
+everything is synchronized:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<p>You can verify that a specific package was successfully downgraded by
+checking its installed version with <code>apt policy</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt</span> policy package-name</span></code></pre></div>
+<p>The output should show that the installed version matches the version
+provided by the main Ubuntu repository rather than the PPA.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

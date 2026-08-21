@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Setup BIND Master-Slave DNS on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a master-slave DNS configuration using BIND on Ubuntu creates redundancy and improves domain name resolution reliability across your network. In this setup, the primary (master) server holds the authoritative DNS zone files and handles updates">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-setup-bind-master-slave-dns-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Setup BIND Master-Slave DNS on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-setup-bind-master-slave-dns-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a master-slave DNS configuration using BIND on Ubuntu creates redundancy and improves domain name resolution reliability across your network. In this setup, the primary (master) server holds the authoritative DNS zone files and handles updates" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-setup-bind-master-slave-dns-on-ubuntu">How to Setup BIND
+Master-Slave DNS on Ubuntu</h1>
+<p>Setting up a master-slave DNS configuration using BIND on Ubuntu
+creates redundancy and improves domain name resolution reliability
+across your network. In this setup, the primary (master) server holds
+the authoritative DNS zone files and handles updates, while the
+secondary (slave) server automatically syncs copies of these records to
+handle query loads and provide failover support. This guide outlines the
+step-by-step process to install, configure, and verify a BIND9
+master-slave pair on Ubuntu servers.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Two Ubuntu servers on the same network:
+<ul>
+<li><strong>Master Server IP:</strong> <code>192.168.1.10</code></li>
+<li><strong>Slave Server IP:</strong> <code>192.168.1.11</code></li>
+</ul></li>
+<li>Domain Name: <code>example.com</code></li>
+<li>Sudo privileges on both servers</li>
+</ul>
+<hr />
+<h2 id="step-1-install-bind9-on-both-servers">Step 1: Install BIND9 on
+Both Servers</h2>
+<p>Run the following commands on both the Master and Slave servers to
+update the package index and install BIND9 along with its utilities:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install bind9 bind9utils bind9-doc <span class="at">-y</span></span></code></pre></div>
+<hr />
+<h2 id="step-2-configure-the-master-dns-server">Step 2: Configure the
+Master DNS Server</h2>
+<h3 id="1-edit-global-options">1. Edit Global Options</h3>
+<p>Open the global options file on the Master server to allow query
+access and set up listening interfaces:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/bind/named.conf.options</span></code></pre></div>
+<p>Ensure the configuration permits queries from your network:</p>
+<pre class="etc"><code>options {
+        directory &quot;/var/cache/bind&quot;;
+
+        recursion yes;
+        allow-query { any; };
+
+        forwarders {
+                8.8.8.8;
+                8.8.4.4;
+        };
+
+        dnssec-validation auto;
+        listen-on-v6 { any; };
+};</code></pre>
+<h3 id="2-define-the-zone-file">2. Define the Zone File</h3>
+<p>Edit <code>/etc/bind/named.conf.local</code> on the Master server to
+define the domain zone and authorize zone transfers to the Slave server
+IP (<code>192.168.1.11</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/bind/named.conf.local</span></code></pre></div>
+<p>Add the following block:</p>
+<pre class="etc"><code>zone &quot;example.com&quot; {
+    type master;
+    file &quot;/etc/bind/zones/db.example.com&quot;;
+    allow-transfer { 192.168.1.11; };
+    also-notify { 192.168.1.11; };
+};</code></pre>
+<h3 id="3-create-the-forward-zone-file">3. Create the Forward Zone
+File</h3>
+<p>Create the directory for zone files and copy the default
+template:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/bind/zones</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/bind/db.local /etc/bind/zones/db.example.com</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/bind/zones/db.example.com</span></code></pre></div>
+<p>Configure the record details:</p>
+<pre class="etc"><code>$TTL    604800
+@       IN      SOA     ns1.example.com. admin.example.com. (
+                              3         ; Serial (Increment this on changes)
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+; Name Servers
+@       IN      NS      ns1.example.com.
+@       IN      NS      ns2.example.com.
+
+; A Records for Name Servers
+ns1     IN      A       192.168.1.10
+ns2     IN      A       192.168.1.11
+
+; Host A Records
+@       IN      A       192.168.1.10
+web     IN      A       192.168.1.20</code></pre>
+<hr />
+<h2 id="step-3-configure-the-slave-dns-server">Step 3: Configure the
+Slave DNS Server</h2>
+<h3 id="1-define-the-secondary-zone">1. Define the Secondary Zone</h3>
+<p>On the Slave server, edit <code>/etc/bind/named.conf.local</code> to
+point to the Master server:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/bind/named.conf.local</span></code></pre></div>
+<p>Add the secondary zone configuration:</p>
+<pre class="etc"><code>zone &quot;example.com&quot; {
+    type slave;
+    file &quot;/var/cache/bind/db.example.com&quot;;
+    masters { 192.168.1.10; };
+};</code></pre>
+<p><em>Note: The zone file path points to <code>/var/cache/bind/</code>
+because BIND needs write permissions to store synced zone files
+automatically.</em></p>
+<hr />
+<h2 id="step-4-validate-and-restart-bind-services">Step 4: Validate and
+Restart BIND Services</h2>
+<h3 id="1-check-configuration-files">1. Check Configuration Files</h3>
+<p>Run syntax checks on both servers to ensure there are no
+configuration errors.</p>
+<p>On the Master server:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> named-checkconf</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> named-checkzone example.com /etc/bind/zones/db.example.com</span></code></pre></div>
+<p>On the Slave server:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> named-checkconf</span></code></pre></div>
+<h3 id="2-restart-bind-services">2. Restart BIND Services</h3>
+<p>Restart and enable the BIND service on the Master server first, then
+on the Slave server:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart bind9</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable bind9</span></code></pre></div>
+<hr />
+<h2 id="step-5-verify-zone-transfer">Step 5: Verify Zone Transfer</h2>
+<p>Check the logs on the Slave server to confirm that the zone file was
+transferred successfully from the Master:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> journalctl <span class="at">-u</span> bind9 <span class="at">-f</span></span></code></pre></div>
+<p>Look for confirmation entries such as
+<code>transfer of 'example.com/IN' from 192.168.1.10#53: Transfer completed</code>.</p>
+<p>Test DNS resolution from a client machine using <code>dig</code>
+against the Slave server:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dig</span> @192.168.1.11 web.example.com</span></code></pre></div>
+<p>If configured correctly, the Slave server will return the resolved IP
+address (<code>192.168.1.20</code>).</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

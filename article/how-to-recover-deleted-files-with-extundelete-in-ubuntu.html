@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Recover Deleted Files with extundelete in Ubuntu - ubuntu</title>
+    <meta name="description" content="Accidentally deleting important files on Ubuntu can be stressful, but the extundelete utility offers a reliable solution for recovering lost data from ext3 and ext4 filesystems. This tool parses the filesystem's inode log to locate and restore deleted fi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-recover-deleted-files-with-extundelete-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Recover Deleted Files with extundelete in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-recover-deleted-files-with-extundelete-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Accidentally deleting important files on Ubuntu can be stressful, but the extundelete utility offers a reliable solution for recovering lost data from ext3 and ext4 filesystems. This tool parses the filesystem's inode log to locate and restore deleted fi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-recover-deleted-files-with-extundelete-in-ubuntu">How to
+Recover Deleted Files with extundelete in Ubuntu</h1>
+<p>Accidentally deleting important files on Ubuntu can be stressful, but
+the <code>extundelete</code> utility offers a reliable solution for
+recovering lost data from ext3 and ext4 filesystems. This tool parses
+the filesystem's inode log to locate and restore deleted files before
+they are overwritten. This guide covers how to install
+<code>extundelete</code>, identify the target partition, and execute the
+proper commands to successfully recover your deleted files or
+directories.</p>
+<h2 id="step-1-unmount-the-affected-partition-immediately">Step 1:
+Unmount the Affected Partition Immediately</h2>
+<p>To prevent deleted data from being overwritten by new OS processes,
+unmount the drive or partition where the file was originally located. If
+the file was on your root partition (<code>/</code>), boot from a Live
+USB to run the recovery process safely.</p>
+<p>To unmount a secondary partition, run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount /dev/sdXN</span></code></pre></div>
+<p><em>Replace <code>/dev/sdXN</code> with your actual partition
+identifier (e.g., <code>/dev/sdb1</code>).</em></p>
+<h2 id="step-2-install-extundelete">Step 2: Install extundelete</h2>
+<p>Open a terminal and install <code>extundelete</code> using the
+official Ubuntu package repository:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install extundelete</span></code></pre></div>
+<h2 id="step-3-identify-your-drive-partition">Step 3: Identify Your
+Drive Partition</h2>
+<p>If you are unsure which partition contains your deleted files, list
+all available storage devices and their partitions using
+<code>lsblk</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>Note the identifier for the target partition (for example,
+<code>/dev/sdb1</code>).</p>
+<h2 id="step-4-run-the-recovery-command">Step 4: Run the Recovery
+Command</h2>
+<p><code>extundelete</code> restores files into a directory named
+<code>RECOVERED_FILES</code> created in your current working terminal
+directory. Ensure your terminal is currently set to a different
+partition than the one you are recovering from so you do not overwrite
+lost data.</p>
+<h3 id="recover-a-specific-file">Recover a Specific File</h3>
+<p>To recover a single file, specify the relative file path from the
+root of the partition (do not include the drive mount point name):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> extundelete /dev/sdXN <span class="at">--restore-file</span> path/to/deleted/file.txt</span></code></pre></div>
+<h3 id="recover-a-specific-directory">Recover a Specific Directory</h3>
+<p>To restore an entire folder and its contents:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> extundelete /dev/sdXN <span class="at">--restore-directory</span> path/to/deleted/folder</span></code></pre></div>
+<h3 id="recover-all-deleted-files">Recover All Deleted Files</h3>
+<p>To attempt a full recovery of all recently deleted files on the
+partition:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> extundelete /dev/sdXN <span class="at">--restore-all</span></span></code></pre></div>
+<h2 id="step-5-access-your-restored-files">Step 5: Access Your Restored
+Files</h2>
+<p>Once the process finishes, navigate to the newly created recovery
+folder in your terminal:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> RECOVERED_FILES</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span></span></code></pre></div>
+<p>Check the folder to verify that your files have been successfully
+recovered.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

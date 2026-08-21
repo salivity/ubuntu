@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up a WireGuard VPN Server on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a WireGuard VPN server on an Ubuntu instance provides a fast, modern, and highly secure solution for encrypting your internet traffic and accessing remote network resources. This guide walks you through the straightforward process of installin">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-a-wireguard-vpn-server-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up a WireGuard VPN Server on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-a-wireguard-vpn-server-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a WireGuard VPN server on an Ubuntu instance provides a fast, modern, and highly secure solution for encrypting your internet traffic and accessing remote network resources. This guide walks you through the straightforward process of installin" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-a-wireguard-vpn-server-on-ubuntu">How to Set Up a
+WireGuard VPN Server on Ubuntu</h1>
+<p>Setting up a WireGuard VPN server on an Ubuntu instance provides a
+fast, modern, and highly secure solution for encrypting your internet
+traffic and accessing remote network resources. This guide walks you
+through the straightforward process of installing the WireGuard package,
+generating cryptographic key pairs, configuring the server interface,
+enabling IP forwarding, setting up firewall rules, and adding client
+configurations.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An Ubuntu server instance (20.04 or 22.04 recommended).</li>
+<li>A user account with <code>sudo</code> privileges.</li>
+<li>A static public IP address assigned to your server.</li>
+</ul>
+<h2 id="step-1-update-the-system-and-install-wireguard">Step 1: Update
+the System and Install WireGuard</h2>
+<p>Update your package index and install the WireGuard software from the
+standard Ubuntu repositories.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install wireguard <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-generate-server-private-and-public-keys">Step 2: Generate
+Server Private and Public Keys</h2>
+<p>WireGuard uses public-key cryptography for authentication. Navigate
+to the WireGuard directory and generate a private/public key pair for
+the server.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /etc/wireguard</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">umask</span> 077</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">wg</span> genkey <span class="kw">|</span> <span class="fu">tee</span> privatekey <span class="kw">|</span> <span class="ex">wg</span> pubkey <span class="op">&gt;</span> publickey</span></code></pre></div>
+<p>To view the generated private key (needed in the next step), run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> privatekey</span></code></pre></div>
+<h2 id="step-3-configure-the-wireguard-server">Step 3: Configure the
+WireGuard Server</h2>
+<p>Identify your active network interface name (commonly
+<code>eth0</code> or <code>ens3</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> <span class="at">-br</span> address show</span></code></pre></div>
+<p>Create the server configuration file named <code>wg0.conf</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/wireguard/wg0.conf</span></code></pre></div>
+<p>Paste the following configuration, replacing
+<code>&lt;SERVER_PRIVATE_KEY&gt;</code> with the contents of your
+<code>privatekey</code> file and <code>eth0</code> with your actual
+network interface name:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Interface]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateKey </span><span class="ot">=</span><span class="st"> &lt;SERVER_PRIVATE_KEY&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">Address </span><span class="ot">=</span><span class="st"> 10.8.0.1/24</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">ListenPort </span><span class="ot">=</span><span class="st"> </span><span class="dv">51820</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">PostUp </span><span class="ot">=</span><span class="st"> iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dt">PostDown </span><span class="ot">=</span><span class="st"> iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE</span></span></code></pre></div>
+<p>Save and close the file (<code>Ctrl+O</code>, <code>Enter</code>,
+then <code>Ctrl+X</code>).</p>
+<h2 id="step-4-enable-ip-forwarding">Step 4: Enable IP Forwarding</h2>
+<p>To allow the server to route traffic between the WireGuard client and
+the internet, enable IPv4 packet forwarding.</p>
+<p>Open <code>/etc/sysctl.conf</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div>
+<p>Uncomment or add the following line:</p>
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre>
+<p>Apply the changes immediately:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div>
+<h2 id="step-5-configure-firewall-rules">Step 5: Configure Firewall
+Rules</h2>
+<p>Open the WireGuard UDP port and ensure SSH access remains enabled
+before activating the UFW firewall.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 51820/udp</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow OpenSSH</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw enable</span></code></pre></div>
+<h2 id="step-6-start-and-enable-the-wireguard-service">Step 6: Start and
+Enable the WireGuard Service</h2>
+<p>Start the WireGuard service using the <code>wg-quick</code> utility
+and set it to launch automatically at system boot.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start wg-quick@wg0</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable wg-quick@wg0</span></code></pre></div>
+<p>Verify that the server is active:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> wg show</span></code></pre></div>
+<h2 id="step-7-create-client-configuration-and-key-pair">Step 7: Create
+Client Configuration and Key Pair</h2>
+<p>Generate a separate key pair for a client machine:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wg</span> genkey <span class="kw">|</span> <span class="fu">tee</span> client_privatekey <span class="kw">|</span> <span class="ex">wg</span> pubkey <span class="op">&gt;</span> client_publickey</span></code></pre></div>
+<p>Display the client keys:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> client_privatekey</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> client_publickey</span></code></pre></div>
+<h3 id="add-the-client-to-the-server-etcwireguardwg0conf">Add the Client
+to the Server (<code>/etc/wireguard/wg0.conf</code>)</h3>
+<p>Edit the server configuration to recognize the client:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/wireguard/wg0.conf</span></code></pre></div>
+<p>Append the following lines to the end of the file:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Peer]</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="dt">PublicKey </span><span class="ot">=</span><span class="st"> &lt;CLIENT_PUBLIC_KEY&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="dt">AllowedIPs </span><span class="ot">=</span><span class="st"> 10.8.0.2/32</span></span></code></pre></div>
+<p>Save the file and restart WireGuard to apply the changes:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart wg-quick@wg0</span></code></pre></div>
+<h3 id="create-the-client-configuration-file-clientconf">Create the
+Client Configuration File (<code>client.conf</code>)</h3>
+<p>On the client device, create a configuration file named
+<code>client.conf</code> with the following structure:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Interface]</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateKey </span><span class="ot">=</span><span class="st"> &lt;CLIENT_PRIVATE_KEY&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">Address </span><span class="ot">=</span><span class="st"> 10.8.0.2/32</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="dt">DNS </span><span class="ot">=</span><span class="st"> 1.1.1.1</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Peer]</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="dt">PublicKey </span><span class="ot">=</span><span class="st"> &lt;SERVER_PUBLIC_KEY&gt;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="dt">Endpoint </span><span class="ot">=</span><span class="st"> &lt;SERVER_PUBLIC_IP&gt;:51820</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="dt">AllowedIPs </span><span class="ot">=</span><span class="st"> 0.0.0.0/0</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="dt">PersistentKeepalive </span><span class="ot">=</span><span class="st"> </span><span class="dv">25</span></span></code></pre></div>
+<p>Replace <code>&lt;CLIENT_PRIVATE_KEY&gt;</code>,
+<code>&lt;SERVER_PUBLIC_KEY&gt;</code> (from
+<code>/etc/wireguard/publickey</code>), and
+<code>&lt;SERVER_PUBLIC_IP&gt;</code> with your actual server data.
+Import this file into your WireGuard client app to connect.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up Wake-on-LAN on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up Wake-on-LAN (WoL) on an Ubuntu system allows you to remotely power on your computer over a local network by sending a specialized network message called a "magic packet." This guide covers enabling Wake-on-LAN in your system's motherboard firm">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-wake-on-lan-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up Wake-on-LAN on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-wake-on-lan-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up Wake-on-LAN (WoL) on an Ubuntu system allows you to remotely power on your computer over a local network by sending a specialized network message called a "magic packet." This guide covers enabling Wake-on-LAN in your system's motherboard firm" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-wake-on-lan-on-ubuntu">How to Set Up Wake-on-LAN
+on Ubuntu</h1>
+<p>Setting up Wake-on-LAN (WoL) on an Ubuntu system allows you to
+remotely power on your computer over a local network by sending a
+specialized network message called a "magic packet." This guide covers
+enabling Wake-on-LAN in your system's motherboard firmware, installing
+necessary software packages on Ubuntu, configuring your network
+interface to accept power-on signals, and ensuring the configuration
+remains active after system reboots.</p>
+<h2 id="step-1-enable-wake-on-lan-in-biosuefi">Step 1: Enable
+Wake-on-LAN in BIOS/UEFI</h2>
+<p>Before configuring Ubuntu, Wake-on-LAN must be enabled at the
+hardware level.</p>
+<ol type="1">
+<li>Restart your computer and press the designated key (usually
+<code>F2</code>, <code>F10</code>, <code>F12</code>, or
+<code>Delete</code>) to enter the BIOS/UEFI setup menu.</li>
+<li>Navigate to the <strong>Power Management</strong> or
+<strong>Advanced</strong> settings tab.</li>
+<li>Locate options named <strong>Wake-on-LAN</strong>, <strong>Power On
+by PCI-E</strong>, or <strong>Resume by LAN</strong> and set them to
+<strong>Enabled</strong>.</li>
+<li>Save your changes and exit to boot back into Ubuntu.</li>
+</ol>
+<h2 id="step-2-install-ethtool-and-identify-your-network-interface">Step
+2: Install Ethtool and Identify Your Network Interface</h2>
+<p>Ubuntu requires the <code>ethtool</code> utility to manage network
+card features.</p>
+<ol type="1">
+<li>Open a terminal (<code>Ctrl+Alt+T</code>) and run:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ethtool net-tools <span class="at">-y</span></span></code></pre></div></li>
+<li>Find the name of your network interface by listing active
+connections:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> link show</span></code></pre></div>
+Look for your Ethernet card name (e.g., <code>enp3s0</code> or
+<code>eth0</code>). Note this name as well as your hardware MAC address
+listed next to <code>link/ether</code>.</li>
+</ol>
+<h2 id="step-3-check-and-enable-wol-support">Step 3: Check and Enable
+WoL Support</h2>
+<p>Verify if your network card supports Wake-on-LAN commands.</p>
+<ol type="1">
+<li><p>Run the following command (replace <code>enp3s0</code> with your
+interface name):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool enp3s0</span></code></pre></div></li>
+<li><p>Look for these two specific lines in the output:</p>
+<ul>
+<li><strong>Supports Wake-on:</strong> If this includes <code>g</code>,
+your hardware supports magic packets.</li>
+<li><strong>Wake-on:</strong> If set to <code>d</code>, WoL is disabled.
+If set to <code>g</code>, WoL is active.</li>
+</ul></li>
+<li><p>Enable Wake-on-LAN temporarily by running:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool <span class="at">-s</span> enp3s0 wol g</span></code></pre></div></li>
+</ol>
+<h2 id="step-4-make-the-wake-on-lan-configuration-persistent">Step 4:
+Make the Wake-on-LAN Configuration Persistent</h2>
+<p>Changes made with <code>ethtool</code> reset upon reboot. Create a
+systemd service to automatically enable WoL every time Ubuntu boots.</p>
+<ol type="1">
+<li>Create a new service file using a text editor:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/wol.service</span></code></pre></div></li>
+<li>Add the following contents to the file, replacing
+<code>enp3s0</code> with your network interface name:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Enable Wake-on-LAN</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network-online.target</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">Wants</span><span class="ot">=</span><span class="st">network-online.target</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">oneshot</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/sbin/ethtool -s enp3s0 wol g</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div></li>
+<li>Save and close the file (<code>Ctrl+O</code>, <code>Enter</code>,
+then <code>Ctrl+X</code>).</li>
+<li>Enable and start the newly created service:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable wol.service</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start wol.service</span></code></pre></div></li>
+</ol>
+<h2 id="step-5-test-the-setup">Step 5: Test the Setup</h2>
+<p>To turn on your Ubuntu system remotely, send a magic packet from
+another machine on the same local network using the target machine's MAC
+address.</p>
+<ul>
+<li><p><strong>From another Linux machine:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install wakeonlan</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">wakeonlan</span> AA:BB:CC:DD:EE:FF</span></code></pre></div>
+<p><em>(Replace <code>AA:BB:CC:DD:EE:FF</code> with the target machine's
+actual MAC address).</em></p></li>
+<li><p><strong>From a Windows machine:</strong> Download a WoL utility
+or use PowerShell scripts to broadcast the magic packet to the target
+MAC address.</p></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up an iSCSI Target on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up an iSCSI target on Ubuntu allows you to share local block storage devices, such as physical disks, partitions, or file images, over a network to remote client machines known as initiators. This guide covers the complete step-by-step process to">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-an-iscsi-target-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up an iSCSI Target on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-an-iscsi-target-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up an iSCSI target on Ubuntu allows you to share local block storage devices, such as physical disks, partitions, or file images, over a network to remote client machines known as initiators. This guide covers the complete step-by-step process to" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-set-up-an-iscsi-target-on-ubuntu">How to Set Up an iSCSI
+Target on Ubuntu</h1>
+<p>Setting up an iSCSI target on Ubuntu allows you to share local block
+storage devices, such as physical disks, partitions, or file images,
+over a network to remote client machines known as initiators. This guide
+covers the complete step-by-step process to install the required
+package, configure storage backstores, define the iSCSI target IQN, set
+up access control lists, and allow firewall traffic for seamless network
+storage sharing.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An Ubuntu server (20.04 LTS or later recommended) with root or
+<code>sudo</code> privileges.</li>
+<li>A secondary dedicated block device, partition, or sufficient disk
+space to create a storage file image.</li>
+<li>The static IP address of the Ubuntu server and the IQN (iSCSI
+Qualified Name) of the client machine (initiator).</li>
+</ul>
+<h2 id="step-1-install-targetcli-fb">Step 1: Install targetcli-fb</h2>
+<p>Ubuntu uses the <code>targetcli-fb</code> administration tool to
+manage the Linux kernel target framework.</p>
+<p>Run the following commands to update package lists and install the
+administration shell:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install targetcli-fb <span class="at">-y</span></span></code></pre></div>
+<p>Verify that the service is active and running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status targetctl</span></code></pre></div>
+<h2 id="step-2-open-the-targetcli-management-interface">Step 2: Open the
+targetcli Management Interface</h2>
+<p>Launch the interactive configuration interface:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> targetcli</span></code></pre></div>
+<p>You will see a navigation prompt (<code>/&gt;</code>).</p>
+<h2 id="step-3-create-the-storage-backstore">Step 3: Create the Storage
+Backstore</h2>
+<p>You must define the storage you want to share. You can use a raw
+block device (like <code>/dev/sdb</code>) or a file-based storage
+image.</p>
+<h3 id="option-a-block-device-physical-diskpartition">Option A: Block
+Device (Physical Disk/Partition)</h3>
+<p>If you have an unused drive or partition (e.g.,
+<code>/dev/sdb</code>):</p>
+<pre class="text"><code>cd /backstores/block
+create name=storage_block dev=/dev/sdb</code></pre>
+<h3 id="option-b-file-based-backstore">Option B: File-Based
+Backstore</h3>
+<p>If you want to use a file created on your existing filesystem:</p>
+<pre class="text"><code>cd /backstores/fileio
+create name=storage_file file_or_dev=/var/iscsi_storage.img size=20G</code></pre>
+<h2 id="step-4-create-the-iscsi-target-iqn">Step 4: Create the iSCSI
+Target IQN</h2>
+<p>Navigate to the iSCSI directory and create a Target Qualified Name
+(IQN). The standard format is
+<code>iqn.yyyy-mm.reverse-domain:identifier</code>.</p>
+<pre class="text"><code>cd /iscsi
+create iqn.2023-10.com.example:ubuntu.target</code></pre>
+<p>This command automatically creates a Target Portal Group
+(<code>tpg1</code>).</p>
+<h2 id="step-5-map-the-storage-to-a-lun">Step 5: Map the Storage to a
+LUN</h2>
+<p>Bind the backstore storage created in Step 3 to the Target Portal
+Group as a Logical Unit Number (LUN):</p>
+<pre class="text"><code>cd /iscsi/iqn.2023-10.com.example:ubuntu.target/tpg1/luns
+create /backstores/fileio/storage_file</code></pre>
+<p><em>(Replace <code>/backstores/fileio/storage_file</code> with
+<code>/backstores/block/storage_block</code> if you chose Option
+A).</em></p>
+<h2 id="step-6-configure-access-control-lists-acls">Step 6: Configure
+Access Control Lists (ACLs)</h2>
+<p>To restrict access so that only authorized initiators can mount the
+storage, create an ACL entry using the client's IQN (found in
+<code>/etc/iscsi/initiatorname.iscsi</code> on the client machine):</p>
+<pre class="text"><code>cd /iscsi/iqn.2023-10.com.example:ubuntu.target/tpg1/acls
+create iqn.2023-10.com.example:client.initiator</code></pre>
+<h2 id="step-7-save-configuration-and-exit">Step 7: Save Configuration
+and Exit</h2>
+<p>Save the changes to make them persistent across system reboots, then
+exit the interface:</p>
+<pre class="text"><code>saveconfig
+exit</code></pre>
+<h2 id="step-8-configure-the-firewall">Step 8: Configure the
+Firewall</h2>
+<p>iSCSI traffic communicates over TCP port 3260. Allow this port
+through Ubuntu's Uncomplicated Firewall (UFW):</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 3260/tcp</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div>
+<h2 id="testing-and-client-connection">Testing and Client
+Connection</h2>
+<p>From the remote client (initiator) machine, discover and connect to
+your newly exposed Ubuntu target:</p>
+<ol type="1">
+<li>Discover targets:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> discovery <span class="at">-t</span> sendtargets <span class="at">-p</span> <span class="op">&lt;</span>UBUNTU_SERVER_IP<span class="op">&gt;</span></span></code></pre></div></li>
+<li>Log in to the target:
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> node <span class="at">-T</span> iqn.2023-10.com.example:ubuntu.target <span class="at">-p</span> <span class="op">&lt;</span>UBUNTU_SERVER_IP<span class="op">&gt;</span> --login</span></code></pre></div></li>
+</ol>
+<p>Once connected, the remote block device will appear on the initiator
+machine as a local raw disk (e.g., <code>/dev/sdb</code> or
+<code>/dev/sdc</code>), ready to be formatted and mounted.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

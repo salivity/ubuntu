@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Difference Between apt and apt-get in Ubuntu - ubuntu</title>
+    <meta name="description" content="Both apt and apt-get are command-line package management utilities used in Ubuntu to install, update, upgrade, and remove software. While apt-get is a lower-level, long-standing tool built primarily for system scripts and backward compatibility, apt is a">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/difference-between-apt-and-apt-get-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Difference Between apt and apt-get in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/difference-between-apt-and-apt-get-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Both apt and apt-get are command-line package management utilities used in Ubuntu to install, update, upgrade, and remove software. While apt-get is a lower-level, long-standing tool built primarily for system scripts and backward compatibility, apt is a" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="difference-between-apt-and-apt-get-in-ubuntu">Difference Between
+apt and apt-get in Ubuntu</h1>
+<p>Both <code>apt</code> and <code>apt-get</code> are command-line
+package management utilities used in Ubuntu to install, update, upgrade,
+and remove software. While <code>apt-get</code> is a lower-level,
+long-standing tool built primarily for system scripts and backward
+compatibility, <code>apt</code> is a newer command designed for daily
+human use that combines the most frequently used features of
+<code>apt-get</code> and <code>apt-cache</code> into a streamlined,
+user-friendly interface.</p>
+<h2 id="what-is-apt-get">What is apt-get?</h2>
+<p>Introduced in the early days of Debian and Ubuntu,
+<code>apt-get</code> is a low-level package management tool that
+interacts directly with the Advanced Package Tool (APT) library. Because
+its options and output format are strictly maintained to ensure backward
+compatibility, <code>apt-get</code> is the preferred choice for shell
+scripts and automated system administration tasks.</p>
+<h2 id="what-is-apt">What is apt?</h2>
+<p>Introduced to reduce complexity for end users, <code>apt</code>
+combines the most common functionalities from separate utilities like
+<code>apt-get</code>, <code>apt-cache</code>, and
+<code>apt-config</code>. It simplifies the command-line experience for
+interactive terminal sessions by providing visual improvements, such as
+a progress bar during installations and color-coded text formatting.</p>
+<h2 id="key-differences">Key Differences</h2>
+<h3 id="1-user-interface">1. User Interface</h3>
+<ul>
+<li><strong><code>apt</code></strong>: Displays a progress bar at the
+bottom of the screen during installations, shows a total count of
+upgradable packages after updating, and uses color-coded output for
+easier reading.</li>
+<li><strong><code>apt-get</code></strong>: Displays standard text-only
+log outputs without progress bars or enhanced visual indicators.</li>
+</ul>
+<h3 id="2-command-consolidation">2. Command Consolidation</h3>
+<p>With older tools, managing packages required switching between
+<code>apt-get</code> (for modifying packages) and <code>apt-cache</code>
+(for querying package information). The <code>apt</code> command merges
+these functions into a single interface:</p>
+<ul>
+<li><code>apt-cache search</code> becomes <code>apt search</code></li>
+<li><code>apt-cache show</code> becomes <code>apt show</code></li>
+<li><code>apt-get install</code> becomes <code>apt install</code></li>
+</ul>
+<h3 id="3-scripting-vs-terminal-usage">3. Scripting vs. Terminal
+Usage</h3>
+<ul>
+<li><strong>Scripting (<code>apt-get</code>)</strong>: Recommended for
+bash scripts and automated tasks because its syntax and output structure
+never change, preventing scripts from breaking unexpectedly.</li>
+<li><strong>Interactive Use (<code>apt</code>)</strong>: Designed
+explicitly for terminal users. In fact, <code>apt</code> may display a
+warning message if it detects that it is being run inside a script.</li>
+</ul>
+<h2 id="command-comparison-chart">Command Comparison Chart</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Legacy Method</th>
+<th style="text-align: left;">Modern Method (<code>apt</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Update repository list</td>
+<td style="text-align: left;"><code>sudo apt-get update</code></td>
+<td style="text-align: left;"><code>sudo apt update</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Upgrade all packages</td>
+<td style="text-align: left;"><code>sudo apt-get upgrade</code></td>
+<td style="text-align: left;"><code>sudo apt upgrade</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Install a package</td>
+<td
+style="text-align: left;"><code>sudo apt-get install &lt;package&gt;</code></td>
+<td
+style="text-align: left;"><code>sudo apt install &lt;package&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Remove a package</td>
+<td
+style="text-align: left;"><code>sudo apt-get remove &lt;package&gt;</code></td>
+<td
+style="text-align: left;"><code>sudo apt remove &lt;package&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Search for a package</td>
+<td
+style="text-align: left;"><code>apt-cache search &lt;package&gt;</code></td>
+<td
+style="text-align: left;"><code>apt search &lt;package&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Show package details</td>
+<td
+style="text-align: left;"><code>apt-cache show &lt;package&gt;</code></td>
+<td style="text-align: left;"><code>apt show &lt;package&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Remove unneeded dependencies</td>
+<td style="text-align: left;"><code>sudo apt-get autoremove</code></td>
+<td style="text-align: left;"><code>sudo apt autoremove</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="which-should-you-use">Which Should You Use?</h2>
+<p>For standard command-line operations on Ubuntu, use
+<strong><code>apt</code></strong>. It provides a faster, cleaner, and
+more intuitive experience. Reserve <strong><code>apt-get</code></strong>
+for writing system scripts, automation tools, or working on legacy
+systems where compatibility is required.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

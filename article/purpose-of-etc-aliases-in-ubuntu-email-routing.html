@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of /etc/aliases in Ubuntu Email Routing - ubuntu</title>
+    <meta name="description" content="The /etc/aliases file in Ubuntu serves as a system-wide configuration table used by Mail Transfer Agents (MTAs) like Postfix, Sendmail, or Exim to redirect local email messages to different local user accounts, external email addresses, files, or executa">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-etc-aliases-in-ubuntu-email-routing">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of /etc/aliases in Ubuntu Email Routing - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-etc-aliases-in-ubuntu-email-routing" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /etc/aliases file in Ubuntu serves as a system-wide configuration table used by Mail Transfer Agents (MTAs) like Postfix, Sendmail, or Exim to redirect local email messages to different local user accounts, external email addresses, files, or executa" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="purpose-of-etcaliases-in-ubuntu-email-routing">Purpose of
+/etc/aliases in Ubuntu Email Routing</h1>
+<p>The <code>/etc/aliases</code> file in Ubuntu serves as a system-wide
+configuration table used by Mail Transfer Agents (MTAs) like Postfix,
+Sendmail, or Exim to redirect local email messages to different local
+user accounts, external email addresses, files, or executable scripts.
+This article explains the primary function of the
+<code>/etc/aliases</code> file, details its syntax, outlines common use
+cases, and demonstrates how to apply changes effectively within your
+server's mail system.</p>
+<h2 id="primary-functions-of-etcaliases">Primary Functions of
+<code>/etc/aliases</code></h2>
+<p>When a system process, cron job, or local user sends an email on an
+Ubuntu server, the local MTA consults the <code>/etc/aliases</code> file
+to determine the actual destination for the message. Its main roles
+include:</p>
+<ol type="1">
+<li><strong>Forwarding System Alerts:</strong> By default, system
+daemons send critical alerts and logs to local accounts such as
+<code>root</code>, <code>postmaster</code>, or <code>webmaster</code>.
+Since administrators rarely log in as <code>root</code> to check local
+mail directly, <code>/etc/aliases</code> redirects these emails to a
+real user account or an external inbox.</li>
+<li><strong>Creating Local Email Groups:</strong> It allows
+administrators to create a single alias that redistributes incoming mail
+to multiple recipients.</li>
+<li><strong>Piping Mail to Commands:</strong> Emails sent to a specific
+local address can be passed directly to a script or application for
+processing, which is common in automated ticketing or logging
+systems.</li>
+<li><strong>Appending Mail to Files:</strong> Incoming emails can be
+routed directly to append to a specified text file on disk.</li>
+</ol>
+<h2 id="file-syntax-and-structure">File Syntax and Structure</h2>
+<p>The syntax of the <code>/etc/aliases</code> file is straightforward.
+Each entry consists of a key (the local alias name) followed by a colon
+and one or more comma-separated destinations.</p>
+<pre class="text"><code># Basic format
+name: destination1, destination2, ...</code></pre>
+<h3 id="common-configuration-examples">Common Configuration
+Examples</h3>
+<ul>
+<li><p><strong>Forwarding to a Local User:</strong> Redirects email
+intended for <code>postmaster</code> to a local system account named
+<code>sysadmin</code>.</p>
+<pre class="text"><code>postmaster: sysadmin</code></pre></li>
+<li><p><strong>Forwarding to an External Email Address:</strong> Routes
+all system emails sent to <code>root</code> to an off-server corporate
+email address.</p>
+<pre class="text"><code>root: admin@example.com</code></pre></li>
+<li><p><strong>Routing to Multiple Destinations:</strong> Sends messages
+directed to <code>alerts</code> to both a local user and an external
+address.</p>
+<pre class="text"><code>alerts: sysadmin, primary-tech@example.com</code></pre></li>
+<li><p><strong>Piping to an Executable Script:</strong> Passes incoming
+emails for <code>support</code> as standard input to a custom
+script.</p>
+<pre class="text"><code>support: &quot;|/usr/local/bin/process_ticket.py&quot;</code></pre></li>
+</ul>
+<h2 id="applying-changes-with-the-newaliases-command">Applying Changes
+with the <code>newaliases</code> Command</h2>
+<p>MTAs do not directly read the plain text <code>/etc/aliases</code>
+file for every email lookup due to performance considerations. Instead,
+they read a binary database file (typically
+<code>/etc/aliases.db</code>) built from <code>/etc/aliases</code>.</p>
+<p>After editing the <code>/etc/aliases</code> file, you must run the
+following command to compile your changes into the indexed database:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> newaliases</span></code></pre></div>
+<p>If you do not execute <code>sudo newaliases</code> after modifying
+the file, the MTA will continue using the old configuration, and your
+updated email routing rules will not take effect.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

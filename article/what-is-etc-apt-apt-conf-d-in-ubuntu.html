@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is /etc/apt/apt.conf.d in Ubuntu? - ubuntu</title>
+    <meta name="description" content="The /etc/apt/apt.conf.d directory is a crucial component of Ubuntu's Advanced Package Tool (APT) system, used to store modular configuration snippets that dictate how package management behaves. This article explains the purpose of /etc/apt/apt.conf.d, h">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/what-is-etc-apt-apt-conf-d-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is /etc/apt/apt.conf.d in Ubuntu? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/what-is-etc-apt-apt-conf-d-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /etc/apt/apt.conf.d directory is a crucial component of Ubuntu's Advanced Package Tool (APT) system, used to store modular configuration snippets that dictate how package management behaves. This article explains the purpose of /etc/apt/apt.conf.d, h" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-etcaptaptconfd-in-ubuntu">What Is /etc/apt/apt.conf.d in
+Ubuntu?</h1>
+<p>The <code>/etc/apt/apt.conf.d</code> directory is a crucial component
+of Ubuntu's Advanced Package Tool (APT) system, used to store modular
+configuration snippets that dictate how package management behaves. This
+article explains the purpose of <code>/etc/apt/apt.conf.d</code>, how
+APT processes its configuration files, and practical examples of how
+system administrators use this directory to customize package
+installations, updates, and repository settings.</p>
+<h2 id="understanding-the-modular-apt-configuration">Understanding the
+Modular APT Configuration</h2>
+<p>Ubuntu and Debian-based systems use APT to install, update, and
+remove software. Historically, APT configuration was stored in a single
+file located at <code>/etc/apt/apt.conf</code>.</p>
+<p>Modern Ubuntu systems favor a modular approach. Instead of editing a
+single main configuration file—which can easily be overwritten or broken
+during system upgrades—APT scans the <code>/etc/apt/apt.conf.d/</code>
+directory and merges all the individual configuration files found inside
+it into a single runtime configuration.</p>
+<h2 id="how-apt-reads-configuration-fragments">How APT Reads
+Configuration Fragments</h2>
+<p>APT loads the files in <code>/etc/apt/apt.conf.d</code> in a specific
+order based on their filenames:</p>
+<ol type="1">
+<li><strong>Numerical Sorting:</strong> Files are read in numerical and
+lexicographical (alphabetical) order.</li>
+<li><strong>Precedence:</strong> Settings parsed later in the sequence
+overwrite conflicting settings defined in earlier files.</li>
+<li><strong>Naming Convention:</strong> Most files use a two-digit
+prefix (such as <code>01</code>, <code>20</code>, or <code>50</code>)
+followed by a descriptive name (e.g.,
+<code>50unattended-upgrades</code>). Lower numbers are processed first,
+and higher numbers are processed last.</li>
+</ol>
+<p>For example, a directive set in <code>99mysettings</code> will
+override a conflicting directive defined in
+<code>01autoremove</code>.</p>
+<h2 id="purpose-and-key-use-cases">Purpose and Key Use Cases</h2>
+<p>The primary purpose of <code>/etc/apt/apt.conf.d</code> is to allow
+package maintainers, automated scripts, and system administrators to
+modify APT's behavior without interfering with each other's
+configuration files.</p>
+<h3 id="1-application-specific-settings">1. Application-Specific
+Settings</h3>
+<p>When you install specific system utilities, they often drop their own
+configuration files into this directory. For example:</p>
+<ul>
+<li><code>50unattended-upgrades</code> manages automatic security
+updates.</li>
+<li><code>01autoremove</code> defines rules for clearing out unused
+dependencies.</li>
+</ul>
+<h3 id="2-customizing-network-and-proxy-settings">2. Customizing Network
+and Proxy Settings</h3>
+<p>If your Ubuntu machine operates behind a corporate proxy, you can
+create a custom file (e.g., <code>90proxy</code>) inside
+<code>/etc/apt/apt.conf.d</code> to define network routes for APT:</p>
+<pre class="text"><code>Acquire::http::Proxy &quot;http://proxy.example.com:8080/&quot;;
+Acquire::https::Proxy &quot;https://proxy.example.com:8080/&quot;;</code></pre>
+<h3 id="3-modifying-package-installation-behavior">3. Modifying Package
+Installation Behavior</h3>
+<p>Administrators can control default installation parameters, such as
+disabling recommended packages to save disk space. Creating a file named
+<code>99norecommends</code> with the following content achieves
+this:</p>
+<pre class="text"><code>APT::Install-Recommends &quot;false&quot;;
+APT::Install-Suggests &quot;false&quot;;</code></pre>
+<h3 id="4-tuning-update-check-intervals">4. Tuning Update Check
+Intervals</h3>
+<p>You can control how often APT refreshes package lists or checks for
+updates automatically by adding periodic configuration directives:</p>
+<pre class="text"><code>APT::Periodic::Update-Package-Lists &quot;1&quot;;
+APT::Periodic::Unattended-Upgrade &quot;1&quot;;</code></pre>
+<h2 id="syntax-rules-for-files-in-etcaptaptconfd">Syntax Rules for Files
+in /etc/apt/apt.conf.d</h2>
+<p>When adding or modifying files in this directory, keep the following
+rules in mind:</p>
+<ul>
+<li><strong>End with Semicolons:</strong> Every configuration line must
+end with a semicolon <code>;</code>.</li>
+<li><strong>Grouped Block Structure:</strong> Options can use tree
+notation (<code>APT::Get::Assume-Yes "true";</code>) or block
+notation.</li>
+<li><strong>No File Extensions Required:</strong> Files do not need a
+<code>.conf</code> extension; APT reads any valid file inside the
+directory unless the filename contains invalid characters (such as
+period extensions like <code>.bak</code> or <code>.disabled</code>,
+which APT ignores).</li>
+</ul>
+<h2 id="verifying-the-final-configuration">Verifying the Final
+Configuration</h2>
+<p>Because APT merges multiple files from
+<code>/etc/apt/apt.conf.d</code>, you can view the complete, active APT
+configuration by running:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-config</span> dump</span></code></pre></div>
+<p>To check a specific configuration key (e.g., proxy settings), filter
+the output:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-config</span> dump <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> proxy</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

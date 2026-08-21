@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is Apport Error Reporting System in Ubuntu? - ubuntu</title>
+    <meta name="description" content="Apport is the default crash reporting system built into Ubuntu designed to automatically detect software failures, gather diagnostic data, and assist users in filing detailed bug reports. By capturing crucial system information at the exact moment a prog">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/what-is-apport-error-reporting-system-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is Apport Error Reporting System in Ubuntu? - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/what-is-apport-error-reporting-system-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Apport is the default crash reporting system built into Ubuntu designed to automatically detect software failures, gather diagnostic data, and assist users in filing detailed bug reports. By capturing crucial system information at the exact moment a prog" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-apport-error-reporting-system-in-ubuntu">What Is Apport
+Error Reporting System in Ubuntu?</h1>
+<p>Apport is the default crash reporting system built into Ubuntu
+designed to automatically detect software failures, gather diagnostic
+data, and assist users in filing detailed bug reports. By capturing
+crucial system information at the exact moment a program crashes, Apport
+streamlines the troubleshooting process for developers and helps improve
+overall system stability. This article provides a clear overview of
+Apport's primary roles, how it operates, and how users can manage its
+behavior on their systems.</p>
+<h2 id="key-roles-and-functions-of-apport">Key Roles and Functions of
+Apport</h2>
+<p>Apport performs several specific roles within the Ubuntu ecosystem to
+maintain software quality and assist developers:</p>
+<h3 id="1-automated-crash-detection">1. Automated Crash Detection</h3>
+<p>Apport runs in the background as a system service. When an
+application crashes or encounters an unhandled exception, the Linux
+kernel passes the crash details to Apport. It catches these failures
+immediately, preventing silent application closures without diagnostic
+logs.</p>
+<h3 id="2-comprehensive-data-collection">2. Comprehensive Data
+Collection</h3>
+<p>When an error occurs, Apport generates a crash report containing
+vital context about the state of the application and system. The data
+collected includes:</p>
+<ul>
+<li><strong>Core Dumps:</strong> A snapshot of the program's memory at
+the time of the crash.</li>
+<li><strong>Stack Traces:</strong> Information showing the exact
+function calls that led to the crash.</li>
+<li><strong>Package Information:</strong> The specific version of the
+failing software and its dependencies.</li>
+<li><strong>System Environment:</strong> Operating system architecture,
+kernel version, and hardware details.</li>
+</ul>
+<h3 id="3-user-notification-and-bug-reporting">3. User Notification and
+Bug Reporting</h3>
+<p>Apport displays a graphical prompt—typically reading "System program
+problem detected"—to inform the user of the failure. It allows the user
+to review the captured information before choosing whether to send the
+report to Canonical's servers or Launchpad (Ubuntu's bug tracking
+platform). No reports are sent without user consent.</p>
+<h3 id="4-duplicate-reduction-and-triage">4. Duplicate Reduction and
+Triage</h3>
+<p>By standardizing the format of crash reports, Apport helps
+maintainers identify duplicate issues, prioritize critical bugs, and
+determine which software packages require urgent patches.</p>
+<h2 id="apport-behavior-stable-vs-development-releases">Apport Behavior:
+Stable vs. Development Releases</h2>
+<p>Apport operates differently depending on the version of Ubuntu in
+use:</p>
+<ul>
+<li><strong>Development Releases:</strong> Apport is fully enabled by
+default. Since pre-release versions are meant for testing, automatically
+capturing every crash ensures developers can fix bugs before the
+official release.</li>
+<li><strong>Stable Releases:</strong> Apport's automatic crash-uploading
+feature is disabled by default to prevent non-technical users from being
+overwhelmed by pop-ups and to conserve system resources. However, local
+error logs are still recorded, which can trigger the "System program
+problem detected" notification.</li>
+</ul>
+<h2 id="how-to-manage-apport">How to Manage Apport</h2>
+<p>Users can easily enable, disable, or control the Apport service using
+the terminal.</p>
+<h3 id="disabling-apport">Disabling Apport</h3>
+<p>To stop Apport from running and prevent error notifications, edit its
+configuration file:</p>
+<ol type="1">
+<li>Open <code>/etc/default/apport</code> in a text editor with
+administrative privileges:
+<code>sudo nano /etc/default/apport</code></li>
+<li>Change the <code>enabled</code> setting from <code>1</code> to
+<code>0</code>: <code>enabled=0</code></li>
+<li>Save the file and exit.</li>
+<li>Stop the currently running service:
+<code>sudo systemctl stop apport</code></li>
+</ol>
+<h3 id="enabling-apport">Enabling Apport</h3>
+<p>To re-enable crash reporting for troubleshooting purposes:</p>
+<ol type="1">
+<li>Edit <code>/etc/default/apport</code> and set
+<code>enabled=1</code>.</li>
+<li>Start the service: <code>sudo systemctl start apport</code></li>
+</ol>
+<h3 id="clearing-existing-crash-logs">Clearing Existing Crash Logs</h3>
+<p>If crash pop-ups persist due to old reports, delete the collected
+logs in the crash directory: <code>sudo rm /var/crash/*</code></p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

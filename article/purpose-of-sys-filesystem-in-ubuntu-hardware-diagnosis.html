@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of /sys Filesystem in Ubuntu Hardware Diagnosis - ubuntu</title>
+    <meta name="description" content="The /sys filesystem (sysfs) in Ubuntu is a virtual filesystem created by the Linux kernel that exports information about system devices, drivers, and kernel subsystems in a structured, user-readable format. Serving as an interactive window into the kerne">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-sys-filesystem-in-ubuntu-hardware-diagnosis">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of /sys Filesystem in Ubuntu Hardware Diagnosis - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-sys-filesystem-in-ubuntu-hardware-diagnosis" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /sys filesystem (sysfs) in Ubuntu is a virtual filesystem created by the Linux kernel that exports information about system devices, drivers, and kernel subsystems in a structured, user-readable format. Serving as an interactive window into the kerne" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="purpose-of-sys-filesystem-in-ubuntu-hardware-diagnosis">Purpose
+of /sys Filesystem in Ubuntu Hardware Diagnosis</h1>
+<p>The <code>/sys</code> filesystem (sysfs) in Ubuntu is a virtual
+filesystem created by the Linux kernel that exports information about
+system devices, drivers, and kernel subsystems in a structured,
+user-readable format. Serving as an interactive window into the kernel's
+device model, it enables system administrators and developers to inspect
+hardware states, analyze device configurations, and diagnose underlying
+hardware issues in real time without requiring specialized diagnostic
+utilities.</p>
+<h2 id="understanding-the-structure-of-sys">Understanding the Structure
+of /sys</h2>
+<p>Unlike traditional filesystems stored on a hard drive,
+<code>/sys</code> exists entirely in memory. The kernel generates its
+contents dynamically as hardware is detected and drivers are loaded.
+Every directory and file within <code>/sys</code> represents a specific
+kernel object, attribute, or relationship.</p>
+<p>The directory layout categorizes hardware into distinct logical
+views:</p>
+<ul>
+<li><strong><code>/sys/class/</code></strong>: Groups devices by their
+functional class (e.g., net, power_supply, thermal, block, sound). This
+is usually the most convenient location for diagnostic tasks.</li>
+<li><strong><code>/sys/bus/</code></strong>: Groups devices according to
+the physical or virtual bus they connect to (e.g., pci, usb, i2c,
+scsi).</li>
+<li><strong><code>/sys/devices/</code></strong>: Contains the global
+device hierarchy, representing the actual physical layout of hardware as
+attached to the system.</li>
+<li><strong><code>/sys/block/</code></strong>: Contains entries for each
+block device (disks, partitions) present on the system.</li>
+</ul>
+<h2 id="key-hardware-diagnostic-capabilities">Key Hardware Diagnostic
+Capabilities</h2>
+<p>Using standard command-line tools like <code>cat</code>,
+<code>grep</code>, or <code>ls</code>, users can read files in
+<code>/sys</code> to retrieve instant hardware diagnostics.</p>
+<h3 id="1-network-diagnostics">1. Network Diagnostics</h3>
+<p>Network device health and operational status can be checked directly
+under <code>/sys/class/net/</code>.</p>
+<ul>
+<li>Check physical link state:
+<code>cat /sys/class/net/eth0/operstate</code></li>
+<li>View link speed: <code>cat /sys/class/net/eth0/speed</code></li>
+<li>Inspect error counters:
+<code>cat /sys/class/net/eth0/statistics/rx_errors</code></li>
+</ul>
+<h3 id="2-power-and-battery-health">2. Power and Battery Health</h3>
+<p>Laptops and UPS units report power metrics under
+<code>/sys/class/power_supply/</code>.</p>
+<ul>
+<li>Check battery charge status:
+<code>cat /sys/class/power_supply/BAT0/status</code></li>
+<li>Determine remaining energy vs. design capacity: Read
+<code>energy_now</code> and <code>energy_full_design</code> to assess
+battery degradation.</li>
+</ul>
+<h3 id="3-thermal-and-cpu-monitoring">3. Thermal and CPU Monitoring</h3>
+<p>Thermal sensors expose temperature readings and cooling device states
+via <code>/sys/class/thermal/</code>.</p>
+<ul>
+<li>Read CPU thermal zone temperatures:
+<code>cat /sys/class/thermal/thermal_zone0/temp</code> (value is in
+millidegrees Celsius).</li>
+<li>Check current CPU frequency scaling and policies under
+<code>/sys/devices/system/cpu/</code>.</li>
+</ul>
+<h3 id="4-usb-and-pci-device-identification">4. USB and PCI Device
+Identification</h3>
+<p>When a device fails to function, <code>/sys/bus/pci/</code> and
+<code>/sys/bus/usb/</code> provide raw vendor IDs, product IDs, and
+driver binding status.</p>
+<ul>
+<li>Verify if a driver bound to a PCI device:
+<code>ls -l /sys/bus/pci/devices/0000:01:00.0/driver</code></li>
+<li>Check power management and runtime suspend states for connected
+devices.</li>
+</ul>
+<h2 id="modifying-hardware-attributes-at-runtime">Modifying Hardware
+Attributes at Runtime</h2>
+<p>In addition to read-only diagnostics, many files in <code>/sys</code>
+accept write operations to modify device behavior dynamically for
+testing purposes. For example, writing values to a device's
+<code>power/control</code> file allows enabling or disabling runtime
+power management to troubleshoot device stability issues.</p>
+<h2 id="advantages-of-using-sys-for-troubleshooting">Advantages of Using
+/sys for Troubleshooting</h2>
+<ul>
+<li><strong>No Dependency on External Tools</strong>: Diagnostics can be
+performed on minimal or recovery installations of Ubuntu where utilities
+like <code>lshw</code>, <code>inxi</code>, or <code>hardinfo</code> are
+unavailable.</li>
+<li><strong>Scriptability</strong>: Because attributes are presented as
+standard text files, shell scripts can easily monitor hardware health,
+log statistics, or generate alerts.</li>
+<li><strong>Kernel-Level Accuracy</strong>: Information reflects the
+exact state maintained by the Linux kernel drivers rather than
+user-space approximations.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

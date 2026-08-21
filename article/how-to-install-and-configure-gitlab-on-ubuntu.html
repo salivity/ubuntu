@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure GitLab on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walk-through for installing and configuring GitLab Community Edition (CE) on an Ubuntu server. You will learn how to update your system, install necessary dependencies, add the official GitLab repository, install the pa">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-gitlab-on-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure GitLab on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-gitlab-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walk-through for installing and configuring GitLab Community Edition (CE) on an Ubuntu server. You will learn how to update your system, install necessary dependencies, add the official GitLab repository, install the pa" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-and-configure-gitlab-on-ubuntu">How to Install
+and Configure GitLab on Ubuntu</h1>
+<p>This guide provides a step-by-step walk-through for installing and
+configuring GitLab Community Edition (CE) on an Ubuntu server. You will
+learn how to update your system, install necessary dependencies, add the
+official GitLab repository, install the package, set up your external
+URL, adjust firewall settings, and complete the initial administrator
+login.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An Ubuntu server (20.04 LTS or 22.04 LTS recommended) with at least
+4GB of RAM.</li>
+<li>A user account with <code>sudo</code> privileges.</li>
+<li>A domain name or public IP address pointing to your server.</li>
+</ul>
+<h2 id="step-1-update-the-system-and-install-dependencies">Step 1:
+Update the System and Install Dependencies</h2>
+<p>Open your terminal and update your local package index to ensure all
+existing packages are up to date:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<p>Next, install the essential packages required by GitLab, including
+OpenSSH and Postfix (for sending notification emails):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> curl openssh-server ca-certificates tzdata perl</span></code></pre></div>
+<p>During the Postfix installation, select <strong>Internet
+Site</strong> when prompted, and enter your server's domain name as the
+System Mail Name.</p>
+<h2 id="step-2-add-the-official-gitlab-repository">Step 2: Add the
+Official GitLab Repository</h2>
+<p>GitLab provides an automated script to add its repository to your
+system package sources. Run the following command:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh <span class="kw">|</span> <span class="fu">sudo</span> bash</span></code></pre></div>
+<h2 id="step-3-install-gitlab-community-edition">Step 3: Install GitLab
+Community Edition</h2>
+<p>To install GitLab and automatically configure it with your domain
+name or IP address, pass your address using the
+<code>EXTERNAL_URL</code> environment variable. Replace
+<code>http://your_domain_or_ip</code> with your actual domain or IP
+address:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> EXTERNAL_URL=<span class="st">&quot;http://your_domain_or_ip&quot;</span> apt install gitlab-ce</span></code></pre></div>
+<p>If you have a domain configured and want to automatically enable
+HTTPS encryption via Let's Encrypt, use <code>https://</code>
+instead:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> EXTERNAL_URL=<span class="st">&quot;https://your_domain.com&quot;</span> apt install gitlab-ce</span></code></pre></div>
+<p>The installation process may take several minutes to complete as it
+configures all required components.</p>
+<h2 id="step-4-configure-firewall-rules">Step 4: Configure Firewall
+Rules</h2>
+<p>If you have the UFW firewall enabled, allow HTTP, HTTPS, and SSH
+traffic through the firewall:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow OpenSSH</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow http</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow https</span></code></pre></div>
+<p>Check the status to ensure the rules are active:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status</span></code></pre></div>
+<h2 id="step-5-initial-access-and-root-login">Step 5: Initial Access and
+Root Login</h2>
+<p>Once the installation finishes, GitLab generates an initial
+administrative password valid for 24 hours. Retrieve the password
+using:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cat /etc/gitlab/initial_root_password</span></code></pre></div>
+<ol type="1">
+<li>Open your web browser and navigate to your server's URL (e.g.,
+<code>http://your_domain_or_ip</code>).</li>
+<li>Log in using the username <strong>root</strong> and the password
+retrieved from the step above.</li>
+<li>Go to <strong>User Settings</strong> -&gt; <strong>Password</strong>
+to change the temporary root password immediately.</li>
+</ol>
+<h2 id="step-6-managing-gitlab-services">Step 6: Managing GitLab
+Services</h2>
+<p>You can manage the status of GitLab using the <code>gitlab-ctl</code>
+command-line utility:</p>
+<ul>
+<li><strong>Reconfigure GitLab:</strong>
+<code>sudo gitlab-ctl reconfigure</code></li>
+<li><strong>Check Service Status:</strong>
+<code>sudo gitlab-ctl status</code></li>
+<li><strong>Restart Services:</strong>
+<code>sudo gitlab-ctl restart</code></li>
+<li><strong>Stop Services:</strong>
+<code>sudo gitlab-ctl stop</code></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

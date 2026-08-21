@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Ubuntu Server as OpenStack Compute Node - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for configuring an Ubuntu server to function as an OpenStack compute node using Nova and Neutron services. You will learn how to prepare the operating system, install the necessary OpenStack packages, config">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-ubuntu-server-as-openstack-compute-node">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Ubuntu Server as OpenStack Compute Node - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-ubuntu-server-as-openstack-compute-node" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for configuring an Ubuntu server to function as an OpenStack compute node using Nova and Neutron services. You will learn how to prepare the operating system, install the necessary OpenStack packages, config" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="configure-ubuntu-server-as-openstack-compute-node">Configure
+Ubuntu Server as OpenStack Compute Node</h1>
+<p>This guide provides a step-by-step walkthrough for configuring an
+Ubuntu server to function as an OpenStack compute node using Nova and
+Neutron services. You will learn how to prepare the operating system,
+install the necessary OpenStack packages, configure hardware
+virtualization, set up tenant networking, and register the node with
+your OpenStack controller.</p>
+<h2 id="step-1-system-preparation-and-prerequisites">Step 1: System
+Preparation and Prerequisites</h2>
+<p>Before installing OpenStack components, ensure your Ubuntu server is
+updated and properly configured to communicate with the management
+network.</p>
+<ol type="1">
+<li><p>Update the package repository and system packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt dist-upgrade <span class="at">-y</span></span></code></pre></div></li>
+<li><p>Install and configure Chrony for Network Time Protocol (NTP)
+synchronization with your controller node:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install chrony <span class="at">-y</span></span></code></pre></div>
+<p>Edit <code>/etc/chrony/chrony.conf</code> to point to your controller
+node's IP address as the time server, then restart Chrony:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart chrony</span></code></pre></div></li>
+<li><p>Ensure host resolution works by adding the controller node's
+hostname and IP to <code>/etc/hosts</code>:</p>
+<pre class="text"><code>10.0.0.11 controller
+10.0.0.31 compute1</code></pre></li>
+</ol>
+<h2 id="step-2-install-openstack-packages">Step 2: Install OpenStack
+Packages</h2>
+<p>Enable the OpenStack repository corresponding to your target release
+(e.g., Yoga, Zed, or Antelope) and install the core compute
+packages.</p>
+<ol type="1">
+<li><p>Install the OpenStack release repository enabler:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install software-properties-common <span class="at">-y</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository cloud-archive:yoga <span class="at">-y</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></li>
+<li><p>Install the Nova compute component:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nova-compute <span class="at">-y</span></span></code></pre></div></li>
+</ol>
+<h2 id="step-3-configure-nova-compute">Step 3: Configure Nova
+Compute</h2>
+<p>Edit <code>/etc/nova/nova.conf</code> to set up communication with
+the message queue, database, and authentication services running on the
+controller node.</p>
+<ol type="1">
+<li><p>Open the configuration file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nova/nova.conf</span></code></pre></div></li>
+<li><p>Add or update the following sections:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[DEFAULT]</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">transport_url </span><span class="ot">=</span><span class="st"> rabbit://openstack:RABBIT_PASS@controller</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">my_ip </span><span class="ot">=</span><span class="st"> 10.0.0.31</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="dt">use_neutron </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="dt">firewall_driver </span><span class="ot">=</span><span class="st"> nova.virt.firewall.NoopFirewallDriver</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[api]</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_strategy </span><span class="ot">=</span><span class="st"> keystone</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[keystone_authtoken]</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="dt">www_authenticate_uri </span><span class="ot">=</span><span class="st"> http://controller:5000</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_url </span><span class="ot">=</span><span class="st"> http://controller:5000</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="dt">memcached_servers </span><span class="ot">=</span><span class="st"> controller:11211</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_type </span><span class="ot">=</span><span class="st"> password</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="dt">project_domain_name </span><span class="ot">=</span><span class="st"> </span><span class="kw">Default</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="dt">user_domain_name </span><span class="ot">=</span><span class="st"> </span><span class="kw">Default</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="dt">project_name </span><span class="ot">=</span><span class="st"> service</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="dt">username </span><span class="ot">=</span><span class="st"> nova</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="dt">password </span><span class="ot">=</span><span class="st"> NOVA_PASS</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">[vnc]</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="dt">enabled </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="dt">server_listen </span><span class="ot">=</span><span class="st"> 0.0.0.0</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="dt">server_proxyclient_address </span><span class="ot">=</span><span class="st"> $my_ip</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="dt">novncproxy_base_url </span><span class="ot">=</span><span class="st"> http://controller:6080/vnc_auto.html</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="kw">[glance]</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="dt">api_servers </span><span class="ot">=</span><span class="st"> http://controller:9292</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="kw">[oslo_concurrency]</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="dt">lock_path </span><span class="ot">=</span><span class="st"> /var/lib/nova/tmp</span></span></code></pre></div></li>
+<li><p>Determine hardware acceleration support:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">egrep</span> <span class="at">-c</span> <span class="st">&#39;(vmx|svm)&#39;</span> /proc/cpuinfo</span></code></pre></div>
+<p>If the output is <code>0</code>, your hardware does not support
+hardware acceleration and you must configure QEMU instead of KVM. Edit
+<code>/etc/nova/nova-compute.conf</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[libvirt]</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">virt_type </span><span class="ot">=</span><span class="st"> qemu</span></span></code></pre></div>
+<p>If the output is <code>1</code> or greater, leave
+<code>virt_type = kvm</code>.</p></li>
+<li><p>Restart the Nova compute service:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart nova-compute</span></code></pre></div></li>
+</ol>
+<h2 id="step-4-install-and-configure-networking-neutron">Step 4: Install
+and Configure Networking (Neutron)</h2>
+<p>Configure the compute node's networking service to manage virtual
+machine networks.</p>
+<ol type="1">
+<li><p>Install the Neutron OpenvSwitch agent:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install neutron-openvswitch-agent <span class="at">-y</span></span></code></pre></div></li>
+<li><p>Edit <code>/etc/neutron/neutron.conf</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[DEFAULT]</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="dt">transport_url </span><span class="ot">=</span><span class="st"> rabbit://openstack:RABBIT_PASS@controller</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_strategy </span><span class="ot">=</span><span class="st"> keystone</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[keystone_authtoken]</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="dt">www_authenticate_uri </span><span class="ot">=</span><span class="st"> http://controller:5000</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_url </span><span class="ot">=</span><span class="st"> http://controller:5000</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="dt">memcached_servers </span><span class="ot">=</span><span class="st"> controller:11211</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_type </span><span class="ot">=</span><span class="st"> password</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="dt">project_domain_name </span><span class="ot">=</span><span class="st"> </span><span class="kw">Default</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="dt">user_domain_name </span><span class="ot">=</span><span class="st"> </span><span class="kw">Default</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="dt">project_name </span><span class="ot">=</span><span class="st"> service</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="dt">username </span><span class="ot">=</span><span class="st"> neutron</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="dt">password </span><span class="ot">=</span><span class="st"> NEUTRON_PASS</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">[oslo_concurrency]</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="dt">lock_path </span><span class="ot">=</span><span class="st"> /var/lib/neutron/tmp</span></span></code></pre></div></li>
+<li><p>Configure the OpenvSwitch agent in
+<code>/etc/neutron/plugins/ml2/openvswitch_agent.ini</code>:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[ovs]</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">local_ip </span><span class="ot">=</span><span class="st"> 10.0.0.31</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bridge_mappings </span><span class="ot">=</span><span class="st"> provider:br-ex</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[agent]</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="dt">tunnel_types </span><span class="ot">=</span><span class="st"> vxlan</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">l2_population </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[securitygroup]</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="dt">enable_security_group </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="dt">firewall_driver </span><span class="ot">=</span><span class="st"> neutron.agent.linux.iptables_firewall.OVSIptablesFirewallDriver</span></span></code></pre></div></li>
+<li><p>Restart network services:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart openvswitch-switch</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart neutron-openvswitch-agent</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart nova-compute</span></code></pre></div></li>
+</ol>
+<h2 id="step-5-discover-the-compute-node-on-controller">Step 5: Discover
+the Compute Node on Controller</h2>
+<p>Log in to your <strong>OpenStack Controller node</strong> to discover
+the newly added compute node and confirm the registration.</p>
+<ol type="1">
+<li><p>Run the cell discovery command on the controller node:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">su</span> <span class="at">-s</span> /bin/sh <span class="at">-c</span> <span class="st">&quot;nova-manage cell_v2 discover_hosts --verbose&quot;</span> nova</span></code></pre></div></li>
+<li><p>Verify that the compute node is active:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openstack</span> compute service list</span></code></pre></div>
+<p>The output should display <code>nova-compute</code> for your Ubuntu
+compute node with a status of <code>enabled</code> and state
+<code>up</code>.</p></li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt Home Directory for a New User in Ubuntu - ubuntu</title>
+    <meta name="description" content="Encrypting a home directory in Ubuntu adds an essential layer of security by protecting personal files and sensitive data from unauthorized physical or offline access. This article provides a clear, step-by-step guide on how to install the necessary encr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/encrypt-home-directory-for-a-new-user-in-ubuntu">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Encrypt Home Directory for a New User in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/encrypt-home-directory-for-a-new-user-in-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Encrypting a home directory in Ubuntu adds an essential layer of security by protecting personal files and sensitive data from unauthorized physical or offline access. This article provides a clear, step-by-step guide on how to install the necessary encr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="encrypt-home-directory-for-a-new-user-in-ubuntu">Encrypt Home
+Directory for a New User in Ubuntu</h1>
+<p>Encrypting a home directory in Ubuntu adds an essential layer of
+security by protecting personal files and sensitive data from
+unauthorized physical or offline access. This article provides a clear,
+step-by-step guide on how to install the necessary encryption utilities
+and create a brand-new user account with an automatically encrypted home
+directory using the Ubuntu terminal.</p>
+<h2 id="step-1-install-required-encryption-utilities">Step 1: Install
+Required Encryption Utilities</h2>
+<p>Before creating an encrypted user, you must install the
+<code>ecryptfs-utils</code> and <code>pam_ecryptfs</code> packages,
+which provide the underlying software for directory encryption.</p>
+<p>Open your terminal and run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install ecryptfs-utils pam-ecryptfs</span></code></pre></div>
+<h2
+id="step-2-create-the-new-user-with-an-encrypted-home-directory">Step 2:
+Create the New User with an Encrypted Home Directory</h2>
+<p>To create a new user account with an encrypted home directory, use
+the <code>adduser</code> command along with the
+<code>--encrypthome</code> flag.</p>
+<p>Replace <code>newuser</code> with your preferred username:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser <span class="at">--encrypthome</span> newuser</span></code></pre></div>
+<p>During this process, you will be prompted to:</p>
+<ol type="1">
+<li>Enter and confirm a password for the new account.</li>
+<li>Enter optional user information (Full Name, Room Number, etc.).</li>
+<li>Confirm that the information is correct by typing
+<code>Y</code>.</li>
+</ol>
+<h2 id="step-3-record-the-encrypted-passphrase">Step 3: Record the
+Encrypted Passphrase</h2>
+<p>After creating the user, log in as the newly created user to generate
+and view the unique recovery passphrase. This passphrase is critical for
+recovering data if the system crashes or if you need to access the home
+directory from a live CD.</p>
+<ol type="1">
+<li>Switch to the new user account:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">su</span> <span class="at">-</span> newuser</span></code></pre></div>
+<ol start="2" type="1">
+<li>Display the automatic recovery passphrase:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ecryptfs-unwrap-passphrase</span></span></code></pre></div>
+<ol start="3" type="1">
+<li>Enter the account password when prompted. Save the displayed
+passphrase in a secure, offline location.</li>
+</ol>
+<h2 id="step-4-verify-the-encryption">Step 4: Verify the Encryption</h2>
+<p>To confirm that the home directory is successfully encrypted:</p>
+<ol type="1">
+<li>Log out of the new user account:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Check the mount status while logged in as a different user:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /home/newuser</span></code></pre></div>
+<p>When the user is logged out, the contents of
+<code>/home/newuser</code> will appear as encrypted files or restricted
+directories. Once the user logs in, the directory is automatically
+decrypted and mounted for transparent use.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

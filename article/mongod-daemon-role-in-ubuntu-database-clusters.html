@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mongod Daemon Role in Ubuntu Database Clusters - ubuntu</title>
+    <meta name="description" content="The mongod daemon is the primary background process that manages all core operations within a MongoDB database cluster hosted on an Ubuntu system. This article explores the specific functions of the mongod daemon, detailing how it handles client requests">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mongod-daemon-role-in-ubuntu-database-clusters">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mongod Daemon Role in Ubuntu Database Clusters - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mongod-daemon-role-in-ubuntu-database-clusters" />
+    <meta property="og:image:url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The mongod daemon is the primary background process that manages all core operations within a MongoDB database cluster hosted on an Ubuntu system. This article explores the specific functions of the mongod daemon, detailing how it handles client requests" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="mongod-daemon-role-in-ubuntu-database-clusters">Mongod Daemon
+Role in Ubuntu Database Clusters</h1>
+<p>The <code>mongod</code> daemon is the primary background process that
+manages all core operations within a MongoDB database cluster hosted on
+an Ubuntu system. This article explores the specific functions of the
+<code>mongod</code> daemon, detailing how it handles client requests,
+manages disk reads and writes, facilitates data replication, and
+maintains high availability across multiple nodes in an Ubuntu server
+environment.</p>
+<h2 id="primary-responsibilities-of-the-mongod-daemon">Primary
+Responsibilities of the Mongod Daemon</h2>
+<p>The <code>mongod</code> process acts as the core database engine for
+every node in a MongoDB deployment. On Ubuntu, it operates as a
+background service managed through the <code>systemctl</code> init
+system. Its primary responsibilities include:</p>
+<ul>
+<li><strong>Data Management and Storage:</strong> <code>mongod</code>
+manages memory allocation, caching, and disk I/O operations using
+storage engines like WiredTiger. It writes data to disk and maintains
+index structures.</li>
+<li><strong>Network Communication:</strong> The daemon listens for
+incoming socket connections on a designated port (by default, port
+27017) to process CRUD operations sent by application drivers or client
+tools.</li>
+<li><strong>Background Tasks:</strong> It periodically performs
+automated maintenance tasks, including journal flushing, data
+compaction, index building, and cleanup of deleted documents.</li>
+</ul>
+<h2 id="function-in-replica-sets-and-high-availability">Function in
+Replica Sets and High Availability</h2>
+<p>In a clustered Ubuntu database environment, nodes are arranged into
+replica sets to maintain redundancy and ensure uptime. The
+<code>mongod</code> daemon plays distinct roles depending on node
+configuration:</p>
+<h3 id="primary-node-operations">Primary Node Operations</h3>
+<p>The <code>mongod</code> process running on the Primary node receives
+all write requests from application clients. It writes the modifications
+to the local data files and concurrently logs every operation to an
+operation log known as the <code>oplog</code>.</p>
+<h3 id="secondary-node-replication">Secondary Node Replication</h3>
+<p>On Secondary nodes, the <code>mongod</code> daemon replicates the
+database state by tailing the Primary node's <code>oplog</code>. It
+streams these operations over the network and executes them locally to
+maintain consistent data across the cluster.</p>
+<h3 id="heartbeats-and-automatic-election">Heartbeats and Automatic
+Election</h3>
+<p>Each <code>mongod</code> instance in an Ubuntu cluster sends periodic
+heartbeat packets (ping requests) to every other node to monitor health.
+If the <code>mongod</code> daemon on the Primary server fails or loses
+network connectivity, the remaining <code>mongod</code> processes
+automatically hold an election to select a new Primary node without
+human intervention.</p>
+<h2 id="function-in-sharded-clusters">Function in Sharded Clusters</h2>
+<p>When a MongoDB cluster scales out horizontally across multiple Ubuntu
+servers, <code>mongod</code> processes are deployed in specialized
+roles:</p>
+<ul>
+<li><strong>Shard Servers:</strong> <code>mongod</code> daemons run on
+individual shard nodes to store a specific partition (chunk) of the
+overall dataset.</li>
+<li><strong>Config Servers:</strong> Specialized <code>mongod</code>
+instances run as a Config Server Replica Set (CSRS) to store cluster
+metadata, routing configurations, and shard assignment maps.</li>
+</ul>
+<h2 id="management-on-ubuntu-systems">Management on Ubuntu Systems</h2>
+<p>On Ubuntu, <code>mongod</code> is configured via the
+<code>/etc/mongod.conf</code> file, which specifies network interfaces,
+security credentials, storage paths, and cluster replication settings.
+Systemd controls the process via the <code>mongod.service</code> unit,
+ensuring the daemon automatically starts on boot and restarts if
+unexpected crashes occur. Log outputs from the daemon are written to
+<code>/var/log/mongodb/mongod.log</code> or accessed directly using
+<code>journalctl -u mongod</code>.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
