@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Ubuntu Terminal in Real-Time Using tmate - ubuntu</title>
+    <meta name="description" content="Sharing a live terminal session is an essential capability for remote troubleshooting, pair programming, and technical demonstrations. This guide explains how to use tmate, an open-source terminal multiplexer built on top of tmux, to instantly broadcast">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/share-ubuntu-terminal-in-real-time-using-tmate">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Share Ubuntu Terminal in Real-Time Using tmate - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/share-ubuntu-terminal-in-real-time-using-tmate" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Sharing a live terminal session is an essential capability for remote troubleshooting, pair programming, and technical demonstrations. This guide explains how to use tmate, an open-source terminal multiplexer built on top of tmux, to instantly broadcast" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="share-ubuntu-terminal-in-real-time-using-tmate">Share Ubuntu
+Terminal in Real-Time Using tmate</h1>
+<p>Sharing a live terminal session is an essential capability for remote
+troubleshooting, pair programming, and technical demonstrations. This
+guide explains how to use <strong>tmate</strong>, an open-source
+terminal multiplexer built on top of tmux, to instantly broadcast your
+active Ubuntu command-line session over the internet. You will learn how
+to install tmate on Ubuntu, launch a session, retrieve secure connection
+links for remote viewers, and terminate the session safely.</p>
+<h3 id="step-1-install-tmate-on-ubuntu">Step 1: Install tmate on
+Ubuntu</h3>
+<p>tmate is available in the official Ubuntu repositories. Open your
+terminal and run the following commands to update your package lists and
+install the tool:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tmate <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-launch-a-tmate-session">Step 2: Launch a tmate
+Session</h3>
+<p>To start a new session, run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmate</span></span></code></pre></div>
+<p>When tmate starts, it launches a new terminal environment and
+connects to the official tmate cloud servers in the background to
+generate unique SSH and web access credentials.</p>
+<h3 id="step-3-retrieve-session-sharing-links">Step 3: Retrieve Session
+Sharing Links</h3>
+<p>Upon launch, connection links temporarily appear at the bottom of the
+screen. To view them at any time, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmate</span> show-messages</span></code></pre></div>
+<p>You will see several connection strings:</p>
+<ul>
+<li><strong>SSH (read-write):</strong> Allows the remote user to view
+and run commands.
+<pre class="text"><code>ssh session-token@lon1.tmate.io</code></pre></li>
+<li><strong>Web URL (read-write):</strong> Allows the remote user to
+interact with the terminal via a web browser.
+<pre class="text"><code>https://tmate.io/t/session-token</code></pre></li>
+<li><strong>SSH (read-only):</strong> Allows the remote user to view
+output only without executing commands.
+<pre class="text"><code>ssh ro-session-token@lon1.tmate.io</code></pre></li>
+<li><strong>Web URL (read-only):</strong> Allows read-only viewing in a
+browser.
+<pre class="text"><code>https://tmate.io/t/ro-session-token</code></pre></li>
+</ul>
+<p>Choose the appropriate link depending on whether you want your
+collaborator to have interactive control or view-only access, then share
+it with them.</p>
+<h3 id="step-4-access-the-session-from-a-remote-client">Step 4: Access
+the Session from a Remote Client</h3>
+<p>Remote collaborators do not need tmate installed on their machines to
+connect.</p>
+<ul>
+<li><strong>Using SSH:</strong> The collaborator pastes the provided SSH
+command directly into their local terminal:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> session-token@lon1.tmate.io</span></code></pre></div></li>
+<li><strong>Using a Browser:</strong> The collaborator pastes the web
+link into any modern web browser to interact with or view the
+terminal.</li>
+</ul>
+<p>All keystrokes and outputs synchronize instantly across all connected
+users.</p>
+<h3 id="step-5-end-the-session">Step 5: End the Session</h3>
+<p>To disconnect all collaborators and terminate the session, type
+<code>exit</code> in the tmate shell or press <code>Ctrl + D</code>.
+Once the shell exits, the generated session tokens immediately become
+invalid.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

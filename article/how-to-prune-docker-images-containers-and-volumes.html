@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Prune Docker Images, Containers, and Volumes - ubuntu</title>
+    <meta name="description" content="Over time, Docker can consume significant disk space on an Ubuntu system by accumulating stopped containers, dangling images, unused networks, and orphaned volumes. This guide explains the exact Docker CLI commands required to safely reclaim storage by r">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-prune-docker-images-containers-and-volumes">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Prune Docker Images, Containers, and Volumes - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-prune-docker-images-containers-and-volumes" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Over time, Docker can consume significant disk space on an Ubuntu system by accumulating stopped containers, dangling images, unused networks, and orphaned volumes. This guide explains the exact Docker CLI commands required to safely reclaim storage by r" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-prune-docker-images-containers-and-volumes">How to Prune
+Docker Images, Containers, and Volumes</h1>
+<p>Over time, Docker can consume significant disk space on an Ubuntu
+system by accumulating stopped containers, dangling images, unused
+networks, and orphaned volumes. This guide explains the exact Docker CLI
+commands required to safely reclaim storage by removing these unused
+components without affecting running services.</p>
+<h3 id="the-all-in-one-prune-command">The All-in-One Prune Command</h3>
+<p>To safely remove all stopped containers, unused networks,
+unreferenced images, and unused data volumes in a single operation,
+run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> system prune <span class="at">-a</span> <span class="at">--volumes</span></span></code></pre></div>
+<p>If your user is not part of the <code>docker</code> group on Ubuntu,
+prepend <code>sudo</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker system prune <span class="at">-a</span> <span class="at">--volumes</span></span></code></pre></div>
+<h3 id="how-the-command-works-safely">How the Command Works Safely</h3>
+<p>By default, Docker prevents data loss by only targeting resources
+that are not currently associated with a running container. Here is what
+each flag does:</p>
+<ul>
+<li><strong><code>docker system prune</code></strong>: Removes all
+stopped containers, unused networks, dangling images (images without a
+tag), and the build cache.</li>
+<li><strong><code>-a</code> (or <code>--all</code>)</strong>: Extends
+the cleanup to remove all unused images, not just dangling ones. Any
+image not actively used by an existing container will be deleted.</li>
+<li><strong><code>--volumes</code></strong>: Instructs Docker to also
+remove unused volumes. By default, <code>docker system prune</code>
+leaves volumes untouched to prevent accidental loss of persistent
+data.</li>
+</ul>
+<h3 id="verification-and-safety-steps">Verification and Safety
+Steps</h3>
+<p>Before running the destructive prune command, inspect how much space
+Docker is currently using by running:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> system df</span></code></pre></div>
+<p>When you execute <code>docker system prune -a --volumes</code>,
+Docker displays a warning prompt asking for confirmation:</p>
+<pre class="text"><code>WARNING! This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all volumes not used by at least one container
+  - all images without at least one container associated to them
+  - all build cache
+
+Are you sure you want to continue? [y/N]</code></pre>
+<p>Type <code>y</code> and press <strong>Enter</strong> to proceed.
+Docker will delete the unreferenced assets and output the total amount
+of reclaimed disk space.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

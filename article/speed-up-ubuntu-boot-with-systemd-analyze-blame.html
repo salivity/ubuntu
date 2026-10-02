@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Up Ubuntu Boot with systemd-analyze blame - ubuntu</title>
+    <meta name="description" content="The systemd-analyze blame command is a built-in Ubuntu diagnostic tool designed to profile the boot process by listing every active system service in descending order of initialization time. By highlighting the specific background daemons and startup scr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/speed-up-ubuntu-boot-with-systemd-analyze-blame">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Speed Up Ubuntu Boot with systemd-analyze blame - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/speed-up-ubuntu-boot-with-systemd-analyze-blame" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The systemd-analyze blame command is a built-in Ubuntu diagnostic tool designed to profile the boot process by listing every active system service in descending order of initialization time. By highlighting the specific background daemons and startup scr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="speed-up-ubuntu-boot-with-systemd-analyze-blame">Speed Up Ubuntu
+Boot with systemd-analyze blame</h1>
+<p>The <code>systemd-analyze blame</code> command is a built-in Ubuntu
+diagnostic tool designed to profile the boot process by listing every
+active system service in descending order of initialization time. By
+highlighting the specific background daemons and startup scripts that
+take the longest to load, it provides system administrators with the
+exact data needed to pinpoint bottlenecks. Armed with this information,
+users can safely disable, delay, or reconfigure non-essential services
+to significantly reduce Ubuntu boot times.</p>
+<h2 id="how-systemd-analyze-blame-works">How systemd-analyze blame
+Works</h2>
+<p>When an Ubuntu system powers on, the <code>systemd</code> init system
+orchestrates the loading of essential components, drivers, and
+background daemons. The <code>systemd-analyze blame</code> command
+parses the timestamps logged by <code>systemd</code> during the most
+recent startup sequence.</p>
+<p>When executed in the terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-analyze</span> blame</span></code></pre></div>
+<p>The tool outputs a clean, sorted list displaying the time taken by
+each unit file to initialize. Services taking seconds or tens of seconds
+appear at the very top, while instantaneous services are positioned at
+the bottom.</p>
+<h2 id="pinpointing-boot-bottlenecks">Pinpointing Boot Bottlenecks</h2>
+<p>The primary role of <code>systemd-analyze blame</code> in boot
+optimization is discovering unnecessary or slow-loading services. Common
+culprits revealed by the command include:</p>
+<ul>
+<li><strong>NetworkManager-wait-online.service:</strong> Often waits
+indefinitely or for long timeouts until a stable network connection is
+confirmed.</li>
+<li><strong>snapd.seeded.service:</strong> Scans and initializes
+Canonical Snap packages, which can introduce delays on mechanical hard
+drives or low-resource machines.</li>
+<li><strong>apt-daily.service:</strong> Periodically checks for software
+updates immediately after system initialization.</li>
+<li><strong>ModemManager.service:</strong> Probes for broadband cellular
+modems, a feature obsolete for the vast majority of standard desktop and
+server installations.</li>
+</ul>
+<h2 id="interpreting-the-output-correctly">Interpreting the Output
+Correctly</h2>
+<p>While <code>systemd-analyze blame</code> is vital for optimization,
+understanding how <code>systemd</code> handles startup tasks is
+critical. <code>systemd</code> initializes many services in parallel.
+Therefore, a service that takes ten seconds to launch does not
+necessarily delay the entire boot process by ten seconds if it is
+running concurrently alongside other processes without blocking the
+login screen.</p>
+<p>To verify whether a slow service highlighted by <code>blame</code> is
+actively holding up the boot timeline, administrators often
+cross-reference the output with:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-analyze</span> critical-chain</span></code></pre></div>
+<p>This companion command highlights the dependency chain that directly
+impacts the time it takes to reach the graphical desktop or login
+prompt.</p>
+<h2 id="optimizing-the-system-based-on-blame-output">Optimizing the
+System Based on Blame Output</h2>
+<p>Once <code>systemd-analyze blame</code> exposes the slowest services,
+users can take corrective actions depending on the role of each
+service:</p>
+<ol type="1">
+<li><strong>Disabling Unneeded Services:</strong> If a high-latency
+service is not required for daily operations (such as
+<code>ModemManager.service</code>), it can be disabled from starting
+automatically at boot:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable ModemManager.service</span></code></pre></div></li>
+<li><strong>Masking Problematic Units:</strong> If a service repeatedly
+activates due to hard dependencies from other packages, masking
+completely prevents it from starting:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl mask NetworkManager-wait-online.service</span></code></pre></div></li>
+<li><strong>Deferring Background Work:</strong> Non-critical background
+maintenance tasks can be converted into <code>systemd</code> timers
+configured to run several minutes after system startup, moving the
+resource load away from the primary boot phase.</li>
+</ol>
+<p>By serving as the initial discovery layer for system diagnostics,
+<code>systemd-analyze blame</code> transforms boot optimization from
+guesswork into an accurate, targeted process.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

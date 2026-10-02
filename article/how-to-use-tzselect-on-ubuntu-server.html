@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use tzselect on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="The tzselect utility is a command-line tool on Ubuntu and other Unix-like systems designed to help administrators interactively determine their correct timezone. This article explains the primary purpose of tzselect, how its menu-driven interface works,">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-use-tzselect-on-ubuntu-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use tzselect on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-use-tzselect-on-ubuntu-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The tzselect utility is a command-line tool on Ubuntu and other Unix-like systems designed to help administrators interactively determine their correct timezone. This article explains the primary purpose of tzselect, how its menu-driven interface works," />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-use-tzselect-on-ubuntu-server">How to Use tzselect on
+Ubuntu Server</h1>
+<p>The <code>tzselect</code> utility is a command-line tool on Ubuntu
+and other Unix-like systems designed to help administrators
+interactively determine their correct timezone. This article explains
+the primary purpose of <code>tzselect</code>, how its menu-driven
+interface works, and the critical distinction between identifying a
+timezone using this utility and applying it permanently to the entire
+operating system.</p>
+<h3 id="the-purpose-of-tzselect">The Purpose of tzselect</h3>
+<p>On an Ubuntu server, timezones are stored as database files within
+the <code>/usr/share/zoneinfo</code> directory using the standard
+"Area/Location" format (such as <code>America/New_York</code> or
+<code>Europe/London</code>). Because remembering the exact naming
+conventions for thousands of regional zones can be difficult,
+<code>tzselect</code> serves as an interactive questionnaire to find the
+exact timezone string without manually searching system directories.</p>
+<p>When executed, <code>tzselect</code> prompts the user through a
+series of numbered geographic menus:</p>
+<ol type="1">
+<li><strong>Continent or Ocean:</strong> Displays a top-level list
+(e.g., Africa, Americas, Asia, Europe).</li>
+<li><strong>Country:</strong> Narrows the selection to a specific nation
+within that continent.</li>
+<li><strong>Region or City:</strong> Prompts for the specific local time
+region if the country spans multiple time zones.</li>
+</ol>
+<p>Once confirmed, the utility prints the resulting timezone
+specification along with the current time in that zone to verify
+accuracy.</p>
+<h3 id="scope-and-limitations-temporary-vs-permanent">Scope and
+Limitations: Temporary vs. Permanent</h3>
+<p>The most important aspect of <code>tzselect</code> to understand is
+that <strong>it does not modify the system-wide timezone
+configuration</strong>. Instead, it outputs the identified timezone
+string and instructs the user on how to set the <code>TZ</code>
+environment variable temporarily for their current shell session:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">TZ</span><span class="op">=</span><span class="st">&#39;America/Chicago&#39;</span><span class="kw">;</span> <span class="bu">export</span> <span class="va">TZ</span></span></code></pre></div>
+<p>This makes <code>tzselect</code> particularly useful when a user
+needs to run a specific command or script under a different local time
+without affecting other users or background services running on the
+server.</p>
+<h3 id="applying-the-selected-timezone-system-wide">Applying the
+Selected Timezone System-Wide</h3>
+<p>Because <code>tzselect</code> merely identifies the timezone rather
+than persisting it, administrators must use standard Ubuntu utilities to
+apply the change permanently across the server. Once
+<code>tzselect</code> provides the correct timezone name, it can be
+applied system-wide using <code>timedatectl</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-timezone America/Chicago</span></code></pre></div>
+<p>Alternatively, the <code>sudo dpkg-reconfigure tzdata</code> command
+provides a similar interactive terminal interface that automatically
+writes the selection to <code>/etc/timezone</code> and updates the
+<code>/etc/localtime</code> symlink permanently.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

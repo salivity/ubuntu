@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirror Traffic Between Interfaces Using tc in Ubuntu - ubuntu</title>
+    <meta name="description" content="This article provides a direct, step-by-step guide on how to mirror all incoming (ingress) and outgoing (egress) network traffic from one network interface to another on an Ubuntu system. By utilizing the Linux tc (Traffic Control) subsystem alongside th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mirror-traffic-between-interfaces-using-tc-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mirror Traffic Between Interfaces Using tc in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mirror-traffic-between-interfaces-using-tc-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a direct, step-by-step guide on how to mirror all incoming (ingress) and outgoing (egress) network traffic from one network interface to another on an Ubuntu system. By utilizing the Linux tc (Traffic Control) subsystem alongside th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="mirror-traffic-between-interfaces-using-tc-in-ubuntu">Mirror
+Traffic Between Interfaces Using tc in Ubuntu</h1>
+<p>This article provides a direct, step-by-step guide on how to mirror
+all incoming (ingress) and outgoing (egress) network traffic from one
+network interface to another on an Ubuntu system. By utilizing the Linux
+<code>tc</code> (Traffic Control) subsystem alongside the
+<code>clsact</code> queueing discipline and the <code>mirred</code>
+action, you can capture full packet streams for network monitoring,
+intrusion detection, or analysis without disrupting host
+communications.</p>
+<h3 id="1-identify-network-interfaces">1. Identify Network
+Interfaces</h3>
+<p>First, determine the names of your source interface (the interface
+carrying the traffic to be monitored) and your target interface (the
+destination interface where mirrored packets will be sent).</p>
+<p>Run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> link show</span></code></pre></div>
+<p>For the remainder of this guide:</p>
+<ul>
+<li>Source interface: <code>eth0</code></li>
+<li>Destination interface: <code>eth1</code></li>
+</ul>
+<p>Ensure both interfaces are active and up:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ip link set dev eth0 up</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ip link set dev eth1 up</span></code></pre></div>
+<h3 id="2-add-the-clsact-qdisc-to-the-source-interface">2. Add the
+<code>clsact</code> Qdisc to the Source Interface</h3>
+<p>The <code>clsact</code> (classifier action) queueing discipline
+allows attaching filters directly to both the ingress and egress hooks
+of an interface simultaneously without creating classful
+hierarchies.</p>
+<p>Attach <code>clsact</code> to the source interface:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc qdisc add dev eth0 clsact</span></code></pre></div>
+<h3 id="3-mirror-ingress-incoming-traffic">3. Mirror Ingress (Incoming)
+Traffic</h3>
+<p>To mirror all incoming traffic entering <code>eth0</code> to
+<code>eth1</code>, attach a filter using the <code>matchall</code>
+classifier and the <code>mirred</code> action:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc filter add dev eth0 ingress matchall action mirred egress mirror dev eth1</span></code></pre></div>
+<ul>
+<li><code>ingress</code>: Targets packets entering
+<code>eth0</code>.</li>
+<li><code>matchall</code>: Matches all packets regardless of protocol,
+IP, or port.</li>
+<li><code>action mirred egress mirror dev eth1</code>: Copies the packet
+and transmits it out of <code>eth1</code>.</li>
+</ul>
+<h3 id="4-mirror-egress-outgoing-traffic">4. Mirror Egress (Outgoing)
+Traffic</h3>
+<p>To mirror all outgoing traffic leaving <code>eth0</code> to
+<code>eth1</code>, add a matching filter to the egress hook:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc filter add dev eth0 egress matchall action mirred egress mirror dev eth1</span></code></pre></div>
+<ul>
+<li><code>egress</code>: Targets packets leaving <code>eth0</code>.</li>
+<li><code>action mirred egress mirror dev eth1</code>: Directs a copy of
+each outgoing packet to <code>eth1</code>.</li>
+</ul>
+<h3 id="5-verify-active-configuration">5. Verify Active
+Configuration</h3>
+<p>Check the configured filters on both paths to ensure the rules are
+applied:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc filter show dev eth0 ingress</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc filter show dev eth0 egress</span></code></pre></div>
+<p>To verify packet replication in real time, run <code>tcpdump</code>
+on the destination interface:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tcpdump <span class="at">-n</span> <span class="at">-i</span> eth1</span></code></pre></div>
+<p>You should see both incoming and outgoing packets from
+<code>eth0</code> duplicated on <code>eth1</code>.</p>
+<h3 id="6-remove-traffic-mirroring">6. Remove Traffic Mirroring</h3>
+<p>To delete the mirroring configuration, remove the <code>clsact</code>
+qdisc from the source interface. This will automatically remove all
+attached ingress and egress filters:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tc qdisc del dev eth0 clsact</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

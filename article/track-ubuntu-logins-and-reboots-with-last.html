@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Ubuntu Logins and Reboots with last - ubuntu</title>
+    <meta name="description" content="Monitoring user sessions and system restarts is an essential task for Ubuntu system administrators. The last command queries the /var/log/wtmp file to provide a clear audit trail of past user logins, system boots, and runlevel changes. This guide demonst">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/track-ubuntu-logins-and-reboots-with-last">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Track Ubuntu Logins and Reboots with last - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/track-ubuntu-logins-and-reboots-with-last" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Monitoring user sessions and system restarts is an essential task for Ubuntu system administrators. The last command queries the /var/log/wtmp file to provide a clear audit trail of past user logins, system boots, and runlevel changes. This guide demonst" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="track-ubuntu-logins-and-reboots-with-last">Track Ubuntu Logins
+and Reboots with last</h1>
+<p>Monitoring user sessions and system restarts is an essential task for
+Ubuntu system administrators. The <code>last</code> command queries the
+<code>/var/log/wtmp</code> file to provide a clear audit trail of past
+user logins, system boots, and runlevel changes. This guide demonstrates
+how to use the <code>last</code> command to view login histories, filter
+events by user or timeframe, and specifically track system reboots and
+shutdowns.</p>
+<h3 id="basic-usage-of-the-last-command">Basic Usage of the last
+Command</h3>
+<p>Running <code>last</code> without any arguments displays a list of
+all recorded login and logout sessions, ordered from the most recent to
+the oldest:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span></span></code></pre></div>
+<p>Each line of output displays the following information:</p>
+<ul>
+<li><strong>Username:</strong> The account that logged in (or
+<code>reboot</code> for system restart events).</li>
+<li><strong>TTY/Terminal:</strong> The terminal line used (e.g.,
+<code>pts/0</code> for SSH or <code>tty1</code> for local console).</li>
+<li><strong>Host/IP:</strong> The remote IP address or hostname from
+which the connection originated.</li>
+<li><strong>Timestamp:</strong> The date and time the session
+began.</li>
+<li><strong>Duration:</strong> How long the session lasted or whether
+the user is still logged in (<code>still logged in</code>).</li>
+</ul>
+<p>To prevent the terminal from overflowing, limit the output to a
+specific number of lines using the <code>-n</code> or
+<code>-&lt;number&gt;</code> flag:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-n</span> 10</span></code></pre></div>
+<h3 id="tracking-system-reboots">Tracking System Reboots</h3>
+<p>Ubuntu logs every system reboot to <code>/var/log/wtmp</code> under
+the pseudo-user <code>reboot</code>. To view the complete history of
+system reboots, execute:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> reboot</span></code></pre></div>
+<p>The output highlights when the system booted up, the kernel version
+running during the boot, and the duration of uptime before the next
+restart or crash:</p>
+<pre class="text"><code>reboot   system boot  5.15.0-88-generic Mon May 20 08:14   still running
+reboot   system boot  5.15.0-88-generic Sun May 19 14:22 - 08:10  (17:48)</code></pre>
+<p>If an entry ends with <code>crash</code>, the system terminated
+unexpectedly (such as from a power outage or kernel panic) rather than a
+clean shutdown.</p>
+<h3 id="tracking-system-shutdowns-and-runlevels">Tracking System
+Shutdowns and Runlevels</h3>
+<p>To see both reboots and system shutdowns, use the <code>-x</code>
+flag. This option directs <code>last</code> to show system shutdown
+entries and runlevel changes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-x</span></span></code></pre></div>
+<p>To view only shutdown events:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-x</span> shutdown</span></code></pre></div>
+<h3 id="filtering-logins-by-specific-user">Filtering Logins by Specific
+User</h3>
+<p>To track the login activity of a single account, pass the username as
+an argument:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> username</span></code></pre></div>
+<p>For example, to inspect the administrative activity of the
+<code>root</code> user:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> root</span></code></pre></div>
+<h3 id="filtering-by-time-and-date">Filtering by Time and Date</h3>
+<p>The <code>last</code> command supports time-based filtering using the
+<code>-s</code> (<code>--since</code>) and <code>-t</code>
+(<code>--until</code>) flags. The format accepts
+<code>YYYYMMDDHHMMSS</code>, standard dates, or relative words like
+<code>yesterday</code> or <code>today</code>.</p>
+<p>To view all events that occurred since yesterday:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-s</span> yesterday</span></code></pre></div>
+<p>To inspect login activity within a specific date range:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-s</span> <span class="st">&quot;2024-05-01&quot;</span> <span class="at">-t</span> <span class="st">&quot;2024-05-15&quot;</span></span></code></pre></div>
+<h3 id="displaying-ip-addresses-instead-of-hostnames">Displaying IP
+Addresses Instead of Hostnames</h3>
+<p>By default, <code>last</code> may attempt to resolve remote IP
+addresses to hostnames. To force <code>last</code> to display the remote
+IP address, use the <code>-i</code> flag:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-i</span></span></code></pre></div>
+<p>To display the IP address or hostname in the final column instead of
+the third column, add the <code>-F</code> and <code>-a</code> flags for
+improved readability:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-a</span></span></code></pre></div>
+<h3 id="reading-rotated-log-files">Reading Rotated Log Files</h3>
+<p>The <code>/var/log/wtmp</code> file is automatically rotated
+periodically by Ubuntu's logrotate service. Older logs are saved as
+<code>/var/log/wtmp.1</code> or compressed as <code>.gz</code>
+archives.</p>
+<p>To query an older, rotated file, use the <code>-f</code> flag:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="at">-f</span> /var/log/wtmp.1</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

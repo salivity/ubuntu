@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of VXLAN for Layer 2 Networks on Ubuntu - ubuntu</title>
+    <meta name="description" content="Virtual Extensible LAN (VXLAN) is a network virtualization technology designed to solve the scalability and segmentation challenges inherent in traditional local area networks. When configuring virtual environments on Ubuntu, the primary purpose of VXLAN">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-vxlan-for-layer-2-networks-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of VXLAN for Layer 2 Networks on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-vxlan-for-layer-2-networks-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Virtual Extensible LAN (VXLAN) is a network virtualization technology designed to solve the scalability and segmentation challenges inherent in traditional local area networks. When configuring virtual environments on Ubuntu, the primary purpose of VXLAN" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="purpose-of-vxlan-for-layer-2-networks-on-ubuntu">Purpose of
+VXLAN for Layer 2 Networks on Ubuntu</h1>
+<p>Virtual Extensible LAN (VXLAN) is a network virtualization technology
+designed to solve the scalability and segmentation challenges inherent
+in traditional local area networks. When configuring virtual
+environments on Ubuntu, the primary purpose of VXLAN is to encapsulate
+Layer 2 Ethernet frames within standard Layer 3 UDP packets. This allows
+administrators to establish isolated, multi-tenant Layer 2 virtual
+overlay networks that seamlessly span across physical network
+boundaries, routers, and subnets without requiring modifications to the
+underlying physical routing infrastructure.</p>
+<h3 id="overcoming-the-4096-vlan-limit">Overcoming the 4,096 VLAN
+Limit</h3>
+<p>Traditional Virtual Local Area Networks (VLANs) rely on a 12-bit VLAN
+ID tag, which restricts the total number of isolated networks to 4,094
+usable broadcast domains. In modern cloud environments, data centers,
+and multi-tenant hosting deployments, this limit is easily exhausted.
+VXLAN replaces this constraint with a 24-bit VXLAN Network Identifier
+(VNI), expanding the capacity to over 16 million distinct virtual
+segments. On an Ubuntu host running multiple virtual machines (VMs) or
+containers, VXLAN provides virtually unlimited isolated subnets.</p>
+<h3 id="layer-2-connectivity-across-layer-3-boundaries">Layer 2
+Connectivity Across Layer 3 Boundaries</h3>
+<p>Physical network switches are often partitioned by Layer 3 routers to
+limit broadcast domains and optimize routing efficiency. However,
+workloads such as virtual machine live migration, clustered storage, and
+certain legacy enterprise applications require all participating nodes
+to be on the same Layer 2 broadcast domain. VXLAN tunnels Layer 2
+traffic over the existing Layer 3 infrastructure by encapsulating the
+Ethernet frames into standard UDP packets (typically on destination port
+4789). On Ubuntu, this enables hosts located in entirely different
+physical racks or subnets to communicate as if they were plugged
+directly into the same physical Layer 2 switch.</p>
+<h3 id="network-isolation-for-containers-and-virtual-machines">Network
+Isolation for Containers and Virtual Machines</h3>
+<p>Ubuntu serves as a primary operating system for orchestration
+platforms such as Kubernetes, OpenStack, Docker, and LXD. In these
+environments, distinct tenants and microservices require strict traffic
+isolation for security and policy enforcement. VXLAN allows Ubuntu to
+maintain granular network boundaries by assigning unique VNIs to
+specific tenants, clusters, or services. Even if overlapping IP
+addressing schemes exist across different tenants, VXLAN encapsulates
+and isolates the packets to prevent IP conflicts and unauthorized
+lateral movement.</p>
+<h3 id="decoupling-virtual-topology-from-physical-hardware">Decoupling
+Virtual Topology from Physical Hardware</h3>
+<p>Without overlay networks like VXLAN, reconfiguring network paths,
+subnets, or security perimeters requires manual adjustments to physical
+switches, routers, and firewall rules. Utilizing VXLAN on Ubuntu
+isolates the virtual network topology from the physical hardware.
+Systems administrators can create, modify, and tear down virtual Layer 2
+segments programmatically via software without touching physical
+infrastructure.</p>
+<h3 id="native-support-in-ubuntu-and-linux-tooling">Native Support in
+Ubuntu and Linux Tooling</h3>
+<p>The Linux kernel includes native support for VXLAN, making
+implementation on Ubuntu lightweight and performant. VXLAN interfaces
+can be created directly using standard <code>iproute2</code> commands
+(<code>ip link add type vxlan</code>), declared persistently in Ubuntu's
+default network configuration utility (Netplan), or integrated with
+software-defined switches like Open vSwitch (OVS). This native
+integration minimizes overhead and enables features like hardware
+offloading on compatible network interface cards (NICs).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

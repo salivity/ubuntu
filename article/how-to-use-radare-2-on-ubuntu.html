@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use Radare2 on Ubuntu - ubuntu</title>
+    <meta name="description" content="Radare2 is a versatile, open-source command-line framework for reverse engineering, binary analysis, and debugging. This guide provides a straightforward walk-through for setting up Radare2 on an Ubuntu system and covers the fundamental workflow required">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-use-radare-2-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use Radare2 on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-use-radare-2-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Radare2 is a versatile, open-source command-line framework for reverse engineering, binary analysis, and debugging. This guide provides a straightforward walk-through for setting up Radare2 on an Ubuntu system and covers the fundamental workflow required" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-use-radare2-on-ubuntu">How to Use Radare2 on Ubuntu</h1>
+<p>Radare2 is a versatile, open-source command-line framework for
+reverse engineering, binary analysis, and debugging. This guide provides
+a straightforward walk-through for setting up Radare2 on an Ubuntu
+system and covers the fundamental workflow required to inspect, analyze,
+and navigate compiled binaries.</p>
+<h2 id="installing-radare2-on-ubuntu">Installing Radare2 on Ubuntu</h2>
+<p>While Ubuntu repositories often include a packaged version of
+Radare2, building the latest stable version directly from the official
+Git repository ensures access to the newest features and bug fixes.</p>
+<p>Open your terminal and run the following commands to install
+dependencies and build the tool:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> git build-essential</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/radareorg/radare2</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">radare2/sys/install.sh</span></span></code></pre></div>
+<p>To verify the installation, check the installed version:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">r2</span> <span class="at">-v</span></span></code></pre></div>
+<h2 id="basic-analysis-workflow">Basic Analysis Workflow</h2>
+<p>Radare2 relies on single-letter and multi-letter mnemonic commands.
+The standard procedure for analyzing a binary involves loading the file,
+performing automated analysis, inspecting functions, and examining
+code.</p>
+<h3 id="1-opening-a-binary">1. Opening a Binary</h3>
+<p>Launch Radare2 by passing the target binary as an argument. By
+default, it opens the binary in read-only mode:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">r2</span> /path/to/binary</span></code></pre></div>
+<p>To open a binary in read-write mode (for patching), add the
+<code>-w</code> flag:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">r2</span> <span class="at">-w</span> /path/to/binary</span></code></pre></div>
+<h3 id="2-performing-automated-analysis">2. Performing Automated
+Analysis</h3>
+<p>When a binary is first opened, Radare2 places the user at the command
+prompt without automatically parsing all structures. To trigger
+analysis, use the <code>a</code> family of commands:</p>
+<ul>
+<li><code>aa</code>: Analyzes symbols and entry points.</li>
+<li><code>aaa</code>: Performs deep automated analysis, including
+functions, flags, references, and basic blocks.</li>
+</ul>
+<p>Run the deep analysis:</p>
+<pre class="text"><code>[0x00001000]&gt; aaa</code></pre>
+<h3 id="3-locating-information-and-functions">3. Locating Information
+and Functions</h3>
+<p>After analysis, you can inspect the file layout and discovered
+functions using the <code>i</code> (information) and <code>a</code>
+(analysis) prefixes:</p>
+<ul>
+<li><code>iI</code>: Displays general binary information (architecture,
+endianness, security mitigations like PIE, Canary, and NX).</li>
+<li><code>ii</code>: Lists imported functions and libraries.</li>
+<li><code>is</code>: Displays symbols.</li>
+<li><code>afl</code>: Lists all identified functions, their virtual
+addresses, and sizes.</li>
+</ul>
+<p>To search for a specific function such as <code>main</code>:</p>
+<pre class="text"><code>[0x00001000]&gt; afl | grep main</code></pre>
+<h3 id="4-navigating-and-seeking">4. Navigating and Seeking</h3>
+<p>The current offset or address is indicated in the prompt prompt
+prefix. To change your position within the binary, use the seek command
+(<code>s</code>):</p>
+<pre class="text"><code>[0x00001000]&gt; s main</code></pre>
+<p>You can also seek to specific hexadecimal addresses:</p>
+<pre class="text"><code>[0x00001000]&gt; s 0x00001149</code></pre>
+<h3 id="5-disassembling-and-viewing-code">5. Disassembling and Viewing
+Code</h3>
+<p>Once positioned at a target function or address, view the assembly
+instructions using the print command (<code>p</code>):</p>
+<ul>
+<li><code>pdf</code>: Print Disassembly Function (disassembles the
+entire function at the current seek position).</li>
+<li><code>pd 20</code>: Disassembles the next 20 instructions.</li>
+<li><code>px 64</code>: Prints a standard hex dump of 64 bytes.</li>
+</ul>
+<pre class="text"><code>[0x00001149]&gt; pdf</code></pre>
+<h3 id="6-using-the-visual-mode">6. Using the Visual Mode</h3>
+<p>Radare2 includes an interactive text-based user interface that
+simplifies code navigation:</p>
+<ul>
+<li>Press <code>V</code> to enter visual mode.</li>
+<li>Press <code>p</code> repeatedly inside visual mode to toggle through
+different views, including the hex view, disassembly view, and function
+browser.</li>
+<li>Press <code>V</code> then <code>spacebar</code> to access the
+interactive ASCII graph view, which renders control-flow graphs for the
+current function.</li>
+<li>Use the arrow keys or <code>h</code>, <code>j</code>,
+<code>k</code>, <code>l</code> to navigate the graph.</li>
+<li>Press <code>q</code> to exit visual modes and return to the primary
+command prompt.</li>
+</ul>
+<h2 id="exiting-radare2">Exiting Radare2</h2>
+<p>To close the session and exit to the standard Ubuntu shell,
+enter:</p>
+<pre class="text"><code>[0x00001149]&gt; q</code></pre></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

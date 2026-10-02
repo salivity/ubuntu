@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export NFS Share Immediately in Ubuntu Without Reboot - ubuntu</title>
+    <meta name="description" content="This guide explains how to dynamically export a directory as a Network File System (NFS) share in Ubuntu without rebooting the system or interrupting active client connections. By using the built-in exportfs utility, administrators can update the kernel'">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/export-nfs-share-immediately-in-ubuntu-without-reboot">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Export NFS Share Immediately in Ubuntu Without Reboot - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/export-nfs-share-immediately-in-ubuntu-without-reboot" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to dynamically export a directory as a Network File System (NFS) share in Ubuntu without rebooting the system or interrupting active client connections. By using the built-in exportfs utility, administrators can update the kernel'" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="export-nfs-share-immediately-in-ubuntu-without-reboot">Export
+NFS Share Immediately in Ubuntu Without Reboot</h1>
+<p>This guide explains how to dynamically export a directory as a
+Network File System (NFS) share in Ubuntu without rebooting the system
+or interrupting active client connections. By using the built-in
+<code>exportfs</code> utility, administrators can update the kernel's
+export table instantly, ensuring newly configured directories and
+modified access permissions take effect immediately.</p>
+<h3 id="the-immediate-export-command">The Immediate Export Command</h3>
+<p>To export all configured directories immediately without rebooting,
+run the following command with root privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> exportfs <span class="at">-ra</span></span></code></pre></div>
+<h3 id="how-the-command-works">How the Command Works</h3>
+<p>The <code>exportfs</code> command maintains the table of local
+physical file systems exported to NFS clients:</p>
+<ul>
+<li><strong><code>-r</code> (Re-export):</strong> Re-exports all
+directories by synchronizing <code>/etc/exports</code> and files in
+<code>/etc/exports.d/</code> with <code>/var/lib/nfs/etab</code>. It
+removes stale entries that no longer exist in the configuration and
+applies any modifications to existing shares.</li>
+<li><strong><code>-a</code> (All):</strong> Causes all directories
+listed in the exports configuration to be exported or unexported.</li>
+<li><strong><code>-v</code> (Verbose - optional):</strong> You can
+append <code>v</code> (i.e., <code>sudo exportfs -rav</code>) to display
+a detailed list of shares and their active options as they are being
+exported.</li>
+</ul>
+<h3 id="step-by-step-implementation">Step-by-Step Implementation</h3>
+<ol type="1">
+<li><p><strong>Define the Share:</strong> Open the exports configuration
+file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/exports</span></code></pre></div>
+<p>Add the directory path, client IP/subnet, and desired
+permissions:</p>
+<pre class="text"><code>/mnt/data 192.168.1.0/24(rw,sync,no_subtree_check)</code></pre></li>
+<li><p><strong>Apply the Changes:</strong> Run the reload command to
+export the directory immediately:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> exportfs <span class="at">-ra</span></span></code></pre></div></li>
+<li><p><strong>Verify the Export:</strong> Confirm that the directory is
+actively shared by running:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> exportfs <span class="at">-v</span></span></code></pre></div>
+<p>This displays the complete list of active exports along with their
+applied NFS parameters. Active client mounts remain intact during this
+process, avoiding service disruption.</p></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

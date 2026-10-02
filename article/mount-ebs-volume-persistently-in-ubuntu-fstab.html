@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mount EBS Volume Persistently in Ubuntu fstab - ubuntu</title>
+    <meta name="description" content="Configuring a persistent mount point for an Amazon EBS volume ensures that your storage remains attached and accessible across system reboots. This guide covers how to identify your attached EBS volume, format it if necessary, locate its Universally Uniq">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mount-ebs-volume-persistently-in-ubuntu-fstab">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mount EBS Volume Persistently in Ubuntu fstab - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mount-ebs-volume-persistently-in-ubuntu-fstab" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring a persistent mount point for an Amazon EBS volume ensures that your storage remains attached and accessible across system reboots. This guide covers how to identify your attached EBS volume, format it if necessary, locate its Universally Uniq" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="mount-ebs-volume-persistently-in-ubuntu-fstab">Mount EBS Volume
+Persistently in Ubuntu fstab</h1>
+<p>Configuring a persistent mount point for an Amazon EBS volume ensures
+that your storage remains attached and accessible across system reboots.
+This guide covers how to identify your attached EBS volume, format it if
+necessary, locate its Universally Unique Identifier (UUID), and
+configure the <code>/etc/fstab</code> file using the <code>nofail</code>
+option to prevent boot failures if the volume becomes detached.</p>
+<h3 id="step-1-identify-the-attached-volume">Step 1: Identify the
+Attached Volume</h3>
+<p>Connect to your Ubuntu instance via SSH and list the block devices to
+find your attached EBS volume:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>Locate your EBS volume from the output. In AWS Nitro-based instances,
+volumes typically appear as <code>/dev/nvmeXn1</code>, while older
+instances use <code>/dev/xvdf</code> through <code>/dev/xvdz</code>.</p>
+<h3 id="step-2-check-for-an-existing-file-system">Step 2: Check for an
+Existing File System</h3>
+<p>Before formatting, verify whether the volume already contains data or
+a filesystem:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> file <span class="at">-s</span> /dev/xvdf</span></code></pre></div>
+<p><em>(Replace <code>/dev/xvdf</code> with your actual device
+name.)</em></p>
+<ul>
+<li>If the output shows <code>data</code>, the volume is raw and needs
+to be formatted.</li>
+<li>If the output shows filesystem details (such as
+<code>Linux rev 1.0 ext4 filesystem data</code>), do not format it, as
+formatting will erase existing data.</li>
+</ul>
+<p>If the volume is empty, format it using the <code>ext4</code>
+filesystem:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkfs <span class="at">-t</span> ext4 /dev/xvdf</span></code></pre></div>
+<h3 id="step-3-create-a-mount-directory">Step 3: Create a Mount
+Directory</h3>
+<p>Create a directory where the volume will be mounted:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /mnt/ebs-data</span></code></pre></div>
+<h3 id="step-4-get-the-volume-uuid">Step 4: Get the Volume UUID</h3>
+<p>Device names can change between reboots in AWS. Using the volume's
+UUID guarantees the correct device is mounted every time.</p>
+<p>Find the UUID of your formatted partition or disk:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> blkid</span></code></pre></div>
+<p>Locate your device line and copy the <code>UUID</code> value (e.g.,
+<code>UUID="1234abcd-56ef-78gh-90ij-1234567890kl"</code>).</p>
+<h3 id="step-5-back-up-and-edit-etcfstab">Step 5: Back Up and Edit
+<code>/etc/fstab</code></h3>
+<p>Create a backup of <code>/etc/fstab</code> to safeguard your system
+configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/fstab /etc/fstab.orig</span></code></pre></div>
+<p>Open the <code>/etc/fstab</code> file in a text editor:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/fstab</span></code></pre></div>
+<p>Add a new line at the end of the file using the following
+structure:</p>
+<pre class="text"><code>UUID=your-uuid-here /mnt/ebs-data ext4 defaults,nofail 0 2</code></pre>
+<ul>
+<li><strong><code>UUID=...</code></strong>: Identifies the specific EBS
+volume.</li>
+<li><strong><code>/mnt/ebs-data</code></strong>: The target mount
+point.</li>
+<li><strong><code>ext4</code></strong>: The filesystem type used on the
+volume.</li>
+<li><strong><code>defaults,nofail</code></strong>: The
+<code>nofail</code> option is critical; it allows the operating system
+to boot normally even if the EBS volume is detached or unvailable.</li>
+<li><strong><code>0</code></strong>: Prevents the filesystem from being
+dumped by the dump utility.</li>
+<li><strong><code>2</code></strong>: Sets the filesystem check order
+during boot.</li>
+</ul>
+<p>Save and exit the file.</p>
+<h3 id="step-6-test-the-mount-configuration">Step 6: Test the Mount
+Configuration</h3>
+<p>Test your <code>/etc/fstab</code> configuration immediately without
+rebooting. First, unmount the volume if it is currently mounted, then
+execute:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">-a</span></span></code></pre></div>
+<p>If the command executes without displaying errors, your configuration
+is correct. Verify the volume is mounted:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span> <span class="at">-f</span></span></code></pre></div>
+<p>The mount point column should now display <code>/mnt/ebs-data</code>
+alongside your device. The volume will now automatically remount
+whenever the instance boots.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

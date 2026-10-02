@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable Ubuntu Studio Controls for Low Latency Audio - ubuntu</title>
+    <meta name="description" content="Ubuntu Studio Controls provides a centralized interface for configuring real-time audio on Linux, allowing users to minimize latency and prevent audio dropouts (xruns). This guide outlines the steps to install the software, grant necessary real-time syst">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/enable-ubuntu-studio-controls-for-low-latency-audio">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enable Ubuntu Studio Controls for Low Latency Audio - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/enable-ubuntu-studio-controls-for-low-latency-audio" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Ubuntu Studio Controls provides a centralized interface for configuring real-time audio on Linux, allowing users to minimize latency and prevent audio dropouts (xruns). This guide outlines the steps to install the software, grant necessary real-time syst" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="enable-ubuntu-studio-controls-for-low-latency-audio">Enable
+Ubuntu Studio Controls for Low Latency Audio</h1>
+<p>Ubuntu Studio Controls provides a centralized interface for
+configuring real-time audio on Linux, allowing users to minimize latency
+and prevent audio dropouts (xruns). This guide outlines the steps to
+install the software, grant necessary real-time system permissions,
+configure the JACK audio engine, and optimize CPU settings to achieve
+stable, low-latency audio processing.</p>
+<h3 id="1-install-studio-controls">1. Install Studio Controls</h3>
+<p>If you are not using a full Ubuntu Studio installation, install the
+control utility and the low-latency kernel meta-packages via the
+terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install studio-controls linux-lowlatency</span></code></pre></div>
+<h3 id="2-enable-real-time-audio-permissions">2. Enable Real-Time Audio
+Permissions</h3>
+<p>Your user account must belong to the <code>audio</code> group to
+utilize real-time scheduling privileges:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-a</span> <span class="at">-G</span> audio <span class="va">$USER</span></span></code></pre></div>
+<p>Log out and log back in, or restart your system, to apply the group
+changes.</p>
+<h3 id="3-launch-studio-controls">3. Launch Studio Controls</h3>
+<p>Open your application launcher and search for <strong>Studio
+Controls</strong> (or run <code>studio-controls</code> in a terminal).
+The utility manages the interaction between the JACK audio server,
+PulseAudio, and ALSA.</p>
+<h3 id="4-configure-audio-devices-and-latency">4. Configure Audio
+Devices and Latency</h3>
+<p>Inside the Studio Controls interface, configure the primary settings
+under the main tab:</p>
+<ul>
+<li><strong>Jack Master Device</strong>: Select your primary USB or
+internal audio interface.</li>
+<li><strong>Sample Rate</strong>: Set this to <strong>48000 Hz</strong>
+(or 44100 Hz, depending on your project requirements).</li>
+<li><strong>Buffer Size (Frames)</strong>: Lower numbers reduce latency
+but require more CPU power:
+<ul>
+<li><strong>64 or 128 frames</strong>: Ultra-low latency, ideal for live
+monitoring of MIDI or virtual instruments (around 1.3ms to 2.6ms).</li>
+<li><strong>256 frames</strong>: Safe, low-latency baseline for tracking
+and recording without dropouts.</li>
+</ul></li>
+<li><strong>Periods</strong>: Set to <strong>2</strong> for onboard and
+PCI/PCIe cards, or <strong>3</strong> for USB interfaces to maintain
+stability.</li>
+</ul>
+<h3 id="5-adjust-cpu-and-system-settings">5. Adjust CPU and System
+Settings</h3>
+<p>To prevent CPU frequency scaling from causing buffer underruns:</p>
+<ol type="1">
+<li>Locate the <strong>CPU Governor</strong> option inside Studio
+Controls.</li>
+<li>Change the setting to <strong>Performance</strong>. This forces your
+processor cores to run at their maximum clock speed rather than
+throttling down during quiet passages.</li>
+<li>Ensure <strong>Enable JACK</strong> is switched to
+<strong>On</strong>.</li>
+</ol>
+<h3 id="6-apply-changes-and-verify">6. Apply Changes and Verify</h3>
+<p>Click <strong>Apply Audio Settings</strong> to restart the JACK audio
+engine with the new configuration.</p>
+<p>To confirm that the low-latency settings are operational, launch a
+digital audio workstation (such as Ardour, Carla, or Reaper) and verify
+that the audio driver is set to <strong>JACK</strong>. Check the DAW's
+status bar to confirm the reported round-trip latency and monitor for
+any xrun notifications while playing audio.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

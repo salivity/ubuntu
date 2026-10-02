@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of Prometheus Node Exporter on Ubuntu - ubuntu</title>
+    <meta name="description" content="The Prometheus nodeexporter is a lightweight service designed to measure host-level hardware and operating system statistics on Linux systems. This article outlines the primary role of nodeexporter on an Ubuntu server, detailing how it collects system pe">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-prometheus-node-exporter-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of Prometheus Node Exporter on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-prometheus-node-exporter-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Prometheus nodeexporter is a lightweight service designed to measure host-level hardware and operating system statistics on Linux systems. This article outlines the primary role of nodeexporter on an Ubuntu server, detailing how it collects system pe" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="role-of-prometheus-node-exporter-on-ubuntu">Role of Prometheus
+Node Exporter on Ubuntu</h1>
+<p>The Prometheus <code>node_exporter</code> is a lightweight service
+designed to measure host-level hardware and operating system statistics
+on Linux systems. This article outlines the primary role of
+<code>node_exporter</code> on an Ubuntu server, detailing how it
+collects system performance data, exposes it to the Prometheus
+monitoring server, and provides the foundation for infrastructure
+monitoring and alerting.</p>
+<h3 id="what-is-prometheus-node-exporter">What is Prometheus Node
+Exporter?</h3>
+<p>On an Ubuntu server, <code>node_exporter</code> functions as an agent
+that gathers machine-level metrics. Developed by the official Prometheus
+project, it does not evaluate or store data itself. Instead, it reads
+performance counters from the Linux kernel—primarily via the
+<code>/proc</code> and <code>/sys</code> virtual filesystems—and formats
+them into the Prometheus data model. It then serves these metrics over
+an HTTP endpoint, typically on port 9100 at the <code>/metrics</code>
+path.</p>
+<h3 id="core-role-in-the-prometheus-architecture">Core Role in the
+Prometheus Architecture</h3>
+<p>The primary role of <code>node_exporter</code> is to act as a bridge
+between the Ubuntu operating system and the Prometheus server.
+Prometheus operates on a "pull" (scraping) model. Rather than the Ubuntu
+host pushing metrics to a central database, Prometheus periodically
+sends an HTTP GET request to the Ubuntu server's
+<code>node_exporter</code> endpoint.</p>
+<p>When queried, <code>node_exporter</code> immediately reads the
+current system states, formats them into time-series data points with
+relevant labels, and returns them to Prometheus for storage, querying,
+and alert evaluation.</p>
+<h3 id="key-metrics-collected">Key Metrics Collected</h3>
+<p>Running <code>node_exporter</code> provides broad visibility into the
+physical or virtual health of an Ubuntu server. Key categories
+include:</p>
+<ul>
+<li><strong>CPU Utilization:</strong> Tracks time spent by processors in
+user, system, idle, and iowait states across all cores.</li>
+<li><strong>Memory and Swap Usage:</strong> Monitors active, free,
+cached, and buffer memory, as well as swap utilization to identify
+memory leaks or constraints.</li>
+<li><strong>Disk and Filesystem Health:</strong> Measures available
+storage capacity, inode usage, read/write I/O operations per second
+(IOPS), and disk latency.</li>
+<li><strong>Network Performance:</strong> Records inbound and outbound
+traffic, packet transfer rates, drop rates, and interface errors.</li>
+<li><strong>System Load and Uptime:</strong> Exposes 1-minute, 5-minute,
+and 15-minute load averages alongside system boot time and uptime.</li>
+</ul>
+<h3 id="operation-via-systemd-on-ubuntu">Operation via Systemd on
+Ubuntu</h3>
+<p>On Ubuntu, <code>node_exporter</code> is usually deployed as a
+<code>systemd</code> service. This configuration ensures that metric
+collection starts automatically on boot, restarts if the process
+terminates unexpectedly, and runs under an unprivileged user account to
+maintain host security. Because it is written in Go and compiles to a
+single binary, it runs with minimal CPU and memory overhead, making it
+safe to run continuously in production environments without impacting
+core workloads.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

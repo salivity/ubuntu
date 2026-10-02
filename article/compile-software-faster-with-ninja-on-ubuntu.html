@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compile Software Faster with Ninja on Ubuntu - ubuntu</title>
+    <meta name="description" content="Ninja is a minimalist, speed-focused build system designed to execute builds as quickly as possible by focusing strictly on build file execution rather than high-level configuration. This article explains how to install Ninja on an Ubuntu machine, config">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/compile-software-faster-with-ninja-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Compile Software Faster with Ninja on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/compile-software-faster-with-ninja-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Ninja is a minimalist, speed-focused build system designed to execute builds as quickly as possible by focusing strictly on build file execution rather than high-level configuration. This article explains how to install Ninja on an Ubuntu machine, config" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="compile-software-faster-with-ninja-on-ubuntu">Compile Software
+Faster with Ninja on Ubuntu</h1>
+<p>Ninja is a minimalist, speed-focused build system designed to execute
+builds as quickly as possible by focusing strictly on build file
+execution rather than high-level configuration. This article explains
+how to install Ninja on an Ubuntu machine, configure modern build
+generators like CMake to output Ninja build files, and execute parallel
+builds to significantly cut down software compilation times.</p>
+<h3 id="step-1-install-ninja-on-ubuntu">Step 1: Install Ninja on
+Ubuntu</h3>
+<p>Ninja is available directly from the default Ubuntu repositories.
+Open your terminal and run the following commands to install it:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ninja-build</span></code></pre></div>
+<p>Verify the installation and check the installed version:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ninja</span> <span class="at">--version</span></span></code></pre></div>
+<h3 id="step-2-use-ninja-with-cmake">Step 2: Use Ninja with CMake</h3>
+<p>Ninja is a low-level build system and does not directly parse
+configuration files like <code>CMakeLists.txt</code>. Instead, tools
+like CMake generate the <code>build.ninja</code> configuration file.</p>
+<ol type="1">
+<li>Navigate to your project directory containing the
+<code>CMakeLists.txt</code> file:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/your/project</span></code></pre></div>
+<ol start="2" type="1">
+<li>Generate the build files using the <code>-G Ninja</code> generator
+flag:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-B</span> build <span class="at">-G</span> Ninja</span></code></pre></div>
+<p>This tells CMake to create a <code>build</code> directory configured
+specifically for the Ninja build engine.</p>
+<h3 id="step-3-compile-the-project">Step 3: Compile the Project</h3>
+<p>Once the build files are generated, you can trigger the compilation
+using either Ninja directly or via CMake:</p>
+<p><strong>Using Ninja directly:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ninja</span> <span class="at">-C</span> build</span></code></pre></div>
+<p><strong>Using the CMake wrapper:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">--build</span> build</span></code></pre></div>
+<h3 id="step-4-optimize-build-performance">Step 4: Optimize Build
+Performance</h3>
+<p>Ninja automatically detects the number of available CPU cores and
+spawns the optimal number of parallel compilation jobs by default,
+unlike standard GNU Make, which requires the manual <code>-j</code>
+flag.</p>
+<p>However, you can customize execution to fit your system's
+resources:</p>
+<ul>
+<li><p><strong>Specify parallel jobs manually:</strong> If you want to
+limit CPU or memory consumption during a build, specify the number of
+parallel workers using the <code>-j</code> flag:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ninja</span> <span class="at">-C</span> build <span class="at">-j</span> 4</span></code></pre></div></li>
+<li><p><strong>Clean build targets:</strong> To clean previous build
+artifacts without deleting the configuration:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ninja</span> <span class="at">-C</span> build <span class="at">-t</span> clean</span></code></pre></div></li>
+<li><p><strong>Inspect targets:</strong> To view all available build
+targets defined in the project:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ninja</span> <span class="at">-C</span> build <span class="at">-t</span> targets</span></code></pre></div></li>
+</ul>
+<h3 id="why-ninja-compiles-faster-than-make">Why Ninja Compiles Faster
+Than Make</h3>
+<p>Ninja eliminates file-globbing, configuration evaluation, and complex
+conditional checks during build execution. By offloading the dependency
+resolution and generation phase entirely to tools like CMake or Meson,
+Ninja reads its generated graph into memory almost instantly, resulting
+in negligible overhead and maximum processor utilization across large
+codebases.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

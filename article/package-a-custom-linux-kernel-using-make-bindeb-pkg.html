@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package a Custom Linux Kernel Using make bindeb-pkg - ubuntu</title>
+    <meta name="description" content="This guide explains how to compile a custom Linux kernel and package it directly into installable Debian (.deb) packages on Ubuntu using the make bindeb-pkg command. By packaging your kernel into .deb binaries, you can easily manage installations, upgrad">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/package-a-custom-linux-kernel-using-make-bindeb-pkg">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Package a Custom Linux Kernel Using make bindeb-pkg - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/package-a-custom-linux-kernel-using-make-bindeb-pkg" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to compile a custom Linux kernel and package it directly into installable Debian (.deb) packages on Ubuntu using the make bindeb-pkg command. By packaging your kernel into .deb binaries, you can easily manage installations, upgrad" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="package-a-custom-linux-kernel-using-make-bindeb-pkg">Package a
+Custom Linux Kernel Using make bindeb-pkg</h1>
+<p>This guide explains how to compile a custom Linux kernel and package
+it directly into installable Debian (<code>.deb</code>) packages on
+Ubuntu using the <code>make bindeb-pkg</code> command. By packaging your
+kernel into <code>.deb</code> binaries, you can easily manage
+installations, upgrades, and removals via Ubuntu’s native package
+manager (<code>dpkg</code> or <code>apt</code>), as well as distribute
+the compiled kernel to other compatible systems without recompiling.</p>
+<h3 id="1-install-build-dependencies">1. Install Build Dependencies</h3>
+<p>Before building the kernel, install the necessary build tools,
+libraries, and compiler packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> build-essential libncurses-dev bison flex libssl-dev libelf-dev bc dwarves rsync kmod ccache</span></code></pre></div>
+<h3 id="2-prepare-the-kernel-source-and-configuration">2. Prepare the
+Kernel Source and Configuration</h3>
+<p>Navigate to your downloaded kernel source directory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/linux-source</span></code></pre></div>
+<p>To use your current Ubuntu configuration as the baseline:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /boot/config-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span> .config</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> olddefconfig</span></code></pre></div>
+<p>Disable canonical debug certificates to prevent compilation errors
+caused by missing private keys:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/config</span> <span class="at">--set-str</span> SYSTEM_TRUSTED_KEYS <span class="st">&quot;&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/config</span> <span class="at">--set-str</span> SYSTEM_REVOCATION_KEYS <span class="st">&quot;&quot;</span></span></code></pre></div>
+<h3 id="3-build-the-debian-packages">3. Build the Debian Packages</h3>
+<p>Run the <code>bindeb-pkg</code> target. The <code>bindeb-pkg</code>
+command compiles the kernel and modules, generating only the binary
+<code>.deb</code> packages without generating the source package
+overhead:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> <span class="at">-j</span><span class="va">$(</span><span class="fu">nproc</span><span class="va">)</span> bindeb-pkg</span></code></pre></div>
+<p>The <code>-j$(nproc)</code> flag utilizes all available CPU cores to
+speed up compilation.</p>
+<h3 id="4-locate-and-install-the-generated-packages">4. Locate and
+Install the Generated Packages</h3>
+<p>Once the build finishes successfully, the <code>.deb</code> files are
+stored in the parent directory (<code>../</code>). You will find several
+packages:</p>
+<ul>
+<li><code>linux-image-&lt;version&gt;_&lt;arch&gt;.deb</code> (the
+kernel binary and drivers)</li>
+<li><code>linux-headers-&lt;version&gt;_&lt;arch&gt;.deb</code> (header
+files needed for compiling out-of-tree modules)</li>
+<li><code>linux-libc-dev_&lt;version&gt;_&lt;arch&gt;.deb</code>
+(userspace development headers)</li>
+</ul>
+<p>Install the kernel image and headers using <code>dpkg</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">-i</span> linux-image-<span class="pp">*</span>.deb linux-headers-<span class="pp">*</span>.deb</span></code></pre></div>
+<h3 id="5-update-bootloader-and-reboot">5. Update Bootloader and
+Reboot</h3>
+<p>The installation script automatically triggers
+<code>update-initramfs</code> and configures GRUB. To ensure GRUB has
+registered the new kernel:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-grub</span></code></pre></div>
+<p>Reboot your system to run the custom kernel:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>Verify that the system is running your new kernel version:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uname</span> <span class="at">-r</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

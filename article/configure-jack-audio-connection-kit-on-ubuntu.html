@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure JACK Audio Connection Kit on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a comprehensive walkthrough for configuring the JACK Audio Connection Kit on an Ubuntu multimedia production workstation. You will learn how to install JACK2, grant real-time system privileges to your user account to eliminate buffer">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-jack-audio-connection-kit-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure JACK Audio Connection Kit on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-jack-audio-connection-kit-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a comprehensive walkthrough for configuring the JACK Audio Connection Kit on an Ubuntu multimedia production workstation. You will learn how to install JACK2, grant real-time system privileges to your user account to eliminate buffer" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-jack-audio-connection-kit-on-ubuntu">Configure JACK
+Audio Connection Kit on Ubuntu</h1>
+<p>This guide provides a comprehensive walkthrough for configuring the
+JACK Audio Connection Kit on an Ubuntu multimedia production
+workstation. You will learn how to install JACK2, grant real-time system
+privileges to your user account to eliminate buffer underruns, configure
+optimal latency and hardware parameters using Qjackctl, and ensure
+compatibility with existing system audio.</p>
+<h3 id="step-1-install-jack2-and-qjackctl">Step 1: Install JACK2 and
+Qjackctl</h3>
+<p>Open a terminal and install the JACK2 package along with Qjackctl, a
+graphical user interface for managing the JACK server:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install jackd2 qjackctl</span></code></pre></div>
+<p>During installation, a configuration prompt will ask: <em>"Enable
+realtime process priority?"</em> Select <strong>Yes</strong>. This
+automatically configures limits for memory locking and scheduling
+priority required for low-latency audio processing.</p>
+<h3 id="step-2-grant-user-real-time-audio-permissions">Step 2: Grant
+User Real-Time Audio Permissions</h3>
+<p>Your user account must belong to the <code>audio</code> group to use
+real-time scheduling.</p>
+<ol type="1">
+<li>Add your current user to the <code>audio</code> group:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-aG</span> audio <span class="va">$USER</span></span></code></pre></div></li>
+<li>Verify that <code>/etc/security/limits.d/audio.conf</code> contains
+the following lines:
+<pre class="text"><code>@audio   -  rtprio     95
+@audio   -  memlock    unlimited</code></pre></li>
+<li>Log out and log back in (or reboot) for these group and permission
+changes to take effect.</li>
+</ol>
+<h3 id="step-3-handle-audio-server-bridges">Step 3: Handle Audio Server
+Bridges</h3>
+<p>Ubuntu systems use PulseAudio or PipeWire for desktop sound, which
+can conflict with JACK when accessing hardware directly.</p>
+<ul>
+<li><strong>For PipeWire (Ubuntu 22.10 and newer):</strong> PipeWire
+often handles JACK applications natively. If you wish to use the native
+PipeWire JACK replacement without running the standalone JACK daemon,
+install:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install pipewire-audio-client-libraries</span></code></pre></div>
+Run applications via <code>pw-jack &lt;application-name&gt;</code> or
+configure PipeWire directly.</li>
+<li><strong>For PulseAudio (Ubuntu 20.04/22.04 LTS):</strong> To route
+standard desktop audio through JACK, install the PulseAudio-JACK bridge:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install pulseaudio-module-jack</span></code></pre></div></li>
+</ul>
+<h3 id="step-4-configure-audio-parameters-in-qjackctl">Step 4: Configure
+Audio Parameters in Qjackctl</h3>
+<p>Launch Qjackctl from your application menu or by running
+<code>qjackctl</code> in the terminal.</p>
+<ol type="1">
+<li>Click the <strong>Setup</strong> button on the right side of the
+control panel.</li>
+<li>In the <strong>Settings</strong> tab:
+<ul>
+<li><strong>Driver:</strong> Set to <code>alsa</code>.</li>
+<li><strong>Realtime:</strong> Ensure this checkbox is enabled.</li>
+<li><strong>Interface:</strong> Click the <code>&gt;</code> symbol and
+select your dedicated audio interface rather than the default
+motherboard soundcard.</li>
+<li><strong>Sample Rate:</strong> Set to <code>48000</code> (standard
+for video) or <code>44100</code> (standard for music).</li>
+<li><strong>Frames/Period:</strong> This controls latency. Start with
+<code>256</code> or <code>128</code>. Lower values (such as
+<code>64</code>) decrease latency but increase CPU load, potentially
+causing audio dropouts (Xruns).</li>
+<li><strong>Periods/Buffer:</strong> Set to <code>2</code> for USB
+devices or onboard cards, or <code>3</code> if using certain
+internal/PCI interfaces.</li>
+</ul></li>
+<li>In the <strong>Misc</strong> tab, check <strong>Start JACK audio
+server on application startup</strong> and <strong>Enable system tray
+icon</strong>.</li>
+<li>Click <strong>OK</strong> to save settings.</li>
+</ol>
+<h3 id="step-5-start-and-test-the-server">Step 5: Start and Test the
+Server</h3>
+<ol type="1">
+<li>Click <strong>Start</strong> in the main Qjackctl window.</li>
+<li>Observe the status display:
+<ul>
+<li>The status should display <code>Started</code>.</li>
+<li>The RT indicator should be blinking or lit, confirming real-time
+operation.</li>
+<li>Note the calculated latency in milliseconds at the bottom right (aim
+for under 10 ms for live monitoring).</li>
+</ul></li>
+<li>Click the <strong>Graph</strong> button to view, connect, and route
+inputs and outputs between hardware channels, Digital Audio Workstations
+(DAWs), and software synthesizers.</li>
+<li>Monitor the <strong>Xrun</strong> counter. If the counter increments
+frequently during playback or recording, open <strong>Setup</strong> and
+increase the <strong>Frames/Period</strong> setting to stabilize the
+audio stream.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

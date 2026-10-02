@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Anacron for Delayed Tasks on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to set up and configure Anacron on an Ubuntu laptop to ensure scheduled tasks execute reliably, even when the machine is shut down or suspended during regular runtimes. Unlike standard cron, which assumes continuous uptime and s">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-anacron-for-delayed-tasks-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Anacron for Delayed Tasks on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-anacron-for-delayed-tasks-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to set up and configure Anacron on an Ubuntu laptop to ensure scheduled tasks execute reliably, even when the machine is shut down or suspended during regular runtimes. Unlike standard cron, which assumes continuous uptime and s" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-anacron-for-delayed-tasks-on-ubuntu">Configure Anacron
+for Delayed Tasks on Ubuntu</h1>
+<p>This article explains how to set up and configure Anacron on an
+Ubuntu laptop to ensure scheduled tasks execute reliably, even when the
+machine is shut down or suspended during regular runtimes. Unlike
+standard cron, which assumes continuous uptime and skips jobs when a
+computer is off, Anacron tracks intervals and executes pending tasks
+shortly after the system boots. Below, you will find instructions for
+verifying your installation, editing the configuration file, scheduling
+custom jobs, and testing your setup.</p>
+<h2 id="why-use-anacron-on-a-laptop">Why Use Anacron on a Laptop?</h2>
+<p>The standard <code>cron</code> daemon relies on continuous execution:
+if a task is scheduled for 03:00 AM and your laptop is closed, the task
+is skipped entirely until the next scheduled window. Anacron solves this
+by recording timestamps for completed jobs in
+<code>/var/spool/anacron</code>. When your laptop boots, Anacron checks
+these timestamps. If the defined period has elapsed, it waits for a
+designated delay time and then runs the command.</p>
+<h2 id="step-1-verify-anacron-installation">Step 1: Verify Anacron
+Installation</h2>
+<p>Anacron is installed by default on standard Ubuntu Desktop
+installations. To verify it is installed and active, run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install anacron</span></code></pre></div>
+<p>Check the status of the Anacron systemd service:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> status anacron.service</span></code></pre></div>
+<h2 id="step-2-understand-the-anacrontab-syntax">Step 2: Understand the
+Anacrontab Syntax</h2>
+<p>Anacron is controlled by the configuration file
+<code>/etc/anacrontab</code>. Open it using a text editor with
+administrative privileges:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/anacrontab</span></code></pre></div>
+<p>Entries in this file follow a specific four-field format:</p>
+<pre class="text"><code>period_in_days   delay_in_minutes   job_identifier   command</code></pre>
+<ul>
+<li><strong>period_in_days:</strong> How often the job runs (e.g.,
+<code>1</code> for daily, <code>7</code> for weekly, <code>30</code> for
+monthly). You can also use named macros like <code>@daily</code> or
+<code>@monthly</code>.</li>
+<li><strong>delay_in_minutes:</strong> The number of minutes Anacron
+waits after system boot before starting the command. This prevents disk
+I/O bottlenecks when the OS is starting.</li>
+<li><strong>job_identifier:</strong> A unique name for the task used to
+create a timestamp file in <code>/var/spool/anacron/</code>.</li>
+<li><strong>command:</strong> The terminal command, script, or binary to
+execute.</li>
+</ul>
+<h2 id="step-3-add-a-custom-job">Step 3: Add a Custom Job</h2>
+<p>You can configure tasks directly in <code>/etc/anacrontab</code> or
+leverage Ubuntu's predefined directories.</p>
+<h3 id="method-a-adding-direct-entries-to-etcanacrontab">Method A:
+Adding Direct Entries to <code>/etc/anacrontab</code></h3>
+<p>To execute a custom backup script every three days, with a 15-minute
+delay after system boot, append the following line to
+<code>/etc/anacrontab</code>:</p>
+<pre class="text"><code>3   15   user_laptop_backup   /usr/local/bin/backup_script.sh</code></pre>
+<p>Ensure your script is executable:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod +x /usr/local/bin/backup_script.sh</span></code></pre></div>
+<h3 id="method-b-using-standard-cron-directories">Method B: Using
+Standard Cron Directories</h3>
+<p>By default, Ubuntu's <code>/etc/anacrontab</code> already delegates
+execution to standard cron directories:</p>
+<pre class="text"><code>1   5    cron.daily     run-parts --report /etc/cron.daily
+7   10   cron.weekly    run-parts --report /etc/cron.weekly
+@monthly 15 cron.monthly run-parts --report /etc/cron.monthly</code></pre>
+<p>You can simply place executable scripts inside
+<code>/etc/cron.daily/</code>, <code>/etc/cron.weekly/</code>, or
+<code>/etc/cron.monthly/</code>. Anacron will automatically pick them up
+and run them sequentially.</p>
+<h2 id="step-4-configure-power-and-battery-settings">Step 4: Configure
+Power and Battery Settings</h2>
+<p>By default, Ubuntu prevents Anacron from running when the laptop is
+disconnected from AC power to preserve battery life.</p>
+<p>If your laptop spends significant time running on battery and you
+want Anacron to execute regardless of power state, you can adjust this
+behavior by overriding the systemd condition:</p>
+<ol type="1">
+<li>Edit the systemd service override:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl edit anacron.service</span></code></pre></div></li>
+<li>Add the following lines to bypass the AC power check:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">ConditionACPower</span><span class="ot">=</span></span></code></pre></div></li>
+<li>Save and close the file. Reload systemd:
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span></code></pre></div></li>
+</ol>
+<h2 id="step-5-test-and-validate-the-configuration">Step 5: Test and
+Validate the Configuration</h2>
+<p>To check <code>/etc/anacrontab</code> for syntax errors without
+running any commands:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> anacron <span class="at">-T</span></span></code></pre></div>
+<p>If no errors are returned, the syntax is valid.</p>
+<p>To force immediate execution of all tasks—ignoring delays and
+timestamp records—run:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> anacron <span class="at">-f</span> <span class="at">-n</span></span></code></pre></div>
+<ul>
+<li><code>-f</code> forces the execution of all jobs regardless of
+whether their run period has expired.</li>
+<li><code>-n</code> runs the jobs immediately without waiting for the
+configured delay period.</li>
+</ul>
+<p>To inspect the last time specific jobs were executed, view the
+timestamp files:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /var/spool/anacron/</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /var/spool/anacron/user_laptop_backup</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

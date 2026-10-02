@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitigate DDoS on Ubuntu with Apache mod_evasive - ubuntu</title>
+    <meta name="description" content="The libapache2-mod-evasive module is an essential security tool designed to protect Apache web servers running on Ubuntu from application-layer Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. This article explains the role of mo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mitigate-d-do-s-on-ubuntu-with-apache-mod-evasive">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mitigate DDoS on Ubuntu with Apache mod_evasive - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mitigate-d-do-s-on-ubuntu-with-apache-mod-evasive" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The libapache2-mod-evasive module is an essential security tool designed to protect Apache web servers running on Ubuntu from application-layer Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. This article explains the role of mo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="mitigate-ddos-on-ubuntu-with-apache-mod_evasive">Mitigate DDoS
+on Ubuntu with Apache mod_evasive</h1>
+<p>The <code>libapache2-mod-evasive</code> module is an essential
+security tool designed to protect Apache web servers running on Ubuntu
+from application-layer Denial of Service (DoS) and Distributed Denial of
+Service (DDoS) attacks. This article explains the role of
+<code>mod_evasive</code>, detailing how it detects abusive traffic
+patterns, enforces automated blocking mechanisms, integrates with
+system-level firewalls, and fits into a comprehensive Linux server
+security strategy.</p>
+<h3 id="understanding-libapache2-mod-evasive">Understanding
+libapache2-mod-evasive</h3>
+<p><code>libapache2-mod-evasive</code> is an Apache HTTP server module
+that provides evasive action against HTTP flood attacks, brute-force
+attempts, and rapid-fire requests. When attackers attempt to overwhelm a
+web server by flooding it with high volumes of HTTP GET or POST
+requests, <code>mod_evasive</code> monitors the incoming traffic per IP
+address and intervenes before the server's resources are exhausted.</p>
+<h3 id="how-mod_evasive-detects-and-mitigates-threats">How mod_evasive
+Detects and Mitigates Threats</h3>
+<p>The module maintains an internal hash table of IP addresses and
+request URIs to track client activity across predefined intervals. It
+detects malicious activity using several key thresholds configured in
+<code>/etc/apache2/mods-available/evasive.conf</code>:</p>
+<ul>
+<li><strong>Single-Page Request Floods (<code>DOSPageCount</code> &amp;
+<code>DOSPageInterval</code>):</strong> Tracks how many times an IP
+requests the same URI within a specific time window (e.g., 2 requests
+per second). If the threshold is exceeded, the module flags the IP.</li>
+<li><strong>Site-Wide Request Floods (<code>DOSSiteCount</code> &amp;
+<code>DOSSiteInterval</code>):</strong> Monitors overall requests from
+an IP across the entire website within a short interval (e.g., 50
+requests per second) to prevent aggressive scrapers or multi-page
+crawling attacks.</li>
+<li><strong>Temporary Blacklisting
+(<code>DOSBlockingPeriod</code>):</strong> Once a client violates a
+threshold, <code>mod_evasive</code> automatically blocks the IP address
+for a configured duration (e.g., 10 seconds). Any new requests sent
+during this blocking period reset the timer, keeping persistent
+attackers blocked indefinitely.</li>
+<li><strong>HTTP 403 Forbidden Response:</strong> While blocked, the
+server immediately rejects requests from the abusive IP with a
+<code>403 Forbidden</code> status code. This minimal response consumes
+negligible memory and CPU, shielding backend scripts (like PHP) and
+databases from saturation.</li>
+</ul>
+<h3 id="key-roles-in-an-ubuntu-security-stack">Key Roles in an Ubuntu
+Security Stack</h3>
+<ol type="1">
+<li><strong>Layer 7 Application Defense:</strong> Standard firewalls
+like UFW or <code>iptables</code> monitor network-layer metrics (packets
+and ports) but cannot inherently inspect HTTP request rates.
+<code>mod_evasive</code> operates at the application layer, recognizing
+patterns that appear legitimate to low-level firewalls.</li>
+<li><strong>Automated Firewall Integration:</strong> Through its
+<code>DOSSystemCommand</code> directive, <code>mod_evasive</code> can
+execute shell scripts upon triggering a block. Administrators on Ubuntu
+often configure this to automatically push offending IPs directly to
+<code>iptables</code>, <code>fail2ban</code>, or <code>ufw</code>,
+effectively elevating the block to the network layer to save even more
+web server overhead.</li>
+<li><strong>Admin Alerting:</strong> The module supports native email
+alerts via the <code>DOSEmailNotify</code> directive, enabling system
+administrators to quickly identify ongoing attack campaigns.</li>
+</ol>
+<h3 id="limitations-in-large-scale-ddos-attacks">Limitations in
+Large-Scale DDoS Attacks</h3>
+<p>While <code>libapache2-mod-evasive</code> is highly effective against
+single-source floods, scripted brute-force attacks, and
+small-to-moderate botnet surges, it cannot counter massive,
+high-bandwidth volumetric DDoS attacks. If an attack distributes
+requests across hundreds of thousands of distinct IP addresses, or if
+the incoming traffic exceeds the network interface's bandwidth, the
+server will still become unresponsive. In such scenarios,
+<code>mod_evasive</code> serves as an internal line of defense that
+complements external edge-layer mitigation services and Content Delivery
+Networks (CDNs).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

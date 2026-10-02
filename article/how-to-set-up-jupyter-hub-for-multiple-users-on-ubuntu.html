@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up JupyterHub for Multiple Users on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up JupyterHub on an Ubuntu machine provides a centralized, multi-user environment where individuals can access independent Jupyter notebook workspaces via a web browser. This guide walks through the complete setup process, including installing re">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-jupyter-hub-for-multiple-users-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up JupyterHub for Multiple Users on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-jupyter-hub-for-multiple-users-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up JupyterHub on an Ubuntu machine provides a centralized, multi-user environment where individuals can access independent Jupyter notebook workspaces via a web browser. This guide walks through the complete setup process, including installing re" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-jupyterhub-for-multiple-users-on-ubuntu">How to
+Set Up JupyterHub for Multiple Users on Ubuntu</h1>
+<p>Setting up JupyterHub on an Ubuntu machine provides a centralized,
+multi-user environment where individuals can access independent Jupyter
+notebook workspaces via a web browser. This guide walks through the
+complete setup process, including installing required system
+dependencies, setting up Python and Node.js, configuring the proxy,
+generating the JupyterHub configuration, and managing system user
+accounts.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>A server running Ubuntu 20.04 LTS or 22.04 LTS.</li>
+<li>A user account with <code>sudo</code> administrative
+privileges.</li>
+<li>A static IP address or domain pointing to the server.</li>
+</ul>
+<h3 id="step-1-update-the-system-and-install-dependencies">Step 1:
+Update the System and Install Dependencies</h3>
+<p>Begin by updating the local package index and installing Python, pip,
+Node.js, and npm.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> python3-pip python3-dev nodejs npm</span></code></pre></div>
+<p>Ensure <code>nodejs</code> and <code>npm</code> are properly
+installed:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> <span class="at">-v</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> <span class="at">-v</span></span></code></pre></div>
+<h3 id="step-2-install-configurable-http-proxy">Step 2: Install
+Configurable HTTP Proxy</h3>
+<p>JupyterHub relies on <code>configurable-http-proxy</code> to direct
+incoming network traffic to specific user notebook servers. Install it
+globally using <code>npm</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> npm install <span class="at">-g</span> configurable-http-proxy</span></code></pre></div>
+<h3 id="step-3-install-jupyterhub-and-jupyterlab">Step 3: Install
+JupyterHub and JupyterLab</h3>
+<p>Install JupyterHub along with JupyterLab or the traditional Jupyter
+notebook package. Using a global installation ensures all system users
+can execute the core software.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> python3 <span class="at">-m</span> pip install <span class="at">--upgrade</span> pip</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> python3 <span class="at">-m</span> pip install jupyterhub jupyterlab notebook</span></code></pre></div>
+<h3 id="step-4-generate-configuration-files">Step 4: Generate
+Configuration Files</h3>
+<p>Create a dedicated directory to store the JupyterHub configuration
+and runtime data:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/jupyterhub</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /etc/jupyterhub</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> jupyterhub <span class="at">--generate-config</span></span></code></pre></div>
+<p>This creates the default configuration file at
+<code>/etc/jupyterhub/jupyterhub_config.py</code>.</p>
+<h3 id="step-5-configure-the-server">Step 5: Configure the Server</h3>
+<p>Open the configuration file to define system behavior:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/jupyterhub/jupyterhub_config.py</span></code></pre></div>
+<p>Set JupyterLab as the default interface by adding or uncommenting
+this line:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>c.Spawner.default_url <span class="op">=</span> <span class="st">&#39;/lab&#39;</span></span></code></pre></div>
+<p>By default, JupyterHub uses PAM (Pluggable Authentication Modules),
+meaning any standard Linux user with an account on the Ubuntu system can
+log in. To specify an administrator user, append:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>c.Authenticator.admin_users <span class="op">=</span> {<span class="st">&#39;admin_username&#39;</span>}</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>c.JupyterHub.admin_access <span class="op">=</span> <span class="va">True</span></span></code></pre></div>
+<p>Save and exit the file (Ctrl+O, Enter, Ctrl+X).</p>
+<h3 id="step-6-create-system-users">Step 6: Create System Users</h3>
+<p>Because JupyterHub uses PAM authentication by default, create local
+Linux accounts for every user who needs access:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser user1</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser user2</span></code></pre></div>
+<p>Follow the prompts to set passwords for each account. These
+credentials will be used to log in through the web browser.</p>
+<h3 id="step-7-configure-jupyterhub-as-a-systemd-service">Step 7:
+Configure JupyterHub as a Systemd Service</h3>
+<p>To ensure JupyterHub starts on boot and runs continuously in the
+background, create a <code>systemd</code> service unit:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/jupyterhub.service</span></code></pre></div>
+<p>Paste the following configuration:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">JupyterHub</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network.target</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="dt">User</span><span class="ot">=</span><span class="st">root</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Environment</span><span class="ot">=</span><span class="st">&quot;PATH=/bin:/usr/local/bin:/usr/bin&quot;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="dt">WorkingDirectory</span><span class="ot">=</span><span class="st">/etc/jupyterhub</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/usr/local/bin/jupyterhub -f /etc/jupyterhub/jupyterhub_config.py</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="dt">Restart</span><span class="ot">=</span><span class="st">always</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div>
+<p>Reload <code>systemd</code> to register the new service, then start
+and enable it:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start jupyterhub</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable jupyterhub</span></code></pre></div>
+<p>Check the status to ensure the service is running:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status jupyterhub</span></code></pre></div>
+<h3 id="step-8-access-the-server">Step 8: Access the Server</h3>
+<p>Open a web browser and navigate to:</p>
+<pre class="text"><code>http://&lt;server-ip-or-domain&gt;:8000</code></pre>
+<p>Users can now log in using their Ubuntu username and password.
+JupyterHub automatically creates isolated user home directories and
+notebook environments.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup OSPF Routing Over WireGuard on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for configuring dynamic routing using the Open Shortest Path First (OSPF) protocol across a secure WireGuard tunnel on Ubuntu. By combining WireGuard's modern encryption with the FRRouting (FRR) suite, you c">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-ospf-routing-over-wire-guard-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup OSPF Routing Over WireGuard on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-ospf-routing-over-wire-guard-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for configuring dynamic routing using the Open Shortest Path First (OSPF) protocol across a secure WireGuard tunnel on Ubuntu. By combining WireGuard's modern encryption with the FRRouting (FRR) suite, you c" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-ospf-routing-over-wireguard-on-ubuntu">Setup OSPF Routing
+Over WireGuard on Ubuntu</h1>
+<p>This guide provides a step-by-step walkthrough for configuring
+dynamic routing using the Open Shortest Path First (OSPF) protocol
+across a secure WireGuard tunnel on Ubuntu. By combining WireGuard's
+modern encryption with the FRRouting (FRR) suite, you can build a
+resilient, self-healing network that automatically routes traffic around
+outages without manually updating static routing tables.</p>
+<hr />
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Two Ubuntu servers (referred to as <strong>Node A</strong> and
+<strong>Node B</strong>) with public IP addresses.</li>
+<li>Sudo or root privileges on both machines.</li>
+<li>Basic understanding of CIDR networking.</li>
+</ul>
+<hr />
+<h3 id="step-1-install-wireguard-and-frr">Step 1: Install WireGuard and
+FRR</h3>
+<p>Run the following commands on both <strong>Node A</strong> and
+<strong>Node B</strong> to install WireGuard and FRRouting:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> wireguard frr</span></code></pre></div>
+<hr />
+<h3 id="step-2-configure-wireguard">Step 2: Configure WireGuard</h3>
+<p>Generate private and public key pairs on both nodes.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wg</span> genkey <span class="kw">|</span> <span class="fu">tee</span> privatekey <span class="kw">|</span> <span class="ex">wg</span> pubkey <span class="op">&gt;</span> publickey</span></code></pre></div>
+<h4 id="node-a-configuration-etcwireguardwg0conf">Node A Configuration
+(<code>/etc/wireguard/wg0.conf</code>)</h4>
+<p>Create the WireGuard configuration file on Node A:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Interface]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Address </span><span class="ot">=</span><span class="st"> 10.10.10.1/30</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">ListenPort </span><span class="ot">=</span><span class="st"> </span><span class="dv">51820</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateKey </span><span class="ot">=</span><span class="st"> &lt;Node_A_Private_Key&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Peer]</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="dt">PublicKey </span><span class="ot">=</span><span class="st"> &lt;Node_B_Public_Key&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">Endpoint </span><span class="ot">=</span><span class="st"> &lt;Node_B_Public_IP&gt;:51820</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Allow the tunnel subnet and OSPF multicast addresses (224.0.0.5, 224.0.0.6)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="dt">AllowedIPs </span><span class="ot">=</span><span class="st"> 10.10.10.0/30, 224.0.0.0/24</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="dt">PersistentKeepalive </span><span class="ot">=</span><span class="st"> </span><span class="dv">25</span></span></code></pre></div>
+<h4 id="node-b-configuration-etcwireguardwg0conf">Node B Configuration
+(<code>/etc/wireguard/wg0.conf</code>)</h4>
+<p>Create the WireGuard configuration file on Node B:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Interface]</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Address </span><span class="ot">=</span><span class="st"> 10.10.10.2/30</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="dt">ListenPort </span><span class="ot">=</span><span class="st"> </span><span class="dv">51820</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateKey </span><span class="ot">=</span><span class="st"> &lt;Node_B_Private_Key&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Peer]</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="dt">PublicKey </span><span class="ot">=</span><span class="st"> &lt;Node_A_Public_Key&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="dt">Endpoint </span><span class="ot">=</span><span class="st"> &lt;Node_A_Public_IP&gt;:51820</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="dt">AllowedIPs </span><span class="ot">=</span><span class="st"> 10.10.10.0/30, 224.0.0.0/24</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="dt">PersistentKeepalive </span><span class="ot">=</span><span class="st"> </span><span class="dv">25</span></span></code></pre></div>
+<h4 id="start-wireguard">Start WireGuard</h4>
+<p>Enable and start the tunnel on both nodes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> wg-quick@wg0</span></code></pre></div>
+<p>Verify connectivity by pinging across the tunnel:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On Node A</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> 10.10.10.2</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># On Node B</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> 10.10.10.1</span></code></pre></div>
+<hr />
+<h3 id="step-3-enable-packet-forwarding">Step 3: Enable Packet
+Forwarding</h3>
+<p>Enable IPv4 forwarding on both servers so they can route traffic
+between networks.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee <span class="at">-a</span> /etc/sysctl.d/99-ipforward.conf</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span> /etc/sysctl.d/99-ipforward.conf</span></code></pre></div>
+<hr />
+<h3 id="step-4-configure-frr-for-ospf">Step 4: Configure FRR for
+OSPF</h3>
+<h4 id="1-enable-the-ospf-daemon">1. Enable the OSPF Daemon</h4>
+<p>Edit <code>/etc/frr/daemons</code> on both servers and enable
+<code>ospfd</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">ospfd</span><span class="ot">=</span><span class="kw">yes</span></span></code></pre></div>
+<p>Restart FRR to load the daemon:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart frr</span></code></pre></div>
+<h4 id="2-configure-ospf-on-node-a">2. Configure OSPF on Node A</h4>
+<p>Open the integrated FRR shell on Node A:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vtysh</span></code></pre></div>
+<p>Run the following configuration commands:</p>
+<pre class="text"><code>configure terminal
+!
+interface wg0
+ ip ospf network point-to-point
+ ip ospf area 0.0.0.0
+!
+router ospf
+ ospf router-id 10.10.10.1
+ network 10.10.10.0/30 area 0.0.0.0
+ network 192.168.10.0/24 area 0.0.0.0
+!
+end
+write memory
+exit</code></pre>
+<p><em>(Replace <code>192.168.10.0/24</code> with the local subnet Node
+A should advertise).</em></p>
+<h4 id="3-configure-ospf-on-node-b">3. Configure OSPF on Node B</h4>
+<p>Open the integrated FRR shell on Node B:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vtysh</span></code></pre></div>
+<p>Run the following configuration commands:</p>
+<pre class="text"><code>configure terminal
+!
+interface wg0
+ ip ospf network point-to-point
+ ip ospf area 0.0.0.0
+!
+router ospf
+ ospf router-id 10.10.10.2
+ network 10.10.10.0/30 area 0.0.0.0
+ network 192.168.20.0/24 area 0.0.0.0
+!
+end
+write memory
+exit</code></pre>
+<p><em>(Replace <code>192.168.20.0/24</code> with the local subnet Node
+B should advertise).</em></p>
+<hr />
+<h3 id="step-5-verification">Step 5: Verification</h3>
+<p>Verify that the OSPF neighbor adjacency has formed.</p>
+<p>Inside <code>vtysh</code> on either node, execute:</p>
+<pre class="text"><code>show ip ospf neighbor</code></pre>
+<p>The output should display the peer's router ID with a state of
+<strong>Full</strong>:</p>
+<pre class="text"><code>Neighbor ID     Pri State           Dead Time Address         Interface
+10.10.10.2        1 Full/ -         00:00:34 10.10.10.2      wg0:10.10.10.1</code></pre>
+<p>Next, view the discovered routes:</p>
+<pre class="text"><code>show ip route ospf</code></pre>
+<p>You should see routes to the opposing node's local networks learned
+through the <code>wg0</code> interface. The Linux kernel routing table
+will also reflect these additions, enabling full end-to-end dynamic
+communication.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

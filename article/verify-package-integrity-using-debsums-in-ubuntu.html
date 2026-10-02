@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Package Integrity Using debsums in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to install and utilize the debsums utility in Ubuntu to verify the integrity of your installed packages. By comparing the current MD5 checksums of system files against the original checksums recorded at installation, debsums allow">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/verify-package-integrity-using-debsums-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Verify Package Integrity Using debsums in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/verify-package-integrity-using-debsums-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to install and utilize the debsums utility in Ubuntu to verify the integrity of your installed packages. By comparing the current MD5 checksums of system files against the original checksums recorded at installation, debsums allow" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="verify-package-integrity-using-debsums-in-ubuntu">Verify Package
+Integrity Using debsums in Ubuntu</h1>
+<p>This guide explains how to install and utilize the
+<code>debsums</code> utility in Ubuntu to verify the integrity of your
+installed packages. By comparing the current MD5 checksums of system
+files against the original checksums recorded at installation,
+<code>debsums</code> allows system administrators to quickly identify
+modified, corrupted, or potentially compromised binaries and
+configuration files across the operating system.</p>
+<h3 id="installing-debsums">Installing debsums</h3>
+<p>The <code>debsums</code> tool is not installed by default on Ubuntu
+systems. You can install it using the default package manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install debsums</span></code></pre></div>
+<p>During installation, you may be prompted to automatically run
+<code>debsums</code> weekly or generate checksums for packages that lack
+them. Choose the options that best match your administrative
+preferences.</p>
+<h3 id="checking-all-installed-packages">Checking All Installed
+Packages</h3>
+<p>To scan every installed package and output the status of each
+file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums</span></code></pre></div>
+<p>Because this command prints an entry for every verified file, the
+output can be overwhelming. To display only files that have been
+modified or failed verification, use the <code>-c</code> (changed)
+flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums <span class="at">-c</span></span></code></pre></div>
+<p>To suppress normal output and only display actual errors (such as
+missing files or failed checksums):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums <span class="at">-s</span></span></code></pre></div>
+<h3 id="checking-configuration-files">Checking Configuration Files</h3>
+<p>By default, <code>debsums</code> ignores configuration files located
+in <code>/etc</code> because they are expected to change during standard
+system administration. If you want to include configuration files in
+your integrity check, add the <code>-a</code> (all) flag:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums <span class="at">-a</span> <span class="at">-c</span></span></code></pre></div>
+<p>This command will report any file—including configuration files—that
+differs from its default post-installation state.</p>
+<h3 id="verifying-a-specific-package">Verifying a Specific Package</h3>
+<p>If you suspect an issue with a single service or tool, you can limit
+the verification process to that specific package by passing its
+name:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums apache2</span></code></pre></div>
+<p>To check only for modified files within that specific package:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> debsums <span class="at">-c</span> apache2</span></code></pre></div>
+<h3 id="restoring-modified-or-corrupted-files">Restoring Modified or
+Corrupted Files</h3>
+<p>If <code>debsums</code> flags critical system binaries that should
+not have been altered, you can restore them to their official state by
+reinstalling the affected package with <code>apt</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">--reinstall</span> <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;package-name&gt;</code> with the name of the
+package containing the modified files. After reinstallation, run
+<code>debsums</code> again on that package to confirm all files match
+their official checksums.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

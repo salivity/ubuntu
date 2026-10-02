@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Upgrade an Edubuntu Installation - ubuntu</title>
+    <meta name="description" content="Upgrading an Edubuntu system ensures access to the latest educational software, Linux kernel updates, and security patches. The recommended method for upgrading an Edubuntu installation is utilizing Ubuntu’s native release upgrade utility, which is ava">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-upgrade-an-edubuntu-installation">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Upgrade an Edubuntu Installation - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-upgrade-an-edubuntu-installation" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Upgrading an Edubuntu system ensures access to the latest educational software, Linux kernel updates, and security patches. The recommended method for upgrading an Edubuntu installation is utilizing Ubuntu’s native release upgrade utility, which is ava" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-upgrade-an-edubuntu-installation">How to Upgrade an
+Edubuntu Installation</h1>
+<p>Upgrading an Edubuntu system ensures access to the latest educational
+software, Linux kernel updates, and security patches. The recommended
+method for upgrading an Edubuntu installation is utilizing Ubuntu’s
+native release upgrade utility, which is available through both the
+command-line interface (CLI) and the graphical user interface (GUI).
+This article covers the essential preparation steps, the standard
+terminal-based upgrade process, and alternative desktop methods to
+safely transition your system to the newest version.</p>
+<h3 id="step-1-prepare-the-system-and-back-up-data">Step 1: Prepare the
+System and Back Up Data</h3>
+<p>Before initiating an upgrade, back up all critical student data,
+configuration files, and personal documents to an external drive or
+cloud storage. Next, update and upgrade all existing packages to their
+latest versions:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt full-upgrade <span class="at">-y</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt autoremove <span class="at">-y</span></span></code></pre></div>
+<p>Restart your computer if any kernel or system-level updates were
+installed during this process.</p>
+<h3 id="step-2-configure-the-release-target">Step 2: Configure the
+Release Target</h3>
+<p>Ensure the release upgrader is configured to check for the correct
+release type (either Long Term Support (LTS) releases or normal point
+releases).</p>
+<p>Open the configuration file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/update-manager/release-upgrades</span></code></pre></div>
+<p>Set the <code>Prompt=</code> line to:</p>
+<ul>
+<li><code>lts</code> if you only want to upgrade to the next Long Term
+Support version (recommended for schools and production
+environments).</li>
+<li><code>normal</code> if you wish to upgrade to any newer interim
+release.</li>
+</ul>
+<p>Save the file and exit the editor.</p>
+<h3 id="step-3-run-the-command-line-upgrade-recommended">Step 3: Run the
+Command-Line Upgrade (Recommended)</h3>
+<p>The terminal method is the most reliable approach for upgrading
+Edubuntu, as it minimizes graphical desktop crashes during the package
+migration.</p>
+<ol type="1">
+<li><p>Ensure the <code>update-manager-core</code> package is
+installed:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install update-manager-core</span></code></pre></div></li>
+<li><p>Start the upgrade process:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> do-release-upgrade</span></code></pre></div>
+<p><em>(Note: If you are upgrading shortly after a new release is
+published and it has not yet been enabled globally, you can force the
+check using <code>sudo do-release-upgrade -d</code>.)</em></p></li>
+<li><p>Follow the on-screen instructions. The installer will calculate
+dependencies, prompt for confirmation, and notify you of any
+configuration files that require manual input.</p></li>
+<li><p>When prompted to remove obsolete packages, select <code>y</code>
+(Yes) to clean up legacy dependencies.</p></li>
+<li><p>Once the process completes, confirm the system reboot.</p></li>
+</ol>
+<h3 id="alternative-method-graphical-user-interface-upgrade">Alternative
+Method: Graphical User Interface Upgrade</h3>
+<p>If you prefer using the desktop interface:</p>
+<ol type="1">
+<li>Open the terminal and launch the graphical update manager:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">update-manager</span> <span class="at">-c</span></span></code></pre></div></li>
+<li>The <strong>Software Updater</strong> window will appear, checking
+for updates.</li>
+<li>If a new Edubuntu version is available, a prompt will state that a
+new distribution release is ready.</li>
+<li>Click <strong>Upgrade...</strong> and follow the step-by-step
+wizard.</li>
+<li>Restart the computer once the installation finishes.</li>
+</ol>
+<h3 id="step-4-verify-the-upgrade">Step 4: Verify the Upgrade</h3>
+<p>After rebooting, log in to your Edubuntu desktop and confirm that the
+system successfully upgraded by running:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsb_release</span> <span class="at">-a</span></span></code></pre></div>
+<p>The output should reflect the target version of Ubuntu/Edubuntu.
+Verify that Edubuntu educational desktop meta-packages (such as
+<code>edubuntu-desktop-minimal</code> or <code>edubuntu-desktop</code>)
+remain intact and functioning properly.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

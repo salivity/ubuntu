@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How vnStat Daemon Tracks Network Bandwidth on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains the role of the vnStat daemon (vnstatd) in logging and preserving historical network bandwidth usage on Ubuntu systems. It covers how the background service collects traffic metrics from the Linux kernel, stores historical records i">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-vn-stat-daemon-tracks-network-bandwidth-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How vnStat Daemon Tracks Network Bandwidth on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-vn-stat-daemon-tracks-network-bandwidth-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of the vnStat daemon (vnstatd) in logging and preserving historical network bandwidth usage on Ubuntu systems. It covers how the background service collects traffic metrics from the Linux kernel, stores historical records i" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-vnstat-daemon-tracks-network-bandwidth-on-ubuntu">How vnStat
+Daemon Tracks Network Bandwidth on Ubuntu</h1>
+<p>This article explains the role of the vnStat daemon
+(<code>vnstatd</code>) in logging and preserving historical network
+bandwidth usage on Ubuntu systems. It covers how the background service
+collects traffic metrics from the Linux kernel, stores historical
+records in a persistent database without packet sniffing, and enables
+administrators to analyze hourly, daily, and monthly usage trends
+reliably across system reboots.</p>
+<h2 id="what-is-the-vnstat-daemon">What is the vnStat Daemon?</h2>
+<p>The vnStat tool is split into two primary components: the
+command-line utility (<code>vnstat</code>) used to query and view
+reports, and the background daemon (<code>vnstatd</code>) responsible
+for the actual continuous data collection.</p>
+<p>Unlike traditional packet-sniffing monitors that intercept and
+inspect individual network packets—consuming significant CPU and
+memory—<code>vnstatd</code> operates as a lightweight metric collector.
+It periodically reads the standard network interface counters exposed by
+the Linux kernel via the <code>/proc/net/dev</code> virtual
+filesystem.</p>
+<h2 id="core-roles-of-vnstatd-in-bandwidth-logging">Core Roles of
+vnstatd in Bandwidth Logging</h2>
+<h3 id="1-periodic-metric-sampling">1. Periodic Metric Sampling</h3>
+<p>The daemon runs continuously in the background, waking at regular
+intervals defined in its configuration file
+(<code>/etc/vnstat.conf</code>). During each cycle, it queries the bytes
+received (RX) and transmitted (TX) for all monitored interfaces. Because
+it samples kernel counters rather than intercepting live traffic, it
+introduces virtually zero CPU overhead, making it ideal for low-powered
+virtual private servers (VPS) and high-throughput servers alike.</p>
+<h3 id="2-historical-data-aggregation">2. Historical Data
+Aggregation</h3>
+<p>Kernel counters reset to zero whenever an interface goes down or the
+server reboots. The primary responsibility of <code>vnstatd</code> is to
+maintain continuity despite these resets. It computes the delta (the
+difference between the current and previous sample) and aggregates these
+figures into structured historical categories:</p>
+<ul>
+<li><strong>Five-minute and hourly intervals:</strong> Captures
+short-term spikes and intraday trends.</li>
+<li><strong>Daily summaries:</strong> Retains standard day-by-day
+transfer totals.</li>
+<li><strong>Monthly and yearly archives:</strong> Consolidates daily
+totals to help monitor long-term trends and billing-cycle data
+caps.</li>
+<li><strong>Top usage days:</strong> Automatically records peak
+bandwidth consumption events.</li>
+</ul>
+<h3 id="3-persistent-database-storage">3. Persistent Database
+Storage</h3>
+<p>Modern versions of vnStat on Ubuntu store traffic logs in an SQLite
+database (typically located at <code>/var/lib/vnstat/vnstat.db</code>).
+To protect solid-state drives and storage media from excessive write
+wear, <code>vnstatd</code> keeps current counters in memory and
+periodically flushes aggregated changes to the disk. It also ensures an
+immediate flush occurs when the system signals a clean shutdown or
+reboot.</p>
+<h2 id="managing-the-service-on-ubuntu">Managing the Service on
+Ubuntu</h2>
+<p>On Ubuntu systems, <code>vnstatd</code> runs as a
+<code>systemd</code> background service named
+<code>vnstat.service</code>. Once installed via the <code>apt</code>
+package manager, the daemon starts automatically and enables monitoring
+on all active interfaces by default.</p>
+<p>Administrators can control the daemon using standard system
+commands:</p>
+<ul>
+<li><strong>Check daemon status:</strong>
+<code>sudo systemctl status vnstat</code></li>
+<li><strong>Restart the service:</strong>
+<code>sudo systemctl restart vnstat</code></li>
+<li><strong>Force an immediate write to disk:</strong>
+<code>sudo killall -HUP vnstatd</code></li>
+</ul>
+<p>Once <code>vnstatd</code> is running and collecting data,
+administrators invoke the front-end <code>vnstat</code> command with
+various flags (such as <code>-h</code> for hourly, <code>-d</code> for
+daily, or <code>-m</code> for monthly) to render the historical logs
+managed by the background daemon.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

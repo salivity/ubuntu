@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure YubiKey Login on Ubuntu Desktop - ubuntu</title>
+    <meta name="description" content="Securing your Ubuntu workstation with multi-factor authentication significantly reduces the risk of unauthorized physical access. This guide provides a step-by-step walkthrough for configuring Pluggable Authentication Modules (PAM) to require a hardware">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-yubi-key-login-on-ubuntu-desktop">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure YubiKey Login on Ubuntu Desktop - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-yubi-key-login-on-ubuntu-desktop" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing your Ubuntu workstation with multi-factor authentication significantly reduces the risk of unauthorized physical access. This guide provides a step-by-step walkthrough for configuring Pluggable Authentication Modules (PAM) to require a hardware" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-yubikey-login-on-ubuntu-desktop">Configure YubiKey
+Login on Ubuntu Desktop</h1>
+<p>Securing your Ubuntu workstation with multi-factor authentication
+significantly reduces the risk of unauthorized physical access. This
+guide provides a step-by-step walkthrough for configuring Pluggable
+Authentication Modules (PAM) to require a hardware YubiKey via the
+FIDO2/U2F standard alongside your password to log in to the Ubuntu
+desktop environment.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>An Ubuntu desktop installation (20.04 LTS, 22.04 LTS, or
+newer).</li>
+<li>A functional YubiKey supporting FIDO/U2F.</li>
+<li>Sudo privileges on the machine.</li>
+</ul>
+<h3 id="step-1-install-required-dependencies">Step 1: Install Required
+Dependencies</h3>
+<p>Ubuntu provides the Universal 2nd Factor (U2F) PAM module within its
+default repositories. Open a terminal and install the module:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libpam-u2f <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-register-your-yubikey">Step 2: Register Your YubiKey</h3>
+<p>You must associate your YubiKey with your Ubuntu user account by
+creating an authentication configuration file.</p>
+<ol type="1">
+<li>Insert your YubiKey into an available USB port.</li>
+<li>Create the configuration directory:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.config/Yubico</span></code></pre></div>
+<ol start="3" type="1">
+<li>Generate the key mapping using the <code>pamu2fcfg</code>
+utility:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pamu2fcfg</span> <span class="op">&gt;</span> ~/.config/Yubico/u2f_keys</span></code></pre></div>
+<p>When your YubiKey begins flashing, touch the metal contact to
+complete the registration.</p>
+<p><em>(Optional)</em> If you have a backup YubiKey, insert it and
+append its credentials to the same file:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pamu2fcfg</span> <span class="at">-n</span> <span class="op">&gt;&gt;</span> ~/.config/Yubico/u2f_keys</span></code></pre></div>
+<h3 id="step-3-test-pam-configuration-with-sudo">Step 3: Test PAM
+Configuration with Sudo</h3>
+<p>Before altering the desktop login manager, test the configuration on
+the <code>sudo</code> service to ensure your key works properly and
+prevent accidental lockouts.</p>
+<ol type="1">
+<li>Open <code>/etc/pam.d/sudo</code> in a text editor:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/pam.d/sudo</span></code></pre></div>
+<ol start="2" type="1">
+<li>Add the following line directly after
+<code>@include common-auth</code>:</li>
+</ol>
+<pre class="text"><code>auth required pam_u2f.so</code></pre>
+<ol start="3" type="1">
+<li>Save and exit (<code>Ctrl+O</code>, <code>Enter</code>,
+<code>Ctrl+X</code>).</li>
+<li>Open a new terminal window (keep the original open) and run:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-k</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ls</span></code></pre></div>
+<p>Enter your password. When prompted (or when the key flashes), touch
+your YubiKey. If authentication succeeds, the module is working
+correctly.</p>
+<h3 id="step-4-enforce-yubikey-for-desktop-login">Step 4: Enforce
+YubiKey for Desktop Login</h3>
+<p>Ubuntu uses the GNOME Display Manager (GDM) by default. To require
+the YubiKey at the desktop login screen:</p>
+<ol type="1">
+<li>Open the GDM password configuration file:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/pam.d/gdm-password</span></code></pre></div>
+<ol start="2" type="1">
+<li>Locate the line containing <code>@include common-auth</code>. Add
+the U2F module line immediately below it:</li>
+</ol>
+<pre class="text"><code>auth required pam_u2f.so</code></pre>
+<p><em>Note: Placing <code>auth required pam_u2f.so</code> after
+<code>@include common-auth</code> ensures the system prompts for your
+user password first, followed by a request to touch the
+YubiKey.</em></p>
+<ol start="3" type="1">
+<li>Save and close the file.</li>
+</ol>
+<h3 id="step-5-verify-the-setup">Step 5: Verify the Setup</h3>
+<ol type="1">
+<li>Keep a terminal session open with root or sudo access.</li>
+<li>Lock your desktop screen (<code>Super + L</code>).</li>
+<li>Enter your password to unlock. The YubiKey should flash; tap it to
+gain access.</li>
+<li>If authentication fails, switch to a virtual terminal
+(<code>Ctrl + Alt + F3</code>), log in, and revert changes in
+<code>/etc/pam.d/gdm-password</code>.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

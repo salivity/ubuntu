@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Migrate Ubuntu VMware VM to AWS EC2 - ubuntu</title>
+    <meta name="description" content="Migrating an on-premises Ubuntu VMware virtual machine to AWS EC2 allows organizations to leverage the scalability and reliability of the cloud without re-architecting their existing workloads. This guide outlines the two primary methods for migration: u">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-migrate-ubuntu-v-mware-vm-to-aws-ec-2">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Migrate Ubuntu VMware VM to AWS EC2 - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-migrate-ubuntu-v-mware-vm-to-aws-ec-2" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Migrating an on-premises Ubuntu VMware virtual machine to AWS EC2 allows organizations to leverage the scalability and reliability of the cloud without re-architecting their existing workloads. This guide outlines the two primary methods for migration: u" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-migrate-ubuntu-vmware-vm-to-aws-ec2">How to Migrate
+Ubuntu VMware VM to AWS EC2</h1>
+<p>Migrating an on-premises Ubuntu VMware virtual machine to AWS EC2
+allows organizations to leverage the scalability and reliability of the
+cloud without re-architecting their existing workloads. This guide
+outlines the two primary methods for migration: using the automated AWS
+Application Migration Service (AWS MGN) for minimal downtime, and using
+the manual AWS VM Import/Export tool for file-based transfers. Following
+these structured steps will ensure system compatibility, data integrity,
+and a seamless cutover to the AWS environment.</p>
+<h2
+id="method-1-using-aws-application-migration-service-recommended">Method
+1: Using AWS Application Migration Service (Recommended)</h2>
+<p>AWS Application Migration Service (AWS MGN) is the primary service
+recommended by AWS for lift-and-shift migrations. It continuously
+replicates block-level data from the source server to AWS, minimizing
+cutover downtime.</p>
+<h3 id="step-1-prepare-the-ubuntu-source-vm">Step 1: Prepare the Ubuntu
+Source VM</h3>
+<ol type="1">
+<li>Ensure the VM has internet access to communicate with AWS MGN
+service endpoints.</li>
+<li>Verify outbound TCP port 443 (HTTPS to AWS endpoints) and TCP port
+1500 (data replication to the replication server) are open.</li>
+<li>Install Python 3 on the Ubuntu machine:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> python3</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-configure-aws-mgn">Step 2: Configure AWS MGN</h3>
+<ol type="1">
+<li>Log in to the AWS Management Console and navigate to <strong>AWS
+Application Migration Service</strong>.</li>
+<li>Click <strong>Get Started</strong> to initialize the service and
+create the required IAM roles.</li>
+<li>Define the <strong>Replication Settings</strong>, specifying the
+target VPC, subnet, and staging area disk types.</li>
+</ol>
+<h3 id="step-3-install-the-aws-replication-agent">Step 3: Install the
+AWS Replication Agent</h3>
+<ol type="1">
+<li>In the MGN console, select <strong>Add servers</strong> to generate
+the installation command.</li>
+<li>Download the installer onto your Ubuntu VM:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-O</span> ./aws-replication-installer-init.py https://aws-application-migration-service-<span class="op">&lt;</span>region<span class="op">&gt;</span>.s3.amazonaws.com/latest/linux/aws-replication-installer-init.py</span></code></pre></div></li>
+<li>Run the installer using an AWS IAM user's credentials with
+<code>AWSApplicationMigrationAgentPolicy</code> attached:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> python3 aws-replication-installer-init.py <span class="at">--region</span> <span class="op">&lt;</span>region<span class="op">&gt;</span> --aws-access-key-id <span class="op">&lt;</span>ACCESS_KEY<span class="op">&gt;</span> --aws-secret-access-key <span class="op">&lt;</span>SECRET_KEY<span class="op">&gt;</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-4-replicate-test-and-cutover">Step 4: Replicate, Test, and
+Cutover</h3>
+<ol type="1">
+<li><strong>Initial Sync:</strong> Once installed, the agent begins
+replicating your Ubuntu VM disks to AWS. Monitor progress in the MGN
+console until the status reads <strong>Ready for testing</strong>.</li>
+<li><strong>Launch Test Instance:</strong> Select the server and choose
+<strong>Launch test instances</strong>. Verify that the instance boots
+correctly, applications run as expected, and network settings are
+functional.</li>
+<li><strong>Cutover:</strong> When ready for final migration, shut down
+non-essential services on the source VM, choose <strong>Launch cutover
+instances</strong>, and finalize the cutover in the console.</li>
+</ol>
+<hr />
+<h2 id="method-2-using-aws-vm-importexport">Method 2: Using AWS VM
+Import/Export</h2>
+<p>If automated agent-based replication is not suitable, you can export
+the VM from VMware vSphere as an image file and import it directly as an
+Amazon Machine Image (AMI).</p>
+<h3 id="step-1-prepare-the-ubuntu-vm-for-export">Step 1: Prepare the
+Ubuntu VM for Export</h3>
+<ol type="1">
+<li>Enable the SSH service and ensure password or key-based access is
+configured.</li>
+<li>Install cloud-init to handle EC2 initialization:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> cloud-init</span></code></pre></div></li>
+<li>Verify that GRUB is configured to use legacy naming or predictable
+network interface names, and remove any static IP configurations.</li>
+</ol>
+<h3 id="step-2-export-from-vmware">Step 2: Export from VMware</h3>
+<ol type="1">
+<li>In vSphere Client, shut down the Ubuntu VM.</li>
+<li>Right-click the VM, navigate to <strong>Template</strong>, and
+select <strong>Export OVF Template</strong>.</li>
+<li>Select <strong>OVA</strong> format or export raw
+<strong>VMDK</strong> files.</li>
+</ol>
+<h3 id="step-3-upload-image-to-amazon-s3">Step 3: Upload Image to Amazon
+S3</h3>
+<ol type="1">
+<li>Create an Amazon S3 bucket in your target region.</li>
+<li>Upload the exported <code>.ova</code> or <code>.vmdk</code> file
+using the AWS CLI:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 cp /path/to/exported-vm.ova s3://your-migration-bucket/</span></code></pre></div></li>
+</ol>
+<h3 id="step-4-configure-the-vmimport-service-role">Step 4: Configure
+the vmimport Service Role</h3>
+<ol type="1">
+<li>Create a file named <code>trust-policy.json</code>:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>   <span class="dt">&quot;Version&quot;</span><span class="fu">:</span> <span class="st">&quot;2012-10-17&quot;</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>   <span class="dt">&quot;Statement&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         <span class="dt">&quot;Effect&quot;</span><span class="fu">:</span> <span class="st">&quot;Allow&quot;</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="dt">&quot;Principal&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;Service&quot;</span><span class="fu">:</span> <span class="st">&quot;vmie.amazonaws.com&quot;</span> <span class="fu">},</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="dt">&quot;Action&quot;</span><span class="fu">:</span> <span class="st">&quot;sts:AssumeRole&quot;</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>         <span class="dt">&quot;Condition&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;StringEquals&quot;</span><span class="fu">:{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>               <span class="dt">&quot;sts:ExternalId&quot;</span><span class="fu">:</span> <span class="st">&quot;vmimport&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="fu">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>         <span class="fu">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>   <span class="ot">]</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div></li>
+<li>Create the IAM role:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> iam create-role <span class="at">--role-name</span> vmimport <span class="at">--assume-role-policy-document</span> file://trust-policy.json</span></code></pre></div></li>
+<li>Attach a role policy granting access to read from your S3 bucket and
+convert the image.</li>
+</ol>
+<h3 id="step-5-execute-the-import-task">Step 5: Execute the Import
+Task</h3>
+<ol type="1">
+<li>Create a <code>containers.json</code> file defining the source
+image:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;Description&quot;</span><span class="fu">:</span> <span class="st">&quot;Ubuntu VM Import&quot;</span><span class="fu">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;Format&quot;</span><span class="fu">:</span> <span class="st">&quot;ova&quot;</span><span class="fu">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;UserBucket&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;S3Bucket&quot;</span><span class="fu">:</span> <span class="st">&quot;your-migration-bucket&quot;</span><span class="fu">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;S3Key&quot;</span><span class="fu">:</span> <span class="st">&quot;exported-vm.ova&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div></li>
+<li>Start the import process:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> ec2 import-image <span class="at">--description</span> <span class="st">&quot;Ubuntu VMware Migration&quot;</span> <span class="at">--disk-containers</span> file://containers.json</span></code></pre></div></li>
+<li>Track the task status using the <code>ImportTaskId</code> returned:
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> ec2 describe-import-image-tasks <span class="at">--import-image-task-ids</span> <span class="op">&lt;</span>task-id<span class="op">&gt;</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-6-launch-the-ec2-instance">Step 6: Launch the EC2
+Instance</h3>
+<p>Once the task status changes to <code>completed</code>, an AMI ID is
+generated. Navigate to the <strong>EC2 AMIs</strong> console, select the
+imported AMI, and launch your new EC2 instance with your chosen instance
+type, VPC, and security group.</p>
+<hr />
+<h2 id="post-migration-steps">Post-Migration Steps</h2>
+<ol type="1">
+<li><strong>Install AWS Systems Manager (SSM) Agent:</strong> Ensures
+remote management capabilities without requiring open SSH ports.</li>
+<li><strong>Remove VMware Tools:</strong> Uninstall the legacy
+hypervisor integration tools from the Ubuntu system:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt purge <span class="at">-y</span> open-vm-tools</span></code></pre></div></li>
+<li><strong>Verify Networking and DNS:</strong> Assign Elastic IPs if
+needed and update external DNS records to point to the new EC2
+instance.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

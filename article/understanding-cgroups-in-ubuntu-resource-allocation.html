@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding cgroups in Ubuntu Resource Allocation - ubuntu</title>
+    <meta name="description" content="Control groups, commonly known as cgroups, are a Linux kernel feature that allows administrators to organize processes into hierarchical groups to monitor, meter, and restrict their system resource usage. In Ubuntu, cgroups serve as the foundational mech">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/understanding-cgroups-in-ubuntu-resource-allocation">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Understanding cgroups in Ubuntu Resource Allocation - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/understanding-cgroups-in-ubuntu-resource-allocation" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Control groups, commonly known as cgroups, are a Linux kernel feature that allows administrators to organize processes into hierarchical groups to monitor, meter, and restrict their system resource usage. In Ubuntu, cgroups serve as the foundational mech" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1
+id="understanding-cgroups-in-ubuntu-resource-allocation">Understanding
+cgroups in Ubuntu Resource Allocation</h1>
+<p>Control groups, commonly known as cgroups, are a Linux kernel feature
+that allows administrators to organize processes into hierarchical
+groups to monitor, meter, and restrict their system resource usage. In
+Ubuntu, cgroups serve as the foundational mechanism for resource
+allocation, ensuring that critical system services, user applications,
+and containers receive balanced access to finite hardware resources like
+CPU, memory, disk I/O, and network bandwidth. By preventing individual
+processes from exhausting system capacity, cgroups guarantee stability,
+multi-tenant fairness, and predictable performance across the operating
+system.</p>
+<h2 id="core-functions-of-cgroups">Core Functions of cgroups</h2>
+<p>The implementation of cgroups in Ubuntu revolves around four distinct
+functional pillars:</p>
+<h3 id="1-resource-limiting">1. Resource Limiting</h3>
+<p>cgroups enforce hard and soft boundaries on how much of a specific
+hardware resource a collection of processes can consume.</p>
+<ul>
+<li><strong>Memory:</strong> Administrators can set limits on physical
+RAM and swap space. If a group exceeds its allotted memory, the kernel
+can throttle it or trigger an Out-Of-Memory (OOM) killer targeted
+specifically at that group rather than terminating critical system-wide
+processes.</li>
+<li><strong>CPU:</strong> Using the Completely Fair Scheduler (CFS)
+bandwidth control, cgroups limit the quota of CPU time a group can
+consume during a given period.</li>
+<li><strong>Block I/O:</strong> Limits can be placed on read and write
+throughput or input/output operations per second (IOPS) for specific
+storage devices.</li>
+</ul>
+<h3 id="2-prioritization-and-share-allocation">2. Prioritization and
+Share Allocation</h3>
+<p>Instead of rigid ceilings, cgroups can assign proportional weights to
+different tasks. When resource contention occurs:</p>
+<ul>
+<li>A high-priority group (such as a database service) can be configured
+with higher CPU shares than background tasks (such as log
+indexing).</li>
+<li>The kernel dynamically distributes resources based on these relative
+weights, ensuring mission-critical processes operate smoothly under
+heavy load.</li>
+</ul>
+<h3 id="3-accounting-and-monitoring">3. Accounting and Monitoring</h3>
+<p>cgroups provide real-time metrics detailing resource consumption at
+the group level. Ubuntu administrators can track:</p>
+<ul>
+<li>Total CPU time consumed across all threads in a group.</li>
+<li>Current and peak memory usage, including cache and swap
+utilization.</li>
+<li>Total I/O operations executed on block devices.</li>
+</ul>
+<p>These metrics enable continuous performance analysis, capacity
+planning, and usage-based billing in multi-user environments.</p>
+<h3 id="4-process-control">4. Process Control</h3>
+<p>cgroups allow actions to be executed across an entire tree of
+processes simultaneously. For example, using the freezer subsystem, an
+administrator can suspend (freeze) an entire application stack and its
+child processes, create a snapshot or backup, and resume it without
+altering the internal state of individual processes. Similarly, all
+child processes of an application can be safely terminated at once,
+eliminating orphaned "zombie" processes.</p>
+<h2 id="role-in-systemd-and-containers">Role in systemd and
+Containers</h2>
+<p>In modern Ubuntu releases, cgroups are integrated directly with
+<strong>systemd</strong> and default to the unified <strong>cgroups
+v2</strong> architecture. Every systemd unit (services, scopes, and
+slices) automatically runs inside its own control group. This enables
+administrators to define resource constraints directly inside systemd
+service files using directives like <code>MemoryMax=</code>,
+<code>CPUQuota=</code>, and <code>IOReadBandwidthMax=</code>.</p>
+<p>Furthermore, cgroups are the enabling technology behind
+containerization platforms on Ubuntu, including Docker, containerd, and
+LXD. While Linux namespaces isolate what a container can <em>see</em>
+(such as filesystems and network interfaces), cgroups enforce what a
+container can <em>use</em>, preventing containerized workloads from
+compromising the host operating system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

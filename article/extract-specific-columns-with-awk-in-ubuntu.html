@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Specific Columns with Awk in Ubuntu - ubuntu</title>
+    <meta name="description" content="The awk command is a standard, versatile text-processing utility in Ubuntu designed to parse and manipulate structured data. Its primary role in column extraction is reading input line by line, automatically dividing each line into fields based on delimi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/extract-specific-columns-with-awk-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Extract Specific Columns with Awk in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/extract-specific-columns-with-awk-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The awk command is a standard, versatile text-processing utility in Ubuntu designed to parse and manipulate structured data. Its primary role in column extraction is reading input line by line, automatically dividing each line into fields based on delimi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="extract-specific-columns-with-awk-in-ubuntu">Extract Specific
+Columns with Awk in Ubuntu</h1>
+<p>The <code>awk</code> command is a standard, versatile text-processing
+utility in Ubuntu designed to parse and manipulate structured data. Its
+primary role in column extraction is reading input line by line,
+automatically dividing each line into fields based on delimiters, and
+allowing users to select, reorder, or format specific columns using
+simple commands. This article covers how <code>awk</code> identifies
+fields, the basic syntax for extracting data, and practical examples for
+handling common column-extraction tasks.</p>
+<h3 id="how-awk-identifies-columns">How Awk Identifies Columns</h3>
+<p>By default, <code>awk</code> treats whitespace (spaces and tabs) as
+the delimiter separating columns. When it processes a line, it
+automatically assigns each column to a built-in variable:</p>
+<ul>
+<li><code>$0</code> represents the entire line.</li>
+<li><code>$1</code> represents the first column.</li>
+<li><code>$2</code> represents the second column, and so on.</li>
+<li><code>$NF</code> represents the last column of the line.</li>
+</ul>
+<h3 id="basic-syntax-for-column-extraction">Basic Syntax for Column
+Extraction</h3>
+<p>To print a single column from a file, use the following syntax:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;{print $1}&#39;</span> filename.txt</span></code></pre></div>
+<p>To extract multiple columns, separate the field variables with
+commas:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;{print $1, $3}&#39;</span> filename.txt</span></code></pre></div>
+<p>The comma ensures the output preserves space between the selected
+columns.</p>
+<h3 id="handling-custom-delimiters">Handling Custom Delimiters</h3>
+<p>If a file uses a character other than whitespace to separate
+columns—such as a comma in a CSV file or a colon in a system file—the
+<code>-F</code> option specifies the custom delimiter.</p>
+<p>To extract usernames (column 1) and user IDs (column 3) from the
+Ubuntu <code>/etc/passwd</code> file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&#39;:&#39;</span> <span class="st">&#39;{print $1, $3}&#39;</span> /etc/passwd</span></code></pre></div>
+<p>For comma-separated values (<code>data.csv</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&#39;,&#39;</span> <span class="st">&#39;{print $2}&#39;</span> data.csv</span></code></pre></div>
+<h3 id="formatting-output">Formatting Output</h3>
+<p>You can insert custom strings or formatting directly into the
+extraction command:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;{print &quot;User: &quot; $1 &quot;\tID: &quot; $2}&#39;</span> users.txt</span></code></pre></div>
+<p>This prefixes the first column with "User: ", places a tab space, and
+prefixes the second column with "ID: ".</p>
+<h3 id="extracting-columns-based-on-conditions">Extracting Columns Based
+on Conditions</h3>
+<p><code>awk</code> also allows conditional filtering, meaning it only
+extracts columns from lines that meet specific criteria:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;$3 &gt; 50 {print $1, $3}&#39;</span> scores.txt</span></code></pre></div>
+<p>This command inspects the third column and only prints the first and
+third columns if the value in the third column exceeds 50.</p>
+<h3 id="extracting-the-last-column">Extracting the Last Column</h3>
+<p>When working with lines containing varying numbers of columns,
+<code>$NF</code> dynamically targets the final column without needing to
+know the exact column count:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;{print $NF}&#39;</span> filename.txt</span></code></pre></div>
+<p>Through these features, <code>awk</code> provides a lightweight,
+dependency-free solution for stream processing and column extraction
+directly from the Ubuntu terminal.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

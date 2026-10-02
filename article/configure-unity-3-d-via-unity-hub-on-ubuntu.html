@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Unity 3D via Unity Hub on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide covers the complete workflow for setting up the Unity 3D game engine on Ubuntu using the official Unity Hub management tool. You will learn how to add the official Unity repository, install Unity Hub via the terminal, activate a license, insta">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-unity-3-d-via-unity-hub-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Unity 3D via Unity Hub on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-unity-3-d-via-unity-hub-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide covers the complete workflow for setting up the Unity 3D game engine on Ubuntu using the official Unity Hub management tool. You will learn how to add the official Unity repository, install Unity Hub via the terminal, activate a license, insta" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-unity-3d-via-unity-hub-on-ubuntu">Configure Unity 3D
+via Unity Hub on Ubuntu</h1>
+<p>This guide covers the complete workflow for setting up the Unity 3D
+game engine on Ubuntu using the official Unity Hub management tool. You
+will learn how to add the official Unity repository, install Unity Hub
+via the terminal, activate a license, install an LTS version of the
+Unity Editor, and add essential build modules to begin game development
+on Linux.</p>
+<h3 id="step-1-add-the-unity-hub-repository">Step 1: Add the Unity Hub
+Repository</h3>
+<p>Unity provides an official Debian/Ubuntu repository for Unity Hub.
+Open your terminal and add the public signing key and repository to your
+system:</p>
+<ol type="1">
+<li><p>Import the Unity GPG key:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-qO</span> <span class="at">-</span> https://hub.unity3d.com/linux/keys/public <span class="kw">|</span> <span class="ex">gpg</span> <span class="at">--dearmor</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /usr/share/keyrings/Unity_Technologies_ApS.gpg <span class="op">&gt;</span> /dev/null</span></code></pre></div></li>
+<li><p>Add the repository to your sources list:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sh <span class="at">-c</span> <span class="st">&#39;echo &quot;deb [signed-by=/usr/share/keyrings/Unity_Technologies_ApS.gpg] https://hub.unity3d.com/linux/repos/deb stable main&quot; &gt; /etc/apt/sources.list.d/unityhub.list&#39;</span></span></code></pre></div></li>
+<li><p>Update the package index:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-install-unity-hub">Step 2: Install Unity Hub</h3>
+<p>Install the Unity Hub application using the standard package
+manager:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install unityhub <span class="at">-y</span></span></code></pre></div>
+<p>Once installation completes, launch the application from your
+application menu or by running <code>unityhub</code> in the
+terminal.</p>
+<h3 id="step-3-sign-in-and-activate-a-license">Step 3: Sign In and
+Activate a License</h3>
+<p>Before downloading the editor, Unity Hub requires authentication and
+license activation:</p>
+<ol type="1">
+<li>Launch <strong>Unity Hub</strong>.</li>
+<li>Click <strong>Sign In</strong> in the top-left corner and log in
+with your Unity ID credentials (or create an account if you do not have
+one).</li>
+<li>Click the <strong>Gear icon (Preferences)</strong> in the top-right
+corner.</li>
+<li>Select <strong>Licenses</strong> from the left-hand menu.</li>
+<li>Click <strong>Add License</strong>, select <strong>Get a free
+personal license</strong> (or activate a Pro/Enterprise serial number),
+and accept the terms of service.</li>
+</ol>
+<h3 id="step-4-install-the-unity-editor">Step 4: Install the Unity
+Editor</h3>
+<ol type="1">
+<li>Return to the main window and select the <strong>Installs</strong>
+tab on the left sidebar.</li>
+<li>Click the <strong>Install Editor</strong> button.</li>
+<li>Select an official release. It is recommended to choose the latest
+<strong>LTS (Long Term Support)</strong> version for stability.</li>
+<li>Click <strong>Install</strong>.</li>
+</ol>
+<h3 id="step-5-configure-build-support-and-modules">Step 5: Configure
+Build Support and Modules</h3>
+<p>During or after the editor installation prompt, select the platform
+modules required for your projects:</p>
+<ul>
+<li><strong>Linux Build Support (IL2CPP / Mono):</strong> Required for
+building standalone Linux binaries.</li>
+<li><strong>Android / WebGL / Windows Build Support:</strong> Select any
+additional target platforms you plan to deploy to.</li>
+<li><strong>Documentation:</strong> Offline access to Unity API
+documentation.</li>
+</ul>
+<p>Click <strong>Continue</strong>, accept any license agreements for
+third-party components (such as Android SDK/NDK), and allow the
+installation to complete.</p>
+<h3 id="step-6-verify-and-configure-system-dependencies">Step 6: Verify
+and Configure System Dependencies</h3>
+<p>To ensure the editor runs without graphics or compilation issues,
+ensure your system has proper graphics drivers and essential
+libraries:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install build-essential clang libglu1-mesa <span class="at">-y</span></span></code></pre></div>
+<p>For systems with NVIDIA GPUs, ensure proprietary drivers are
+installed via the <strong>Additional Drivers</strong> utility in
+Ubuntu.</p>
+<h3 id="step-7-create-a-new-project">Step 7: Create a New Project</h3>
+<ol type="1">
+<li>Click on the <strong>Projects</strong> tab in Unity Hub.</li>
+<li>Click <strong>New Project</strong>.</li>
+<li>Select an editor version and project template (such as 2D Core, 3D
+Core, or Universal Render Pipeline).</li>
+<li>Assign a project name, choose a local directory on your filesystem,
+and click <strong>Create project</strong>.</li>
+</ol>
+<p>The Unity Editor will initialize and launch your configured Linux
+development environment.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using PowerTOP to Find Power-Hungry Processes on Ubuntu - ubuntu</title>
+    <meta name="description" content="The PowerTOP utility is a specialized Linux diagnostic tool developed by Intel designed to monitor, analyze, and diagnose power consumption on Ubuntu systems. This article explains how PowerTOP works, its key role in identifying background processes and">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-power-top-to-find-power-hungry-processes-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using PowerTOP to Find Power-Hungry Processes on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-power-top-to-find-power-hungry-processes-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The PowerTOP utility is a specialized Linux diagnostic tool developed by Intel designed to monitor, analyze, and diagnose power consumption on Ubuntu systems. This article explains how PowerTOP works, its key role in identifying background processes and" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-powertop-to-find-power-hungry-processes-on-ubuntu">Using
+PowerTOP to Find Power-Hungry Processes on Ubuntu</h1>
+<p>The PowerTOP utility is a specialized Linux diagnostic tool developed
+by Intel designed to monitor, analyze, and diagnose power consumption on
+Ubuntu systems. This article explains how PowerTOP works, its key role
+in identifying background processes and hardware components draining
+your battery, and how to use it to optimize your system's energy
+efficiency through real-time monitoring and reporting.</p>
+<h2 id="what-is-powertop">What Is PowerTOP?</h2>
+<p>PowerTOP is a command-line utility that provides real-time insights
+into system power usage. While standard system monitors like
+<code>top</code> or <code>htop</code> track CPU and RAM utilization,
+PowerTOP focuses specifically on power draw, processor wakeups, and
+hardware power states (C-states and P-states). It correlates software
+activity directly with physical power consumption, making it an
+essential tool for laptop users aiming to extend battery life on
+Ubuntu.</p>
+<h2 id="installing-powertop-on-ubuntu">Installing PowerTOP on
+Ubuntu</h2>
+<p>PowerTOP is available directly from the standard Ubuntu repositories.
+Install it using the following commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install powertop</span></code></pre></div>
+<p>To enable full power estimation, calibrate PowerTOP by running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> powertop <span class="at">--calibrate</span></span></code></pre></div>
+<p><em>Note: Running calibration will cycle through screen brightness
+levels and toggle hardware settings. It is best run on battery power
+without touching the system.</em></p>
+<h2 id="how-powertop-identifies-power-hungry-processes">How PowerTOP
+Identifies Power-Hungry Processes</h2>
+<p>PowerTOP uncovers energy-draining software through specific
+monitoring mechanisms accessible when launched with root privileges:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> powertop</span></code></pre></div>
+<h3 id="1-monitoring-cpu-wakeups">1. Monitoring CPU Wakeups</h3>
+<p>Modern processors save energy by entering deep sleep states
+(C-states). Poorly optimized applications frequently trigger timers,
+interrupts, and system calls that wake the CPU from these low-power
+states. PowerTOP tracks the exact number of wakeups per second generated
+by each process, exposing background tasks that unnecessarily keep the
+CPU active.</p>
+<h3 id="2-the-overview-tab">2. The Overview Tab</h3>
+<p>The first screen in PowerTOP displays a live list of processes,
+kernel threads, and hardware interrupts ranked by their impact on power
+consumption.</p>
+<p>Key columns include:</p>
+<ul>
+<li><strong>Usage:</strong> The duration the component or process was
+actively using system resources.</li>
+<li><strong>Events/s:</strong> The number of times per second a process
+forces the CPU out of an idle state.</li>
+<li><strong>Category:</strong> The type of resource (Process, Device,
+Timer, or Interrupt).</li>
+<li><strong>Description:</strong> The specific command, process name, or
+hardware driver responsible.</li>
+</ul>
+<p>Processes at the top of this list with high "Events/s" are the
+primary culprits behind rapid battery drain.</p>
+<h3 id="3-hardware-state-inspection">3. Hardware State Inspection</h3>
+<p>PowerTOP allows you to navigate between tabs using the
+<code>Tab</code> key:</p>
+<ul>
+<li><strong>Idle Stats:</strong> Shows how much time the processor cores
+spend in various C-states (C0 being fully active, deeper states like
+C6/C8 being lowest power).</li>
+<li><strong>Frequency Stats:</strong> Displays CPU frequency scaling
+(P-states). If processes are forcing the CPU to run continuously at
+maximum clock speeds, it will be reflected here.</li>
+<li><strong>Device Stats:</strong> Identifies which physical hardware
+components (Wi-Fi, GPU, audio, USB controllers) are consuming
+power.</li>
+</ul>
+<h2 id="generating-detailed-html-reports">Generating Detailed HTML
+Reports</h2>
+<p>For comprehensive analysis without keeping the terminal open,
+PowerTOP can generate an HTML report reflecting system behavior over a
+specified timeframe:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> powertop <span class="at">--html</span><span class="op">=</span>powerreport.html <span class="at">--time</span><span class="op">=</span>60</span></code></pre></div>
+<p>This command monitors the system for 60 seconds and creates a
+<code>powerreport.html</code> file. Opening this file in any web browser
+provides an organized breakdown of:</p>
+<ul>
+<li>Top power-consuming processes.</li>
+<li>Software causing the highest interrupt rates.</li>
+<li>System power estimates in Watts (if supported by the battery
+interface).</li>
+</ul>
+<h2 id="taking-action-with-the-tunables-tab">Taking Action with the
+Tunables Tab</h2>
+<p>Beyond identifying rogue processes, PowerTOP includes a
+<strong>Tunables</strong> tab that inspects kernel and hardware
+power-saving settings. It flags devices using power sub-optimally as
+"Bad" and power-optimized configurations as "Good."</p>
+<p>To automatically apply recommended power-saving settings to all
+detected hardware interfaces, run:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> powertop <span class="at">--auto-tune</span></span></code></pre></div>
+<p>This immediately reduces baseline hardware power consumption,
+allowing you to isolate whether high power usage stems from system
+misconfiguration or demanding user-space applications.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

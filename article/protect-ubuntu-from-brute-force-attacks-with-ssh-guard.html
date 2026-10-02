@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protect Ubuntu from Brute-Force Attacks with SSHGuard - ubuntu</title>
+    <meta name="description" content="The sshguard daemon is a lightweight security tool designed to protect Ubuntu servers from brute-force attacks by monitoring system logs and dynamically blocking malicious IP addresses. Unlike heavier alternatives, sshguard is written in C, making it fas">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/protect-ubuntu-from-brute-force-attacks-with-ssh-guard">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Protect Ubuntu from Brute-Force Attacks with SSHGuard - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/protect-ubuntu-from-brute-force-attacks-with-ssh-guard" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The sshguard daemon is a lightweight security tool designed to protect Ubuntu servers from brute-force attacks by monitoring system logs and dynamically blocking malicious IP addresses. Unlike heavier alternatives, sshguard is written in C, making it fas" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="protect-ubuntu-from-brute-force-attacks-with-sshguard">Protect
+Ubuntu from Brute-Force Attacks with SSHGuard</h1>
+<p>The <code>sshguard</code> daemon is a lightweight security tool
+designed to protect Ubuntu servers from brute-force attacks by
+monitoring system logs and dynamically blocking malicious IP addresses.
+Unlike heavier alternatives, <code>sshguard</code> is written in C,
+making it fast and resource-efficient while seamlessly integrating with
+native Linux firewalls like <code>iptables</code>,
+<code>nftables</code>, and <code>ufw</code>. This article explains the
+primary purpose of <code>sshguard</code>, how it detects unauthorized
+intrusion attempts on an Ubuntu system, and why it serves as an
+effective defense mechanism for SSH and other network services.</p>
+<h3 id="core-purpose-of-sshguard">Core Purpose of SSHGuard</h3>
+<p>The primary purpose of <code>sshguard</code> is to detect and
+mitigate automated brute-force attacks. Cybercriminals frequently deploy
+automated bots to bombard open SSH ports with common usernames and
+passwords in an attempt to gain unauthorized shell access. Left
+unchecked, these attacks can consume significant bandwidth, exhaust
+system resources, and eventually compromise weak credentials.</p>
+<p><code>sshguard</code> runs in the background as a continuous service,
+actively parsing system authentication logs to identify failed login
+sequences. Once an IP address exceeds a predefined threshold of failed
+attempts within a set timeframe, <code>sshguard</code> automatically
+modifies the system's firewall rules to block traffic from that
+source.</p>
+<h3 id="how-sshguard-operates-on-ubuntu">How SSHGuard Operates on
+Ubuntu</h3>
+<p><code>sshguard</code> functions through a three-stage pipeline: log
+monitoring, threat detection, and firewall enforcement.</p>
+<ol type="1">
+<li><strong>Log Parsing:</strong> On modern Ubuntu systems,
+<code>sshguard</code> directly monitors log streams generated by
+<code>systemd-journald</code> or the traditional authentication log
+located at <code>/var/log/auth.log</code>.</li>
+<li><strong>Behavioral Analysis:</strong> The daemon evaluates login
+events against known signatures of failed authentication. It uses a
+scoring system where suspicious behaviors accumulate "danger
+points."</li>
+<li><strong>Firewall Mitigation:</strong> When an IP address exceeds the
+danger threshold, <code>sshguard</code> interacts with Ubuntu’s active
+packet filter—such as <code>nftables</code> or <code>iptables</code>—to
+insert an automatic drop rule. By default, incoming packets from the
+offending address are discarded before they can interact with the SSH
+daemon (<code>sshd</code>).</li>
+</ol>
+<h3 id="progressive-blocking-and-blacklisting">Progressive Blocking and
+Blacklisting</h3>
+<p>A key strength of <code>sshguard</code> is its handling of persistent
+attackers through progressive blocking. When an attacker is blocked for
+the first time, the ban typically lasts for a short duration (such as a
+few minutes). If the same IP address resumes failed login attempts after
+the initial block expires, <code>sshguard</code> automatically increases
+the ban duration exponentially.</p>
+<p>For continuous or aggressive offenders, <code>sshguard</code> can
+escalate the block to a permanent blacklist. The blocked addresses are
+recorded in a blacklist file, ensuring that known attackers remain
+barred even after the server or daemon restarts.</p>
+<h3 id="key-advantages-on-ubuntu-systems">Key Advantages on Ubuntu
+Systems</h3>
+<p>While tools like Fail2ban offer similar functionality,
+<code>sshguard</code> provides several distinct advantages for Ubuntu
+administrators:</p>
+<ul>
+<li><strong>Minimal Resource Usage:</strong> Written in C,
+<code>sshguard</code> uses negligible CPU and memory, making it ideal
+for low-resource environments such as cloud Virtual Private Servers
+(VPS) and IoT devices.</li>
+<li><strong>Low Configuration Overhead:</strong> Out of the box,
+<code>sshguard</code> is configured to protect SSH with minimal tuning
+required.</li>
+<li><strong>Broad Service Coverage:</strong> Despite its name,
+<code>sshguard</code> is capable of monitoring multiple network services
+simultaneously, including mail services (Postfix, Dovecot), FTP daemons,
+and OpenVPN.</li>
+</ul>
+<p>By deploying <code>sshguard</code> on Ubuntu, administrators add an
+essential, automated layer of perimeter defense that neutralizes
+credential-guessing campaigns without impacting server performance.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

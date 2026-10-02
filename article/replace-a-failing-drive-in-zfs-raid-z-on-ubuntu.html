@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replace a Failing Drive in ZFS RAID-Z on Ubuntu - ubuntu</title>
+    <meta name="description" content="Replacing a failing disk in an active ZFS RAID-Z pool on Ubuntu can be accomplished without taking your storage offline. This guide covers how to identify the degraded drive, locate its physical counterpart, introduce the replacement disk, and initiate t">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/replace-a-failing-drive-in-zfs-raid-z-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Replace a Failing Drive in ZFS RAID-Z on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/replace-a-failing-drive-in-zfs-raid-z-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Replacing a failing disk in an active ZFS RAID-Z pool on Ubuntu can be accomplished without taking your storage offline. This guide covers how to identify the degraded drive, locate its physical counterpart, introduce the replacement disk, and initiate t" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="replace-a-failing-drive-in-zfs-raid-z-on-ubuntu">Replace a
+Failing Drive in ZFS RAID-Z on Ubuntu</h1>
+<p>Replacing a failing disk in an active ZFS RAID-Z pool on Ubuntu can
+be accomplished without taking your storage offline. This guide covers
+how to identify the degraded drive, locate its physical counterpart,
+introduce the replacement disk, and initiate the ZFS resilvering process
+to restore pool redundancy safely.</p>
+<h3 id="1-identify-the-failing-disk">1. Identify the Failing Disk</h3>
+<p>Check the status of your ZFS pools to determine which drive is
+generating read, write, or checksum errors:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool status</span></code></pre></div>
+<p>In the output, note the pool name and the identifier of the failing
+device (ideally a persistent identifier such as
+<code>/dev/disk/by-id/...</code> or a numerical GUID if the drive has
+dropped offline entirely).</p>
+<p>To match the logical drive to its physical serial number, query it
+using <code>udevadm</code> or <code>smartctl</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> smartctl <span class="at">-i</span> /dev/sdX</span></code></pre></div>
+<p><em>(Replace <code>/dev/sdX</code> with your drive's kernel name if
+accessible)</em></p>
+<p>Record the serial number so you do not accidentally pull the wrong
+drive.</p>
+<h3 id="2-physically-swap-the-drive">2. Physically Swap the Drive</h3>
+<p>If your system supports hot-swapping, remove the failing drive using
+the serial number verified in the previous step and insert the new
+drive.</p>
+<p>If your motherboard does not support hot-swapping and you cannot
+attach the new drive simultaneously:</p>
+<ol type="1">
+<li>Export the pool or shut down the machine cleanly.</li>
+<li>Swap the physical hardware.</li>
+<li>Power on the system.</li>
+</ol>
+<p>If you have an available drive bay, you can attach the replacement
+drive while keeping the failing drive connected, allowing ZFS to read
+good data directly from the failing drive during the rebuild.</p>
+<h3 id="3-identify-the-replacement-disk-identifier">3. Identify the
+Replacement Disk Identifier</h3>
+<p>ZFS works best with stable identifiers located in
+<code>/dev/disk/by-id/</code> rather than transient names like
+<code>/dev/sdb</code>. Find the ID of your newly connected drive:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /dev/disk/by-id/</span></code></pre></div>
+<p>Locate the entry that corresponds to the serial number printed on
+your new drive, avoiding partition paths (e.g., <code>-part1</code>) and
+selecting the whole-disk identifier (e.g.,
+<code>ata-WDC_WD40EFRX-68N32N0_WD-WCC7K1XXXXXX</code>).</p>
+<h3 id="4-initiate-the-zfs-replacement">4. Initiate the ZFS
+Replacement</h3>
+<p>Run the <code>zpool replace</code> command to assign the new disk to
+the pool and start the rebuild:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool replace <span class="op">&lt;</span>pool-name<span class="op">&gt;</span> <span class="op">&lt;</span>old-device-or-guid<span class="op">&gt;</span> /dev/disk/by-id/<span class="op">&lt;</span>new-device-id<span class="op">&gt;</span></span></code></pre></div>
+<ul>
+<li>If the old drive is completely missing, supply the numerical GUID
+shown in <code>zpool status</code> in place of
+<code>&lt;old-device-or-guid&gt;</code>.</li>
+<li>If you swapped the drive into the exact same port and the old drive
+is gone, simply running
+<code>sudo zpool replace &lt;pool-name&gt; /dev/disk/by-id/&lt;new-device-id&gt;</code>
+often suffices.</li>
+</ul>
+<h3 id="5-monitor-the-resilvering-process">5. Monitor the Resilvering
+Process</h3>
+<p>ZFS will immediately begin resilvering (reconstructing data onto the
+new drive). Monitor progress by running:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool status</span></code></pre></div>
+<p>The output will display the percentage completed, current scan speed,
+and estimated time to completion. Once the resilver finishes, the old
+drive will automatically detach from the pool configuration, and the
+pool state will return to <code>ONLINE</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

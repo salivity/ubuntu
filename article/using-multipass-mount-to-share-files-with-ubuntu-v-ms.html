@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using Multipass Mount to Share Files with Ubuntu VMs - ubuntu</title>
+    <meta name="description" content="This article explores the purpose, functionality, and practical usage of the multipass mount command when working with Canonical's Multipass tool. It explains how this command bridges the host operating system with an Ubuntu virtual machine, enabling sea">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-multipass-mount-to-share-files-with-ubuntu-v-ms">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using Multipass Mount to Share Files with Ubuntu VMs - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-multipass-mount-to-share-files-with-ubuntu-v-ms" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores the purpose, functionality, and practical usage of the multipass mount command when working with Canonical's Multipass tool. It explains how this command bridges the host operating system with an Ubuntu virtual machine, enabling sea" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-multipass-mount-to-share-files-with-ubuntu-vms">Using
+Multipass Mount to Share Files with Ubuntu VMs</h1>
+<p>This article explores the purpose, functionality, and practical usage
+of the <code>multipass mount</code> command when working with
+Canonical's Multipass tool. It explains how this command bridges the
+host operating system with an Ubuntu virtual machine, enabling seamless,
+bi-directional file access without manual transfers. Readers will learn
+the core benefits of directory mounting, the basic syntax required, and
+how it simplifies software development and administration workflows.</p>
+<h3 id="the-purpose-of-multipass-mount">The Purpose of
+<code>multipass mount</code></h3>
+<p>The primary purpose of the <code>multipass mount</code> command is to
+map a directory from your host operating system (Windows, macOS, or
+Linux) directly into an active Multipass Ubuntu virtual machine. Instead
+of copying files back and forth using protocols like SSH, FTP, or
+<code>multipass transfer</code>, mounting creates a live, persistent
+link between the host storage and the guest filesystem.</p>
+<h3 id="real-time-synchronization">Real-Time Synchronization</h3>
+<p>When a directory is mounted, changes made on the host are immediately
+visible inside the Ubuntu VM, and vice versa. This eliminates latency in
+workflows and prevents data divergence. For developers, this means code
+can be written using native host text editors and IDEs (like Visual
+Studio Code or IntelliJ), while execution, compilation, and testing
+happen inside the isolated Ubuntu guest environment.</p>
+<h3 id="syntax-and-implementation">Syntax and Implementation</h3>
+<p>To mount a folder, you specify the local host directory, the name of
+the target virtual machine, and the desired path inside the VM.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multipass</span> mount /path/on/host <span class="op">&lt;</span>instance-name<span class="op">&gt;</span><span class="pp">[</span><span class="ss">:/path/in/guest</span><span class="pp">]</span></span></code></pre></div>
+<ul>
+<li>If you omit the guest path, Multipass automatically mounts the
+directory to a matching path or under the <code>/home/ubuntu</code>
+hierarchy.</li>
+<li>If the target directory inside the guest does not exist, Multipass
+creates it automatically.</li>
+</ul>
+<p>For example, to share a local project folder named
+<code>my-project</code> with an instance named <code>dev-vm</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multipass</span> mount ~/projects/my-project dev-vm:/home/ubuntu/project</span></code></pre></div>
+<h3 id="key-advantages">Key Advantages</h3>
+<ol type="1">
+<li><strong>Storage Efficiency:</strong> Files are not duplicated across
+systems, saving disk space.</li>
+<li><strong>Persistence:</strong> Data remains stored safely on the host
+machine even if the virtual machine is stopped or destroyed.</li>
+<li><strong>Workflow Integration:</strong> Allows heavy graphical tools
+to run natively on the host while keeping runtime environments and
+dependencies isolated within Ubuntu.</li>
+</ol>
+<h3 id="managing-and-removing-mounts">Managing and Removing Mounts</h3>
+<p>You can inspect existing mounts using:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multipass</span> info <span class="op">&lt;</span>instance-name<span class="op">&gt;</span></span></code></pre></div>
+<p>When file access is no longer required, the connection is severed
+cleanly using the <code>multipass unmount</code> command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multipass</span> unmount <span class="op">&lt;</span>instance-name<span class="op">&gt;</span><span class="pp">[</span><span class="ss">:/path/in/guest</span><span class="pp">]</span></span></code></pre></div>
+<p>This detaches the host folder without deleting the underlying files
+on either the host or the VM.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

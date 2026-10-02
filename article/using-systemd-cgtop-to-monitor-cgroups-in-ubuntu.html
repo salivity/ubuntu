@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using systemd-cgtop to Monitor Cgroups in Ubuntu - ubuntu</title>
+    <meta name="description" content="systemd-cgtop is a native Linux monitoring utility that displays real-time resource utilization organized by control groups (cgroups). This guide explains how to launch and configure systemd-cgtop on Ubuntu to track CPU, memory, task counts, and I/O cons">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-systemd-cgtop-to-monitor-cgroups-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using systemd-cgtop to Monitor Cgroups in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-systemd-cgtop-to-monitor-cgroups-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="systemd-cgtop is a native Linux monitoring utility that displays real-time resource utilization organized by control groups (cgroups). This guide explains how to launch and configure systemd-cgtop on Ubuntu to track CPU, memory, task counts, and I/O cons" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-systemd-cgtop-to-monitor-cgroups-in-ubuntu">Using
+systemd-cgtop to Monitor Cgroups in Ubuntu</h1>
+<p><code>systemd-cgtop</code> is a native Linux monitoring utility that
+displays real-time resource utilization organized by control groups
+(cgroups). This guide explains how to launch and configure
+<code>systemd-cgtop</code> on Ubuntu to track CPU, memory, task counts,
+and I/O consumption across system services, user sessions, and
+containers.</p>
+<h3 id="launching-systemd-cgtop">Launching systemd-cgtop</h3>
+<p>To monitor all system slices and service cgroups accurately, run
+<code>systemd-cgtop</code> with administrative privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cgtop</span></code></pre></div>
+<p>Once launched, the tool displays an interactive interface similar to
+standard <code>top</code>, but hierarchically structured by cgroup paths
+(such as <code>system.slice</code>, <code>user.slice</code>, and
+specific <code>.service</code> units) instead of individual process IDs
+(PIDs).</p>
+<h3 id="understanding-the-interface-columns">Understanding the Interface
+Columns</h3>
+<p>The output is divided into several primary metrics:</p>
+<ul>
+<li><strong>Control Group:</strong> The cgroup path or systemd unit
+name.</li>
+<li><strong>Tasks:</strong> The total number of processes or threads
+currently running within that specific control group.</li>
+<li><strong>%CPU:</strong> The percentage of CPU time currently consumed
+by the group.</li>
+<li><strong>Memory:</strong> The current physical memory (RAM)
+allocation of the group.</li>
+<li><strong>Input/s and Output/s:</strong> The disk I/O throughput (read
+and write rates) attributed to the group.</li>
+</ul>
+<h3 id="interactive-sorting-controls">Interactive Sorting Controls</h3>
+<p>While <code>systemd-cgtop</code> is running, you can change how rows
+are sorted using single-key shortcuts:</p>
+<ul>
+<li><strong><code>C</code></strong>: Sort by CPU usage.</li>
+<li><strong><code>M</code></strong>: Sort by memory consumption.</li>
+<li><strong><code>I</code></strong>: Sort by I/O write rate.</li>
+<li><strong><code>T</code></strong>: Sort by task count.</li>
+<li><strong><code>P</code></strong>: Sort alphabetically by cgroup
+path.</li>
+<li><strong><code>+</code> / <code>-</code></strong>: Increase or
+decrease the update interval.</li>
+<li><strong><code>q</code></strong>: Exit the application.</li>
+</ul>
+<h3 id="common-command-line-options">Common Command-Line Options</h3>
+<p>You can modify the default behavior by passing flags directly to the
+command:</p>
+<ul>
+<li><strong>Set the refresh interval:</strong> Use <code>-d</code> to
+specify the delay in seconds between updates.
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cgtop <span class="at">-d</span> 5</span></code></pre></div></li>
+<li><strong>Set default sort order:</strong> Use <code>--order=</code>
+with <code>cpu</code>, <code>memory</code>, <code>io</code>,
+<code>tasks</code>, or <code>path</code>.
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cgtop <span class="at">--order</span><span class="op">=</span>memory</span></code></pre></div></li>
+<li><strong>Run a fixed number of iterations:</strong> Use
+<code>-n</code> to limit output updates, which is useful for logging
+snapshots.
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cgtop <span class="at">-n</span> 1</span></code></pre></div></li>
+<li><strong>Batch mode for scripting:</strong> Combine <code>-b</code>
+(batch mode) with <code>-n</code> to dump clean text to standard output
+without terminal escape sequences.
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cgtop <span class="at">-b</span> <span class="at">-n</span> 1 <span class="op">&gt;</span> cgroup_snapshot.txt</span></code></pre></div></li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

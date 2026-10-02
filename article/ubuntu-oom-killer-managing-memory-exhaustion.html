@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu OOM Killer: Managing Memory Exhaustion - ubuntu</title>
+    <meta name="description" content="The Out of Memory (OOM) Killer is a safeguard mechanism built into the Linux kernel that activates when an Ubuntu system faces critical memory depletion. This article explains the fundamental purpose of the OOM Killer, how memory overcommit causes resour">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ubuntu-oom-killer-managing-memory-exhaustion">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu OOM Killer: Managing Memory Exhaustion - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ubuntu-oom-killer-managing-memory-exhaustion" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Out of Memory (OOM) Killer is a safeguard mechanism built into the Linux kernel that activates when an Ubuntu system faces critical memory depletion. This article explains the fundamental purpose of the OOM Killer, how memory overcommit causes resour" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ubuntu-oom-killer-managing-memory-exhaustion">Ubuntu OOM Killer:
+Managing Memory Exhaustion</h1>
+<p>The Out of Memory (OOM) Killer is a safeguard mechanism built into
+the Linux kernel that activates when an Ubuntu system faces critical
+memory depletion. This article explains the fundamental purpose of the
+OOM Killer, how memory overcommit causes resource crises, the
+mathematical heuristic the kernel uses to select and terminate
+sacrificial processes, and how administrators can monitor and tune this
+behavior to maintain system availability.</p>
+<h3 id="the-purpose-of-the-oom-killer">The Purpose of the OOM
+Killer</h3>
+<p>In Ubuntu, the kernel operates with a feature known as memory
+overcommit. Because applications often request more virtual memory than
+they actively use, the kernel routinely promises more memory than the
+combined total of physical RAM and swap space. While this maximizes
+resource utilization under normal workloads, it creates a risk: if
+multiple applications suddenly demand their full allocations
+simultaneously, the operating system runs completely out of allocatable
+physical pages.</p>
+<p>When physical RAM and swap are entirely exhausted and the kernel
+cannot satisfy a memory allocation request, the system enters an Out of
+Memory state. To prevent an unrecoverable kernel panic or a complete
+system freeze, the kernel invokes the OOM Killer. Its sole job is to
+sacrifice one or more processes to reclaim memory instantly and keep the
+operating system running.</p>
+<h3 id="how-the-oom-killer-selects-a-process">How the OOM Killer Selects
+a Process</h3>
+<p>The OOM Killer does not terminate processes at random. Instead, it
+computes a "badness" score for every running process, assigning each an
+<code>oom_score</code> ranging from 0 to 1000. The process with the
+highest score is targeted first.</p>
+<p>The calculation evaluates several criteria:</p>
+<ul>
+<li><strong>Memory Footprint:</strong> Processes utilizing the largest
+percentage of physical RAM and swap are penalized most heavily, as
+terminating them recovers the most memory immediately.</li>
+<li><strong>Root vs. User Privileges:</strong> Critical system services
+and processes owned by the <code>root</code> user receive slight score
+reductions to prevent destabilizing essential infrastructure.</li>
+<li><strong>Process Lifetime:</strong> Newly spawned, rapidly expanding
+processes are prioritized over long-running foundational daemons.</li>
+<li><strong>Hardware Access:</strong> Processes performing direct
+hardware access are generally avoided to prevent device corruption.</li>
+</ul>
+<p>Once the highest-scoring target is identified, the OOM Killer issues
+a non-catchable <code>SIGKILL</code> (signal 9). The kernel immediately
+reclaims all memory pages assigned to that process.</p>
+<h3 id="modern-ubuntu-and-systemd-oomd">Modern Ubuntu and
+systemd-oomd</h3>
+<p>Recent Ubuntu releases (including Ubuntu 22.04 LTS and later)
+introduce <code>systemd-oomd</code>, a userspace out-of-memory manager
+that complements the kernel-level OOM Killer.</p>
+<p>While the kernel OOM Killer acts as an emergency last line of defense
+when allocations fail entirely, <code>systemd-oomd</code> acts
+proactively. Using control groups (cgroups v2) and Pressure Stall
+Information (PSI), <code>systemd-oomd</code> detects severe memory
+pressure before the kernel runs out of pages entirely. It terminates
+misbehaving application slices or cgroups earlier in the exhaustion
+cycle, resulting in cleaner recoveries and fewer system freezes.</p>
+<h3 id="monitoring-and-adjusting-oom-behavior">Monitoring and Adjusting
+OOM Behavior</h3>
+<p>Administrators can inspect OOM events by querying kernel logs using
+<code>dmesg</code> or <code>journalctl</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dmesg</span> <span class="at">-T</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> oom</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-k</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;killed process&quot;</span></span></code></pre></div>
+<p>The output reveals the exact process terminated, its memory usage at
+the time of death, and the final <code>oom_score</code>.</p>
+<p>If a mission-critical service (such as a database) must never be
+killed, administrators can manually bias the score using the
+<code>oom_score_adj</code> interface located at
+<code>/proc/[PID]/oom_score_adj</code>. Values range from
+<code>-1000</code> (completely immune to the OOM Killer) to
+<code>1000</code> (highest termination priority):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="at">-1000</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /proc/<span class="op">&lt;</span>PID<span class="op">&gt;</span>/oom_score_adj</span></code></pre></div>
+<p>For persistent adjustments, service definitions in systemd can
+include the <code>OOMScoreAdjust=</code> directive within the
+<code>[Service]</code> unit block.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

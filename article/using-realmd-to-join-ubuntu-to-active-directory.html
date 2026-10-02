@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using realmd to Join Ubuntu to Active Directory - ubuntu</title>
+    <meta name="description" content="The realmd tool significantly streamlines the integration of Ubuntu systems into enterprise identity domains such as Microsoft Active Directory and FreeIPA. By acting as an orchestration layer, it automatically detects domain settings, installs necessary">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-realmd-to-join-ubuntu-to-active-directory">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using realmd to Join Ubuntu to Active Directory - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-realmd-to-join-ubuntu-to-active-directory" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The realmd tool significantly streamlines the integration of Ubuntu systems into enterprise identity domains such as Microsoft Active Directory and FreeIPA. By acting as an orchestration layer, it automatically detects domain settings, installs necessary" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-realmd-to-join-ubuntu-to-active-directory">Using realmd to
+Join Ubuntu to Active Directory</h1>
+<p>The <code>realmd</code> tool significantly streamlines the
+integration of Ubuntu systems into enterprise identity domains such as
+Microsoft Active Directory and FreeIPA. By acting as an orchestration
+layer, it automatically detects domain settings, installs necessary
+dependencies, and configures authentication clients without requiring
+administrators to manually edit complex configuration files. This guide
+explains the core role of <code>realmd</code>, how it simplifies
+enrollment, and why it is the preferred utility for domain management on
+modern Ubuntu environments.</p>
+<h3 id="the-challenge-of-traditional-domain-joins">The Challenge of
+Traditional Domain Joins</h3>
+<p>Historically, joining an Ubuntu machine to an Active Directory domain
+required administrators to manually install, configure, and coordinate
+multiple disparate services:</p>
+<ul>
+<li><strong>Samba and Winbind</strong> or <strong>SSSD (System Security
+Services Daemon)</strong> for identity mapping.</li>
+<li><strong>Kerberos (<code>krb5.conf</code>)</strong> for network
+authentication and ticket handling.</li>
+<li><strong>Name Service Switch (<code>nsswitch.conf</code>)</strong> to
+resolve domain users and groups.</li>
+<li><strong>PAM (Pluggable Authentication Modules)</strong> to handle
+authentication policies, session creation, and home directory
+generation.</li>
+</ul>
+<p>A single syntax error in any of these configuration files could
+prevent authentication or leave the system inaccessible.</p>
+<h3 id="how-realmd-simplifies-the-process">How <code>realmd</code>
+Simplifies the Process</h3>
+<p><code>realmd</code> abstracts this complexity by providing a unified,
+high-level command-line interface and DBus API. Instead of handling
+Kerberos and SSSD directly, the administrator interacts almost
+exclusively with <code>realmd</code>.</p>
+<h4 id="1-automatic-domain-discovery">1. Automatic Domain Discovery</h4>
+<p>Before joining, <code>realmd</code> can probe the network via DNS SRV
+records to discover available domain controllers, the domain type, and
+supported authentication mechanisms:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">realm</span> discover example.com</span></code></pre></div>
+<p>This output identifies the realm name, domain software, and lists the
+exact packages Ubuntu requires to complete the join.</p>
+<h4 id="2-automatic-dependency-resolution-and-configuration">2.
+Automatic Dependency Resolution and Configuration</h4>
+<p>When executing the join command, <code>realmd</code> invokes package
+managers to install required software (such as <code>sssd</code>,
+<code>adcli</code>, and <code>realmd</code> packages) if they are
+missing. It then generates the proper configurations for SSSD and
+Kerberos based on the parameters discovered from the domain
+controller.</p>
+<p>Joining typically requires a single command:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> realm join <span class="at">-U</span> Administrator example.com</span></code></pre></div>
+<p><code>realmd</code> authenticates with the domain, creates the
+computer account in Active Directory, retrieves the machine keytab,
+updates <code>/etc/sssd/sssd.conf</code>, and starts the necessary
+background services.</p>
+<h4 id="3-streamlined-access-control">3. Streamlined Access Control</h4>
+<p>Managing which domain accounts are allowed to log into the Ubuntu
+machine is controlled directly through <code>realmd</code>. By default,
+joining allows all domain users to log in, but administrators can
+restrict access immediately:</p>
+<ul>
+<li>Deny all domain logins: <code>sudo realm deny --all</code></li>
+<li>Permit specific users:
+<code>sudo realm permit user@example.com</code></li>
+<li>Permit specific domain groups:
+<code>sudo realm permit -g "Domain Admins"</code></li>
+</ul>
+<p>These commands automatically modify SSSD’s access provider
+configurations behind the scenes.</p>
+<h4 id="4-clean-system-leaves">4. Clean System Leaves</h4>
+<p>Leaving a domain is equally direct. Running <code>realm leave</code>
+unregisters the machine from the domain, updates Active Directory (if
+credentials are provided), disables domain-based authentication in PAM
+and NSS, and resets local configuration files to prevent authentication
+lockouts.</p>
+<h3 id="summary">Summary</h3>
+<p>The <code>realmd</code> command acts as an automation framework on
+Ubuntu, replacing error-prone manual configuration with simple commands
+for discovering, joining, managing, and leaving enterprise identity
+domains. By orchestrating SSSD, Kerberos, and PAM under a standardized
+interface, it ensures fast, repeatable, and secure domain
+integration.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

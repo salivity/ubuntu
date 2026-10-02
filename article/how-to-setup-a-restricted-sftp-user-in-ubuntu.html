@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Setup a Restricted SFTP User in Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a restricted SFTP-only user in Ubuntu allows administrators to grant secure file transfer access while preventing unauthorized SSH shell access and confining users to a designated directory. This configuration leverages OpenSSH's built-in inte">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-setup-a-restricted-sftp-user-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Setup a Restricted SFTP User in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-setup-a-restricted-sftp-user-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a restricted SFTP-only user in Ubuntu allows administrators to grant secure file transfer access while preventing unauthorized SSH shell access and confining users to a designated directory. This configuration leverages OpenSSH's built-in inte" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-setup-a-restricted-sftp-user-in-ubuntu">How to Setup a
+Restricted SFTP User in Ubuntu</h1>
+<p>Setting up a restricted SFTP-only user in Ubuntu allows
+administrators to grant secure file transfer access while preventing
+unauthorized SSH shell access and confining users to a designated
+directory. This configuration leverages OpenSSH's built-in
+<code>internal-sftp</code> subsystem and <code>chroot</code> jail
+mechanisms, ensuring that users can only upload and download files
+within their specific storage folder without navigating the rest of the
+server's filesystem.</p>
+<h3 id="step-1-create-an-sftp-user-group">Step 1: Create an SFTP User
+Group</h3>
+<p>Creating a dedicated group helps manage all restricted SFTP users
+consistently:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> groupadd sftpusers</span></code></pre></div>
+<h3 id="step-2-create-the-sftp-user">Step 2: Create the SFTP User</h3>
+<p>Create the new user, assign them to the <code>sftpusers</code> group,
+and set their default shell to <code>/bin/false</code> or
+<code>/usr/sbin/nologin</code> to block interactive terminal access:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser <span class="at">--ingroup</span> sftpusers <span class="at">--shell</span> /usr/sbin/nologin sftpuser</span></code></pre></div>
+<p>Set a strong password when prompted.</p>
+<h3 id="step-3-configure-the-directory-structure-and-permissions">Step
+3: Configure the Directory Structure and Permissions</h3>
+<p>OpenSSH's <code>ChrootDirectory</code> requires strict ownership
+rules: every directory component in the path leading up to the chroot
+folder must be owned by <code>root</code> and cannot be writable by any
+other user or group.</p>
+<ol type="1">
+<li>Create a root directory for the user and an inner directory where
+the user can actually write files:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /var/sftp/sftpuser/files</span></code></pre></div>
+<ol start="2" type="1">
+<li>Assign <code>root</code> ownership and standard read-and-execute
+permissions to the chroot parent directory:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown root:root /var/sftp/sftpuser</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 755 /var/sftp/sftpuser</span></code></pre></div>
+<ol start="3" type="1">
+<li>Assign ownership of the inner <code>files</code> directory to the
+SFTP user:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown sftpuser:sftpusers /var/sftp/sftpuser/files</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 755 /var/sftp/sftpuser/files</span></code></pre></div>
+<h3 id="step-4-configure-the-ssh-daemon">Step 4: Configure the SSH
+Daemon</h3>
+<p>Modify the OpenSSH server configuration to isolate the
+<code>sftpusers</code> group. Open the configuration file in a text
+editor:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div>
+<p>Scroll to the bottom of the file and append the following
+directives:</p>
+<pre class="text"><code>Match Group sftpusers
+    ChrootDirectory /var/sftp/%u
+    ForceCommand internal-sftp
+    AllowTcpForwarding no
+    X11Forwarding no</code></pre>
+<ul>
+<li><code>Match Group sftpusers</code> applies these rules strictly to
+members of this group.</li>
+<li><code>ChrootDirectory /var/sftp/%u</code> replaces <code>%u</code>
+with the username, isolating them inside their folder.</li>
+<li><code>ForceCommand internal-sftp</code> requires SFTP usage and
+blocks shell execution.</li>
+<li><code>AllowTcpForwarding no</code> and <code>X11Forwarding no</code>
+eliminate network tunneling and GUI forwarding risks.</li>
+</ul>
+<p>Save the file and exit the editor.</p>
+<h3 id="step-5-test-and-restart-the-ssh-service">Step 5: Test and
+Restart the SSH Service</h3>
+<p>Verify that the configuration contains no syntax errors:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sshd <span class="at">-t</span></span></code></pre></div>
+<p>If the command returns no errors, restart the SSH service to apply
+the changes:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div>
+<h3 id="step-6-verify-the-setup">Step 6: Verify the Setup</h3>
+<p>Test the connection from a remote machine using standard SFTP:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sftp</span> sftpuser@server_ip</span></code></pre></div>
+<p>Once connected, navigate to the <code>files</code> directory and
+confirm upload permissions. Finally, attempt an interactive SSH
+login:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> sftpuser@server_ip</span></code></pre></div>
+<p>The server should refuse the shell connection immediately while
+keeping SFTP functionality fully operational.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share a USB Printer Over Network with CUPS on Ubuntu - ubuntu</title>
+    <meta name="description" content="Transforming an Ubuntu system into a network print server allows any device on your local area network (LAN) to use a shared USB printer. This guide outlines how to install the Common Unix Printing System (CUPS), adjust its configuration to accept remote">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/share-a-usb-printer-over-network-with-cups-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Share a USB Printer Over Network with CUPS on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/share-a-usb-printer-over-network-with-cups-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Transforming an Ubuntu system into a network print server allows any device on your local area network (LAN) to use a shared USB printer. This guide outlines how to install the Common Unix Printing System (CUPS), adjust its configuration to accept remote" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="share-a-usb-printer-over-network-with-cups-on-ubuntu">Share a
+USB Printer Over Network with CUPS on Ubuntu</h1>
+<p>Transforming an Ubuntu system into a network print server allows any
+device on your local area network (LAN) to use a shared USB printer.
+This guide outlines how to install the Common Unix Printing System
+(CUPS), adjust its configuration to accept remote traffic, add your
+connected USB printer, and broadcast it securely across your
+network.</p>
+<h3 id="step-1-install-the-cups-package">Step 1: Install the CUPS
+Package</h3>
+<p>Ensure your package repositories are updated, then install the CUPS
+daemon and its required utilities:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cups <span class="at">-y</span></span></code></pre></div>
+<p>Start the CUPS service and configure it to launch automatically upon
+system boot:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> cups</span></code></pre></div>
+<h3 id="step-2-grant-administrative-rights">Step 2: Grant Administrative
+Rights</h3>
+<p>To modify printer configurations and access the administrative
+controls via the CUPS web interface, your system user must belong to the
+<code>lpadmin</code> group:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-aG</span> lpadmin <span class="va">$USER</span></span></code></pre></div>
+<p><em>Note: Log out and log back in, or run
+<code>newgrp lpadmin</code>, for this group change to take
+effect.</em></p>
+<h3 id="step-3-configure-cups-for-remote-network-access">Step 3:
+Configure CUPS for Remote Network Access</h3>
+<p>By default, CUPS only listens to requests coming from
+<code>localhost</code> (127.0.0.1). To permit access from other machines
+on your local network, execute the built-in <code>cupsctl</code>
+command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cupsctl <span class="at">--remote-admin</span> <span class="at">--remote-any</span> <span class="at">--share-printers</span></span></code></pre></div>
+<p>This command automatically modifies <code>/etc/cups/cupsd.conf</code>
+to:</p>
+<ul>
+<li>Listen on port <code>631</code> across all network interfaces.</li>
+<li>Enable the printer-sharing feature globally.</li>
+<li>Permit remote administrative access to the web interface.</li>
+</ul>
+<p>Restart the CUPS service to apply the configuration:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart cups</span></code></pre></div>
+<h3 id="step-4-open-firewall-ports">Step 4: Open Firewall Ports</h3>
+<p>If the Uncomplicated Firewall (UFW) is active on your Ubuntu machine,
+open port 631 to allow incoming Internet Printing Protocol (IPP)
+traffic:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 631/tcp</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div>
+<h3 id="step-5-connect-and-add-the-usb-printer">Step 5: Connect and Add
+the USB Printer</h3>
+<ol type="1">
+<li><p>Plug your printer into a USB port on the Ubuntu computer and turn
+the printer on.</p></li>
+<li><p>Find the Ubuntu machine's local IP address:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span> <span class="at">-I</span></span></code></pre></div></li>
+<li><p>Open a web browser on any computer connected to the same local
+network and navigate to:</p>
+<pre class="text"><code>https://&lt;your-server-ip&gt;:631</code></pre>
+<p><em>(Bypass any SSL certificate warning; CUPS generates a self-signed
+certificate by default).</em></p></li>
+<li><p>Navigate to the <strong>Administration</strong> tab at the top of
+the interface.</p></li>
+<li><p>Click <strong>Add Printer</strong> under the Printers section.
+When prompted, enter your Ubuntu username and password.</p></li>
+<li><p>Under <strong>Local Printers</strong>, select your connected USB
+printer from the list and click <strong>Continue</strong>.</p></li>
+<li><p>Provide a name, description, and location for the printer.
+Crucially, check the box labeled <strong>Share This Printer</strong>
+before clicking <strong>Continue</strong>.</p></li>
+<li><p>Select the manufacturer and driver for your specific printer
+model, or upload a vendor-supplied PPD (PostScript Printer Description)
+file.</p></li>
+<li><p>Click <strong>Add Printer</strong> and set your preferred default
+media options to complete the setup.</p></li>
+</ol>
+<h3 id="step-6-connect-client-devices">Step 6: Connect Client
+Devices</h3>
+<p>Once shared, client operating systems on the network can discover the
+printer:</p>
+<ul>
+<li><strong>Linux:</strong> Open system printer settings; the printer
+will typically be discovered automatically via mDNS/Avahi.
+Alternatively, manually add a network printer using the URL:
+<code>ipp://&lt;your-server-ip&gt;:631/printers/&lt;printer-name&gt;</code>.</li>
+<li><strong>Windows:</strong> Go to <strong>Settings &gt; Devices &gt;
+Printers &amp; scanners &gt; Add a printer or scanner</strong>. If it is
+not automatically discovered, click <strong>The printer that I want
+isn't listed</strong>, choose <strong>Select a shared printer by
+name</strong>, and input:
+<code>http://&lt;your-server-ip&gt;:631/printers/&lt;printer-name&gt;</code>.</li>
+<li><strong>macOS:</strong> Open <strong>System Settings &gt; Printers
+&amp; Scanners &gt; Add Printer</strong>. Select the network-discovered
+Bonjour printer or enter the IP address using the IPP protocol.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

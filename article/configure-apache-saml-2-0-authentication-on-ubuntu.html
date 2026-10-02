@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Apache SAML 2.0 Authentication on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for configuring an Apache web server on Ubuntu to authenticate users using SAML 2.0. By utilizing the libapache2-mod-auth-mellon module, you will learn how to install necessary dependencies, generate Service">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-apache-saml-2-0-authentication-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Apache SAML 2.0 Authentication on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-apache-saml-2-0-authentication-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for configuring an Apache web server on Ubuntu to authenticate users using SAML 2.0. By utilizing the libapache2-mod-auth-mellon module, you will learn how to install necessary dependencies, generate Service" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-apache-saml-20-authentication-on-ubuntu">Configure
+Apache SAML 2.0 Authentication on Ubuntu</h1>
+<p>This guide provides a step-by-step walkthrough for configuring an
+Apache web server on Ubuntu to authenticate users using SAML 2.0. By
+utilizing the <code>libapache2-mod-auth-mellon</code> module, you will
+learn how to install necessary dependencies, generate Service Provider
+(SP) metadata and keys, integrate with an Identity Provider (IdP), and
+protect specific directories using Single Sign-On (SSO).</p>
+<h3 id="step-1-install-apache-and-the-mellon-module">Step 1: Install
+Apache and the Mellon Module</h3>
+<p>Update your local package index and install the Apache HTTP server
+alongside the Mellon SAML authentication module:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install apache2 libapache2-mod-auth-mellon <span class="at">-y</span></span></code></pre></div>
+<p>Ensure the module is enabled:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod auth_mellon</span></code></pre></div>
+<h3 id="step-2-create-a-directory-for-saml-metadata">Step 2: Create a
+Directory for SAML Metadata</h3>
+<p>Create a dedicated directory to store your SAML certificates and
+metadata files:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/apache2/saml2</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /etc/apache2/saml2</span></code></pre></div>
+<h3 id="step-3-generate-service-provider-sp-metadata-and-keys">Step 3:
+Generate Service Provider (SP) Metadata and Keys</h3>
+<p>Mellon provides a utility script to create the SP private key,
+certificate, and XML metadata file automatically. Run the script with
+your entity ID and the Mellon endpoint URL (replace
+<code>example.com</code> with your actual domain name):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /usr/sbin/mellon_create_metadata.sh <span class="st">&quot;https://example.com&quot;</span> <span class="st">&quot;https://example.com/mellon&quot;</span></span></code></pre></div>
+<p>This generates three files matching your domain prefix:</p>
+<ul>
+<li><code>https_example.com.key</code> (Private key)</li>
+<li><code>https_example.com.cert</code> (Certificate)</li>
+<li><code>https_example.com.xml</code> (SP Metadata file)</li>
+</ul>
+<p>Rename them to simpler filenames for easier management:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv https_example.com.key sp-private-key.key</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv https_example.com.cert sp-certificate.cert</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv https_example.com.xml sp-metadata.xml</span></code></pre></div>
+<p>Secure the private key permissions:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 600 sp-private-key.key</span></code></pre></div>
+<h3 id="step-4-import-identity-provider-idp-metadata">Step 4: Import
+Identity Provider (IdP) Metadata</h3>
+<p>Obtain the SAML 2.0 metadata XML file from your Identity Provider
+(such as Okta, Azure AD, Keycloak, or Google Workspace). Save this file
+directly into your SAML directory:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/etc/apache2/saml2/idp-metadata.xml</span></span></code></pre></div>
+<p>Next, register your Service Provider with the IdP by uploading the
+<code>sp-metadata.xml</code> file generated in Step 3 to your IdP's
+administrative dashboard.</p>
+<h3 id="step-5-configure-the-apache-virtualhost">Step 5: Configure the
+Apache VirtualHost</h3>
+<p>Open your Apache site configuration file (e.g.,
+<code>/etc/apache2/sites-available/000-default.conf</code> or your SSL
+configuration file):</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apache2/sites-available/default-ssl.conf</span></code></pre></div>
+<p>Inside the <code>&lt;VirtualHost *:443&gt;</code> block, configure
+the Mellon global directives and define a protected location:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:443</span><span class="fu">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> example.com</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/html</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">SSLEngine</span><span class="ch"> </span><span class="kw">on</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    SSLCertificateFile<span class="st"> /etc/ssl/certs/ssl-cert-snakeoil.pem</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    SSLCertificateKeyFile<span class="st"> /etc/ssl/private/ssl-cert-snakeoil.key</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mellon SAML Configuration</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;Location</span><span class="at"> /</span><span class="fu">&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        MellonEnable &quot;info&quot;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        MellonEndpointPath &quot;/mellon/&quot;</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        MellonSPPrivateKeyFile /etc/apache2/saml2/sp-private-key.key</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        MellonSPCertFile /etc/apache2/saml2/sp-certificate.cert</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        MellonSPMetadataFile /etc/apache2/saml2/sp-metadata.xml</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        MellonIdPMetadataFile /etc/apache2/saml2/idp-metadata.xml</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;/Location&gt;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Protected Directory</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;Location</span><span class="at"> /protected</span><span class="fu">&gt;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        MellonEnable &quot;auth&quot;</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="ex">AuthType</span><span class="ch"> &quot;Mellon&quot;</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        MellonRequire &quot;valid-user&quot;</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        Require<span class="st"> valid-user</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;/Location&gt;</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<ul>
+<li><strong>MellonEndpointPath</strong>: The base URL path where Mellon
+handles internal SAML endpoints (e.g., login, logout, and metadata
+processing).</li>
+<li><strong>MellonEnable "info"</strong>: Populates environment
+variables with SAML attributes across the site without requiring
+authentication.</li>
+<li><strong>MellonEnable "auth"</strong>: Enforces SAML authentication
+for resources within the <code>/protected</code> location.</li>
+</ul>
+<h3 id="step-6-test-and-restart-apache">Step 6: Test and Restart
+Apache</h3>
+<p>Validate the Apache configuration for syntax errors:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apache2ctl configtest</span></code></pre></div>
+<p>If the syntax is verified as <code>Syntax OK</code>, restart Apache
+to apply the changes:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<h3 id="step-7-verify-authentication">Step 7: Verify Authentication</h3>
+<ol type="1">
+<li>Open a web browser and navigate to
+<code>https://example.com/protected</code>.</li>
+<li>Apache will intercept the request and redirect your browser to the
+IdP login page.</li>
+<li>Authenticate with your IdP credentials.</li>
+<li>Upon successful authentication, the IdP redirects you back to
+<code>https://example.com/mellon/postResponse</code>, which establishes
+your session and loads the <code>/protected</code> resource.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

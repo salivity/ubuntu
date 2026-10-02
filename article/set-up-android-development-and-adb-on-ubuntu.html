@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Android Development and ADB on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a comprehensive, step-by-step walkthrough for configuring a complete Android development environment on Ubuntu. You will learn how to install the required Java Development Kit (JDK), set up Android Studio and the Android SDK, install">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/set-up-android-development-and-adb-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Set Up Android Development and ADB on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/set-up-android-development-and-adb-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a comprehensive, step-by-step walkthrough for configuring a complete Android development environment on Ubuntu. You will learn how to install the required Java Development Kit (JDK), set up Android Studio and the Android SDK, install" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="set-up-android-development-and-adb-on-ubuntu">Set Up Android
+Development and ADB on Ubuntu</h1>
+<p>This guide provides a comprehensive, step-by-step walkthrough for
+configuring a complete Android development environment on Ubuntu. You
+will learn how to install the required Java Development Kit (JDK), set
+up Android Studio and the Android SDK, install the Android Debug Bridge
+(ADB) command-line utilities, configure necessary environment variables,
+and set up system permissions to debug physical devices via USB.</p>
+<h3 id="1-update-the-system-and-install-dependencies">1. Update the
+System and Install Dependencies</h3>
+<p>Open your terminal and ensure your package lists and installed
+packages are up to date:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<p>Install the essential 32-bit libraries and core utilities required by
+the Android SDK and emulators:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> openjdk-17-jdk libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386</span></code></pre></div>
+<p>Verify your Java installation:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-version</span></span></code></pre></div>
+<h3 id="2-install-adb-and-fastboot">2. Install ADB and Fastboot</h3>
+<p>If you only require the debugging tools without the full IDE, or want
+standalone CLI access, install the platform tools package directly from
+the Ubuntu repositories:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> adb fastboot</span></code></pre></div>
+<p>Verify the installation:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> version</span></code></pre></div>
+<h3 id="3-install-android-studio">3. Install Android Studio</h3>
+<p>The most straightforward method to install Android Studio on Ubuntu
+is using the official Snap package:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap install android-studio <span class="at">--classic</span></span></code></pre></div>
+<p>Alternatively, download the official tarball from the Android
+developer website, extract it to <code>/opt/</code>, and run
+<code>bin/studio.sh</code>.</p>
+<p>Once installed, launch Android Studio:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">android-studio</span></span></code></pre></div>
+<p>Follow the Setup Wizard to download the latest Android SDK, Android
+SDK Platform-Tools, and build-essential tools.</p>
+<h3 id="4-configure-environment-variables">4. Configure Environment
+Variables</h3>
+<p>To run SDK tools from any terminal session, configure your
+environment paths. Open your <code>~/.bashrc</code> file in a text
+editor:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.bashrc</span></code></pre></div>
+<p>Add the following lines to the end of the file:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANDROID_HOME</span><span class="op">=</span><span class="va">$HOME</span>/Android/Sdk</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/emulator</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/platform-tools</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/cmdline-tools/latest/bin</span></code></pre></div>
+<p>Apply the changes to your current session:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div>
+<h3 id="5-configure-usb-debugging-udev-rules">5. Configure USB Debugging
+(udev Rules)</h3>
+<p>Ubuntu requires proper <code>udev</code> rules to recognize physical
+Android devices connected via USB without root permissions.</p>
+<p>Install the community-maintained udev rules package:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> android-sdk-platform-tools-common</span></code></pre></div>
+<p>If your device is still not recognized, add a generic rule file:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> curl <span class="at">-o</span> /etc/udev/rules.d/51-android.rules https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod a+r /etc/udev/rules.d/51-android.rules</span></code></pre></div>
+<p>Reload the <code>udev</code> service to apply the rules:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> udevadm control <span class="at">--reload-rules</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart udev</span></code></pre></div>
+<h3 id="6-enable-usb-debugging-on-your-device-and-verify">6. Enable USB
+Debugging on Your Device and Verify</h3>
+<ol type="1">
+<li>On your Android device, navigate to <strong>Settings &gt; About
+Phone</strong> and tap <strong>Build Number</strong> seven times to
+enable Developer Options.</li>
+<li>Go to <strong>Settings &gt; System &gt; Developer Options</strong>
+and enable <strong>USB Debugging</strong>.</li>
+<li>Connect your device to your Ubuntu PC with a USB cable.</li>
+<li>Restart the ADB server:</li>
+</ol>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> kill-server</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> start-server</span></code></pre></div>
+<ol start="5" type="1">
+<li>Check for connected devices:</li>
+</ol>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> devices</span></code></pre></div>
+<p>A prompt will appear on your Android device screen requesting
+permission to allow USB debugging from your computer's RSA key
+fingerprint. Select <strong>Always allow from this computer</strong> and
+tap <strong>Allow</strong>.</p>
+<p>Run <code>adb devices</code> again. The output should display your
+device serial number followed by the state <code>device</code>,
+indicating that your development environment is fully operational.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

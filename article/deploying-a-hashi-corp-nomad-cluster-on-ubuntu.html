@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploying a HashiCorp Nomad Cluster on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for deploying a HashiCorp Nomad cluster on Ubuntu to schedule and manage containerized and non-containerized applications. You will learn how to install Nomad, configure dedicated server and client nodes, es">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/deploying-a-hashi-corp-nomad-cluster-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deploying a HashiCorp Nomad Cluster on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/deploying-a-hashi-corp-nomad-cluster-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for deploying a HashiCorp Nomad cluster on Ubuntu to schedule and manage containerized and non-containerized applications. You will learn how to install Nomad, configure dedicated server and client nodes, es" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="deploying-a-hashicorp-nomad-cluster-on-ubuntu">Deploying a
+HashiCorp Nomad Cluster on Ubuntu</h1>
+<p>This guide provides a step-by-step walkthrough for deploying a
+HashiCorp Nomad cluster on Ubuntu to schedule and manage containerized
+and non-containerized applications. You will learn how to install Nomad,
+configure dedicated server and client nodes, establish cluster
+communication, verify node health, and submit a basic application job
+specification to confirm operational readiness.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>At least two Ubuntu instances (one designated as a Nomad server, one
+designated as a Nomad client).</li>
+<li>Root or <code>sudo</code> access on all instances.</li>
+<li>Network connectivity between instances with ports <code>4646</code>
+(HTTP API/UI), <code>4647</code> (RPC), and <code>4648</code> (Serf
+gossip) open.</li>
+</ul>
+<hr />
+<h3 id="step-1-install-nomad-on-all-nodes">Step 1: Install Nomad on All
+Nodes</h3>
+<p>Run the following commands on every Ubuntu node (both servers and
+clients) to add the official HashiCorp package repository and install
+Nomad.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Update package lists and install prerequisite utilities</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt-get install <span class="at">-y</span> wget gpg coreutils</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the HashiCorp GPG key</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-O-</span> https://apt.releases.hashicorp.com/gpg <span class="kw">|</span> <span class="fu">sudo</span> gpg <span class="at">--dearmor</span> <span class="at">-o</span> /usr/share/keyrings/hashicorp-archive-keyring.gpg</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the official HashiCorp Linux repository</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com </span><span class="va">$(</span><span class="ex">lsb_release</span> <span class="at">-cs</span><span class="va">)</span><span class="st"> main&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/hashicorp.list</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Update package lists and install Nomad</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt-get install <span class="at">-y</span> nomad</span></code></pre></div>
+<hr />
+<h3 id="step-2-configure-the-server-node">Step 2: Configure the Server
+Node</h3>
+<p>The server node handles scheduling, evaluates job specifications, and
+manages cluster state.</p>
+<ol type="1">
+<li>Open <code>/etc/nomad.d/nomad.hcl</code> on your server
+instance:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nomad.d/nomad.hcl</span></code></pre></div>
+<ol start="2" type="1">
+<li>Replace the contents with the following configuration (replace
+<code>&lt;SERVER_IP&gt;</code> with the private IP address of the server
+node):</li>
+</ol>
+<pre class="hcl"><code>datacenter = &quot;dc1&quot;
+data_dir   = &quot;/opt/nomad/data&quot;
+bind_addr  = &quot;0.0.0.0&quot;
+
+server {
+  enabled          = true
+  bootstrap_expect = 1
+}
+
+advertise {
+  http = &quot;&lt;SERVER_IP&gt;:4646&quot;
+  rpc  = &quot;&lt;SERVER_IP&gt;:4647&quot;
+  serf = &quot;&lt;SERVER_IP&gt;:4648&quot;
+}</code></pre>
+<p><em>Note: For production environments, configure
+<code>bootstrap_expect = 3</code> or <code>5</code> across multiple
+server nodes for high availability.</em></p>
+<ol start="3" type="1">
+<li>Start and enable the Nomad service:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> nomad</span></code></pre></div>
+<hr />
+<h3 id="step-3-configure-the-client-node">Step 3: Configure the Client
+Node</h3>
+<p>Client nodes register with servers and execute assigned task groups.
+If you plan to run containerized workloads, install Docker on the client
+node first:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> docker.io</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> docker</span></code></pre></div>
+<ol type="1">
+<li>Open <code>/etc/nomad.d/nomad.hcl</code> on your client
+instance:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nomad.d/nomad.hcl</span></code></pre></div>
+<ol start="2" type="1">
+<li>Replace the contents with the following configuration (replace
+<code>&lt;SERVER_IP&gt;</code> with the server node's IP address and
+<code>&lt;CLIENT_IP&gt;</code> with the client node's IP):</li>
+</ol>
+<pre class="hcl"><code>datacenter = &quot;dc1&quot;
+data_dir   = &quot;/opt/nomad/data&quot;
+bind_addr  = &quot;0.0.0.0&quot;
+
+client {
+  enabled = true
+  servers = [&quot;&lt;SERVER_IP&gt;:4647&quot;]
+}
+
+advertise {
+  http = &quot;&lt;CLIENT_IP&gt;:4646&quot;
+  rpc  = &quot;&lt;CLIENT_IP&gt;:4647&quot;
+  serf = &quot;&lt;CLIENT_IP&gt;:4648&quot;
+}</code></pre>
+<ol start="3" type="1">
+<li>Start and enable the Nomad service on the client:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> nomad</span></code></pre></div>
+<hr />
+<h3 id="step-4-verify-cluster-status">Step 4: Verify Cluster Status</h3>
+<p>Run verification commands from the server node to ensure the nodes
+have joined and are communicating properly.</p>
+<p>Check the server members:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nomad</span> server members</span></code></pre></div>
+<p>Check the registered client nodes:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nomad</span> node status</span></code></pre></div>
+<p>Both commands should return the nodes with a <code>ready</code> or
+<code>alive</code> state. You can also access the Nomad Web UI by
+navigating to <code>http://&lt;SERVER_IP&gt;:4646</code> in your web
+browser.</p>
+<hr />
+<h3 id="step-5-deploy-a-test-application">Step 5: Deploy a Test
+Application</h3>
+<p>To verify that the orchestrator is functioning correctly, deploy a
+simple HTTP application using Docker.</p>
+<ol type="1">
+<li>Generate an example job file:</li>
+</ol>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nomad</span> job init-example http-echo.nomad</span></code></pre></div>
+<ol start="2" type="1">
+<li>Alternatively, create a file named
+<code>http-echo.nomad</code>:</li>
+</ol>
+<pre class="hcl"><code>job &quot;http-echo&quot; {
+  datacenters = [&quot;dc1&quot;]
+  type        = &quot;service&quot;
+
+  group &quot;web&quot; {
+    count = 1
+
+    network {
+      port &quot;http&quot; {
+        to = 5678
+      }
+    }
+
+    task &quot;server&quot; {
+      driver = &quot;docker&quot;
+
+      config {
+        image = &quot;hashicorp/http-echo:latest&quot;
+        args  = [&quot;-text&quot;, &quot;Nomad cluster deployed successfully!&quot;, &quot;-listen&quot;, &quot;:5678&quot;]
+        ports = [&quot;http&quot;]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 64
+      }
+    }
+  }
+}</code></pre>
+<ol start="3" type="1">
+<li>Run the job:</li>
+</ol>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nomad</span> job run http-echo.nomad</span></code></pre></div>
+<ol start="4" type="1">
+<li>Check the deployment status:</li>
+</ol>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nomad</span> job status http-echo</span></code></pre></div>
+<p>Once the allocation status shows <code>running</code>, the Nomad
+cluster is fully operational and capable of scheduling container
+workloads across your Ubuntu nodes.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

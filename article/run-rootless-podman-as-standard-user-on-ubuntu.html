@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Rootless Podman as Standard User on Ubuntu - ubuntu</title>
+    <meta name="description" content="Running Podman in rootless mode allows standard users to create, run, and manage containers without requiring root privileges or a background daemon. This guide covers how to set up user namespaces, install Podman on Ubuntu, configure sub-UIDs and sub-GI">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/run-rootless-podman-as-standard-user-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Run Rootless Podman as Standard User on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/run-rootless-podman-as-standard-user-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Running Podman in rootless mode allows standard users to create, run, and manage containers without requiring root privileges or a background daemon. This guide covers how to set up user namespaces, install Podman on Ubuntu, configure sub-UIDs and sub-GI" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="run-rootless-podman-as-standard-user-on-ubuntu">Run Rootless
+Podman as Standard User on Ubuntu</h1>
+<p>Running Podman in rootless mode allows standard users to create, run,
+and manage containers without requiring root privileges or a background
+daemon. This guide covers how to set up user namespaces, install Podman
+on Ubuntu, configure sub-UIDs and sub-GIDs, and run your first isolated
+container entirely within the context of an unprivileged standard user
+account.</p>
+<h3 id="step-1-install-podman-and-dependencies">Step 1: Install Podman
+and Dependencies</h3>
+<p>Log in to Ubuntu and install Podman alongside the <code>uidmap</code>
+package, which provides the tools needed for managing user namespace
+mappings:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> podman uidmap</span></code></pre></div>
+<h3 id="step-2-configure-subordinate-uids-and-gids">Step 2: Configure
+Subordinate UIDs and GIDs</h3>
+<p>Rootless containers rely on user namespaces to map a range of user
+IDs (UIDs) and group IDs (GIDs) on the host to IDs inside the
+container.</p>
+<p>Check if your user already has sub-UID and sub-GID ranges
+allocated:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="va">$USER</span> /etc/subuid</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="va">$USER</span> /etc/subgid</span></code></pre></div>
+<p>If these commands return a line similar to
+<code>username:100000:65536</code>, your ranges are already active. If
+no output appears, allocate a range by running:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">--add-subuids</span> 100000-165535 <span class="va">$USER</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">--add-subgids</span> 100000-165535 <span class="va">$USER</span></span></code></pre></div>
+<p>After modifying these files, apply the new user namespace settings by
+running:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> system migrate</span></code></pre></div>
+<h3 id="step-3-enable-lingering-optional">Step 3: Enable Lingering
+(Optional)</h3>
+<p>If you plan to run long-lived containers or services via
+<code>systemd</code> that persist after logging out, enable user
+lingering for your account:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">loginctl</span> enable-linger <span class="va">$USER</span></span></code></pre></div>
+<h3 id="step-4-verify-rootless-operation">Step 4: Verify Rootless
+Operation</h3>
+<p>Make sure you are logged in as the standard user (not using
+<code>sudo</code>). Run a quick diagnostic to confirm Podman recognizes
+rootless mode:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> info</span></code></pre></div>
+<p>Look for <code>rootless: true</code> in the output under the
+<code>host</code> section.</p>
+<h3 id="step-5-run-a-test-container">Step 5: Run a Test Container</h3>
+<p>You can now launch and test a container without root permissions:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> run <span class="at">--rm</span> <span class="at">-it</span> alpine whoami</span></code></pre></div>
+<p>This command pulls the Alpine image and runs <code>whoami</code>,
+returning <code>root</code>. Inside the container's isolated namespace,
+the user appears as root, but on the host system, the process is mapped
+strictly to your standard unprivileged UID.</p>
+<p>To test port mapping without root permissions, use ports above
+1024:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> run <span class="at">-d</span> <span class="at">--name</span> web <span class="at">-p</span> 8080:80 nginx</span></code></pre></div>
+<p>Verify the running container:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> ps</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080</span></code></pre></div>
+<p>To stop and remove the container:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> stop web</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> rm web</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

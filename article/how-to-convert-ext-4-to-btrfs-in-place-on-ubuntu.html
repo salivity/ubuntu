@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Convert ext4 to Btrfs in Place on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to convert an existing ext4 filesystem to a modern Btrfs filesystem in-place on Ubuntu without losing your existing data. Utilizing the native btrfs-convert utility, this process restructures the underlying filesystem metadata whi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-convert-ext-4-to-btrfs-in-place-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Convert ext4 to Btrfs in Place on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-convert-ext-4-to-btrfs-in-place-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to convert an existing ext4 filesystem to a modern Btrfs filesystem in-place on Ubuntu without losing your existing data. Utilizing the native btrfs-convert utility, this process restructures the underlying filesystem metadata whi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-convert-ext4-to-btrfs-in-place-on-ubuntu">How to Convert
+ext4 to Btrfs in Place on Ubuntu</h1>
+<p>This guide explains how to convert an existing ext4 filesystem to a
+modern Btrfs filesystem in-place on Ubuntu without losing your existing
+data. Utilizing the native <code>btrfs-convert</code> utility, this
+process restructures the underlying filesystem metadata while keeping
+your files intact and creating a rollback image of the original ext4
+layout.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>A full backup of all critical data before proceeding, as filesystem
+conversions inherently carry risks.</li>
+<li>An Ubuntu Live USB environment if you are converting your root
+(<code>/</code>) partition, because the target partition must be
+unmounted during the conversion.</li>
+<li>Sufficient free space on the partition (at least 15–20% free space
+is recommended) to store the new Btrfs metadata alongside the existing
+data.</li>
+</ul>
+<h3 id="step-1-install-btrfs-utilities">Step 1: Install Btrfs
+Utilities</h3>
+<p>Ensure your Ubuntu system or live environment has the necessary tools
+installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install btrfs-progs</span></code></pre></div>
+<h3 id="step-2-unmount-and-check-the-ext4-filesystem">Step 2: Unmount
+and Check the ext4 Filesystem</h3>
+<p>The partition must be unmounted and verified for integrity before
+conversion. Replace <code>/dev/sdXn</code> with your specific target
+drive and partition (e.g., <code>/dev/sda2</code> or
+<code>/dev/nvme0n1p2</code>).</p>
+<p>Unmount the target partition:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount /dev/sdXn</span></code></pre></div>
+<p>Run a thorough filesystem consistency check:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> e2fsck <span class="at">-fvy</span> /dev/sdXn</span></code></pre></div>
+<h3 id="step-3-run-the-in-place-conversion">Step 3: Run the In-Place
+Conversion</h3>
+<p>Execute the conversion utility to transform the ext4 filesystem into
+Btrfs:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs-convert /dev/sdXn</span></code></pre></div>
+<p>This process creates a Btrfs filesystem tree using the existing ext4
+file blocks. It also creates a subvolume named <code>ext2_saved</code>
+containing a complete image of the original ext4 metadata, allowing for
+a rollback if necessary.</p>
+<h3 id="step-4-retrieve-the-new-uuid-and-mount">Step 4: Retrieve the New
+UUID and Mount</h3>
+<p>The conversion changes the partition's UUID. Identify the new
+UUID:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> blkid /dev/sdXn</span></code></pre></div>
+<p>Mount the newly converted Btrfs filesystem:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/sdXn /mnt</span></code></pre></div>
+<h3 id="step-5-update-the-filesystem-table-etcfstab">Step 5: Update the
+Filesystem Table (/etc/fstab)</h3>
+<p>If you converted a secondary data drive, update
+<code>/etc/fstab</code> on your host system. If you converted your root
+filesystem, edit the file located at <code>/mnt/etc/fstab</code>:</p>
+<p>Locate the entry for your partition and change:</p>
+<ol type="1">
+<li>The <code>UUID</code> to the new value obtained from
+<code>blkid</code>.</li>
+<li>The filesystem type from <code>ext4</code> to
+<code>btrfs</code>.</li>
+<li>The mount options to your preferred Btrfs options (such as
+<code>defaults</code> or <code>defaults,compress=zstd</code>).</li>
+</ol>
+<p>Example entry:</p>
+<pre class="text"><code>UUID=your-new-uuid-here  /  btrfs  defaults,compress=zstd  0  0</code></pre>
+<h3
+id="step-6-reinstall-grub-and-update-initramfs-root-conversions-only">Step
+6: Reinstall GRUB and Update Initramfs (Root Conversions Only)</h3>
+<p>If converting the root partition, you must reconfigure the bootloader
+to read the Btrfs filesystem. Bind the necessary pseudo-filesystems and
+chroot into the installation:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">--bind</span> /dev /mnt/dev</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">--bind</span> /proc /mnt/proc</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">--bind</span> /sys /mnt/sys</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If using EFI, mount the EFI partition as well</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/sdX_efi /mnt/boot/efi</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chroot /mnt</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ex">update-initramfs</span> <span class="at">-u</span> <span class="at">-k</span> all</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ex">update-grub</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span></span></code></pre></div>
+<p>Unmount the filesystems and reboot:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount <span class="at">-R</span> /mnt</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<h3 id="step-7-finalize-or-rollback">Step 7: Finalize or Rollback</h3>
+<p>Once you have verified that the system operates correctly under
+Btrfs, you can choose between keeping the changes or rolling back.</p>
+<p><strong>To finalize and free up disk space:</strong> Deleting the
+saved ext4 snapshot removes the rollback capability but frees up the
+space occupied by the old metadata:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs subvolume delete /ext2_saved</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs balance start <span class="at">-m</span> /</span></code></pre></div>
+<p><strong>To rollback (if issues occur):</strong> Boot back into a live
+USB, ensure the partition is unmounted, and revert the conversion:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs-convert <span class="at">-r</span> /dev/sdXn</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

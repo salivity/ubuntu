@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable or Disable Ubuntu Time Sync with timedatectl - ubuntu</title>
+    <meta name="description" content="In Ubuntu, keeping an accurate system clock is essential for security certificates, scheduled tasks, and log accuracy. The timedatectl utility, built into systemd, provides a straightforward way to manage time and date settings directly from the terminal">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/enable-or-disable-ubuntu-time-sync-with-timedatectl">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enable or Disable Ubuntu Time Sync with timedatectl - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/enable-or-disable-ubuntu-time-sync-with-timedatectl" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In Ubuntu, keeping an accurate system clock is essential for security certificates, scheduled tasks, and log accuracy. The timedatectl utility, built into systemd, provides a straightforward way to manage time and date settings directly from the terminal" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="enable-or-disable-ubuntu-time-sync-with-timedatectl">Enable or
+Disable Ubuntu Time Sync with timedatectl</h1>
+<p>In Ubuntu, keeping an accurate system clock is essential for security
+certificates, scheduled tasks, and log accuracy. The
+<code>timedatectl</code> utility, built into systemd, provides a
+straightforward way to manage time and date settings directly from the
+terminal. This guide covers how to check your current system clock
+status and use the <code>timedatectl</code> command to enable or disable
+automatic Network Time Protocol (NTP) synchronization.</p>
+<h3 id="check-current-time-synchronization-status">Check Current Time
+Synchronization Status</h3>
+<p>Before making changes, verify your current time synchronization
+settings. Open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">timedatectl</span></span></code></pre></div>
+<p>Review the output fields:</p>
+<ul>
+<li><strong>System clock synchronized:</strong> Displays
+<code>yes</code> if the time is currently synced, or <code>no</code> if
+it is not.</li>
+<li><strong>NTP service:</strong> Shows <code>active</code> if
+background synchronization is currently running, or
+<code>inactive</code> if it is disabled.</li>
+</ul>
+<hr />
+<h3 id="enable-automatic-time-synchronization">Enable Automatic Time
+Synchronization</h3>
+<p>To turn on automatic time synchronization via NTP, execute:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-ntp true</span></code></pre></div>
+<p><em>Note: You can also use <code>yes</code>, <code>on</code>, or
+<code>1</code> in place of <code>true</code>.</em></p>
+<p>This command enables and starts the underlying synchronization daemon
+(typically <code>systemd-timesyncd</code>).</p>
+<p>To verify that it is active, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">timedatectl</span></span></code></pre></div>
+<p>Ensure that the <strong>NTP service</strong> line now reads
+<strong>active</strong>.</p>
+<hr />
+<h3 id="disable-automatic-time-synchronization">Disable Automatic Time
+Synchronization</h3>
+<p>If you need to manually set the system time or use an external
+service without interference, disable synchronization with:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-ntp false</span></code></pre></div>
+<p><em>Note: You can also use <code>no</code>, <code>off</code>, or
+<code>0</code> in place of <code>false</code>.</em></p>
+<p>Confirm the change by checking the status:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">timedatectl</span></span></code></pre></div>
+<p>The <strong>NTP service</strong> line should now show
+<strong>inactive</strong>. Once disabled, you can manually set the
+system date and time using:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-time <span class="st">&quot;YYYY-MM-DD HH:MM:SS&quot;</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

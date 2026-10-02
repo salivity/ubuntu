@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use tpm2-tools with Hardware TPM on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides an overview and practical demonstration of using the tpm2-tools package to interact directly with a hardware Trusted Platform Module (TPM 2.0) on Ubuntu. You will learn how to verify hardware support in the Linux kernel, install the r">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-use-tpm-2-tools-with-hardware-tpm-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use tpm2-tools with Hardware TPM on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-use-tpm-2-tools-with-hardware-tpm-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides an overview and practical demonstration of using the tpm2-tools package to interact directly with a hardware Trusted Platform Module (TPM 2.0) on Ubuntu. You will learn how to verify hardware support in the Linux kernel, install the r" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-use-tpm2-tools-with-hardware-tpm-on-ubuntu">How to Use
+tpm2-tools with Hardware TPM on Ubuntu</h1>
+<p>This guide provides an overview and practical demonstration of using
+the <code>tpm2-tools</code> package to interact directly with a hardware
+Trusted Platform Module (TPM 2.0) on Ubuntu. You will learn how to
+verify hardware support in the Linux kernel, install the required
+user-space utilities, inspect platform capabilities, read Platform
+Configuration Registers (PCRs), generate cryptographically secure random
+numbers, and seal sensitive data directly to the hardware chip.</p>
+<h3 id="1-verify-tpm-hardware-detection">1. Verify TPM Hardware
+Detection</h3>
+<p>Before installing user-space tools, ensure that your motherboard's
+TPM 2.0 module is enabled in the BIOS/UEFI firmware and detected by the
+Linux kernel.</p>
+<p>Run the following command to check for the TPM device nodes:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /dev/tpm<span class="pp">*</span></span></code></pre></div>
+<p>If your hardware is enabled and supported, you should see
+<code>/dev/tpm0</code> and <code>/dev/tpmrm0</code> in the output. You
+can also inspect kernel boot messages:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dmesg</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> tpm</span></code></pre></div>
+<p>Look for output indicating that a TPM 2.0 device has been initialized
+by the <code>tpm_tis</code> or <code>tpm_crb</code> driver.</p>
+<h3 id="2-install-tpm2-tools">2. Install tpm2-tools</h3>
+<p>Ubuntu provides the <code>tpm2-tools</code> suite along with its
+supporting libraries (<code>tpm2-tss</code>) in the default
+repositories. Install the package using <code>apt</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tpm2-tools</span></code></pre></div>
+<h3 id="3-check-tpm-capabilities-and-specifications">3. Check TPM
+Capabilities and Specifications</h3>
+<p>To query the hardware specifications, manufacturer data, and
+supported algorithms, use the <code>tpm2_getcap</code> command.</p>
+<p>To view fixed hardware properties (such as the manufacturer and
+firmware version):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_getcap</span> properties-fixed</span></code></pre></div>
+<p>To list all available capability queries:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_getcap</span> <span class="at">-l</span></span></code></pre></div>
+<h3 id="4-read-platform-configuration-registers-pcrs">4. Read Platform
+Configuration Registers (PCRs)</h3>
+<p>Platform Configuration Registers store cryptographic hashes
+representing the system's boot integrity state. You can read the current
+state of these registers across all supported hashing algorithms
+using:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_pcrread</span></span></code></pre></div>
+<p>To inspect specific algorithms (e.g., SHA-256) and specific registers
+(e.g., PCRs 0, 1, and 2):</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_pcrread</span> sha256:0,1,2</span></code></pre></div>
+<h3 id="5-generate-hardware-random-numbers">5. Generate Hardware Random
+Numbers</h3>
+<p>The TPM includes a true hardware Random Number Generator (TRNG). You
+can extract cryptographically secure random bytes directly from the
+module using <code>tpm2_getrandom</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_getrandom</span> <span class="at">--hex</span> 32</span></code></pre></div>
+<p>This command outputs 32 bytes of entropy encoded in hexadecimal
+format.</p>
+<h3 id="6-seal-and-unseal-data-using-the-tpm">6. Seal and Unseal Data
+Using the TPM</h3>
+<p>One of the primary security functions of a TPM is data sealing, which
+encrypts data using a key generated inside the TPM hardware so that it
+can only be decrypted by that specific machine.</p>
+<h4 id="step-a-create-a-primary-storage-key">Step A: Create a Primary
+Storage Key</h4>
+<p>Generate a primary key object under the Owner hierarchy
+(<code>-C o</code>):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_createprimary</span> <span class="at">-C</span> o <span class="at">-c</span> primary.ctx</span></code></pre></div>
+<h4 id="step-b-seal-sensitive-data">Step B: Seal Sensitive Data</h4>
+<p>Create a file containing your secret, then use the primary key to
+encrypt (seal) it:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;TopSecretPassword123&quot;</span> <span class="op">&gt;</span> secret.txt</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_create</span> <span class="at">-C</span> primary.ctx <span class="at">-i</span> secret.txt <span class="at">-u</span> sealed_secret.pub <span class="at">-r</span> sealed_secret.priv</span></code></pre></div>
+<p>This generates a public component (<code>sealed_secret.pub</code>)
+and an encrypted private component (<code>sealed_secret.priv</code>).
+The original <code>secret.txt</code> can now be safely deleted.</p>
+<h4 id="step-c-load-and-unseal-the-data">Step C: Load and Unseal the
+Data</h4>
+<p>To recover the data, load the sealed object into the TPM and unseal
+it:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_load</span> <span class="at">-C</span> primary.ctx <span class="at">-u</span> sealed_secret.pub <span class="at">-r</span> sealed_secret.priv <span class="at">-c</span> secret.ctx</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_unseal</span> <span class="at">-c</span> secret.ctx</span></code></pre></div>
+<p>The output will display the original decrypted string:
+<code>TopSecretPassword123</code>.</p>
+<h3 id="7-manage-loaded-contexts">7. Manage Loaded Contexts</h3>
+<p>Loaded objects consume volatile memory inside the TPM. Once
+operations are complete, remove the transient context handles:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_flushcontext</span> secret.ctx</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">tpm2_flushcontext</span> primary.ctx</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> primary.ctx secret.ctx</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

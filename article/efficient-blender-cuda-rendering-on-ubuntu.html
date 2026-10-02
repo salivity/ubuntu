@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Blender CUDA Rendering on Ubuntu - ubuntu</title>
+    <meta name="description" content="Running Blender with CUDA on Ubuntu allows 3D artists to maximize their rendering performance by offloading complex Cycles computations to NVIDIA GPUs. This guide provides a direct, step-by-step walkthrough for configuring your Ubuntu environment, settin">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/efficient-blender-cuda-rendering-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Efficient Blender CUDA Rendering on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/efficient-blender-cuda-rendering-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Running Blender with CUDA on Ubuntu allows 3D artists to maximize their rendering performance by offloading complex Cycles computations to NVIDIA GPUs. This guide provides a direct, step-by-step walkthrough for configuring your Ubuntu environment, settin" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="efficient-blender-cuda-rendering-on-ubuntu">Efficient Blender
+CUDA Rendering on Ubuntu</h1>
+<p>Running Blender with CUDA on Ubuntu allows 3D artists to maximize
+their rendering performance by offloading complex Cycles computations to
+NVIDIA GPUs. This guide provides a direct, step-by-step walkthrough for
+configuring your Ubuntu environment, setting up the proprietary NVIDIA
+drivers, configuring Blender's CUDA preferences, and applying essential
+render optimizations to ensure maximum hardware efficiency and
+stability.</p>
+<h3 id="1-install-proprietary-nvidia-drivers">1. Install Proprietary
+NVIDIA Drivers</h3>
+<p>To use CUDA, you must use the proprietary NVIDIA graphics drivers
+instead of the open-source Nouveau drivers.</p>
+<ol type="1">
+<li>Open your terminal and check for recommended drivers:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ubuntu-drivers</span> devices</span></code></pre></div></li>
+<li>Install the recommended proprietary driver:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ubuntu-drivers autoinstall</span></code></pre></div></li>
+<li>Reboot your system to apply the changes:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+<li>Verify the driver installation:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nvidia-smi</span></span></code></pre></div>
+Ensure the output displays your GPU model and the driver version.</li>
+</ol>
+<h3 id="2-install-blender">2. Install Blender</h3>
+<p>To ensure full compatibility with CUDA libraries, install Blender via
+the official Snap package or directly from the official portable
+tarball, rather than standard APT repositories which may carry outdated
+packages.</p>
+<p>Install Blender via Snap:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap install blender <span class="at">--classic</span></span></code></pre></div>
+<h3 id="3-enable-cuda-in-blender">3. Enable CUDA in Blender</h3>
+<p>Once installed, Blender must be explicitly configured to use your
+NVIDIA GPU.</p>
+<ol type="1">
+<li>Launch Blender.</li>
+<li>Navigate to <strong>Edit</strong> &gt;
+<strong>Preferences</strong>.</li>
+<li>Select the <strong>System</strong> tab on the left.</li>
+<li>Under <strong>Cycles Render Devices</strong>, click the
+<strong>CUDA</strong> tab.</li>
+<li>Check the box next to your NVIDIA graphics card.</li>
+<li>(Optional) Uncheck your CPU if you only want the GPU to handle
+rendering; rendering on both can sometimes slow down CUDA performance
+due to CPU thread synchronization overhead.</li>
+<li>Close the Preferences window (settings save automatically).</li>
+</ol>
+<h3 id="4-optimize-cycles-render-settings">4. Optimize Cycles Render
+Settings</h3>
+<p>Configure your project to fully utilize the GPU pipeline.</p>
+<ul>
+<li><strong>Render Engine:</strong> Set the Render Engine to
+<strong>Cycles</strong> and the Device to <strong>GPU Compute</strong>
+in the <strong>Render Properties</strong> tab.</li>
+<li><strong>OptiX vs. CUDA:</strong> If your GPU supports it (RTX series
+and newer GTX cards), consider selecting OptiX instead of CUDA in the
+System Preferences, as OptiX utilizes dedicated RT cores for faster ray
+tracing. However, pure CUDA remains the most stable configuration for
+older architectures.</li>
+<li><strong>Sampling:</strong> Enable <strong>Noise Threshold</strong>
+(typically set between 0.01 and 0.05) and activate
+<strong>Denoising</strong> using the OpenImageDenoise or OptiX denoiser.
+This drastically reduces the number of samples required for clean
+output.</li>
+<li><strong>Tile Size:</strong> For Cycles in modern Blender versions
+(3.0 and newer), tile rendering is largely automated. Leave the tile
+size at the default setting unless VRAM constraints require smaller
+boundaries.</li>
+</ul>
+<h3 id="5-ubuntu-os-performance-tweaks">5. Ubuntu OS Performance
+Tweaks</h3>
+<p>Maximize GPU availability and efficiency by fine-tuning Ubuntu:</p>
+<ul>
+<li><strong>Enable Persistence Mode:</strong> This keeps the NVIDIA
+driver loaded constantly, preventing initialization delays between
+renders:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nvidia-smi <span class="at">-pm</span> 1</span></code></pre></div></li>
+<li><strong>Render via Command Line:</strong> To conserve VRAM used by
+the Ubuntu desktop environment, render final animations or heavy scenes
+in background mode:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">blender</span> <span class="at">-b</span> project.blend <span class="at">-E</span> CYCLES <span class="at">-o</span> //render_output <span class="at">-a</span></span></code></pre></div>
+This frees up graphical memory otherwise reserved for the display server
+(Xorg/Wayland), preventing out-of-memory errors on high-poly
+scenes.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

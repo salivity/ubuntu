@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Unattended Upgrades: Filtering Auto-Updates - ubuntu</title>
+    <meta name="description" content="The unattended-upgrades configuration file in Ubuntu serves as the central control mechanism for determining precisely which software packages are allowed to update automatically and which are restricted. Located at /etc/apt/apt.conf.d/50unattended-upgra">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ubuntu-unattended-upgrades-filtering-auto-updates">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu Unattended Upgrades: Filtering Auto-Updates - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ubuntu-unattended-upgrades-filtering-auto-updates" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The unattended-upgrades configuration file in Ubuntu serves as the central control mechanism for determining precisely which software packages are allowed to update automatically and which are restricted. Located at /etc/apt/apt.conf.d/50unattended-upgra" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ubuntu-unattended-upgrades-filtering-auto-updates">Ubuntu
+Unattended Upgrades: Filtering Auto-Updates</h1>
+<p>The <code>unattended-upgrades</code> configuration file in Ubuntu
+serves as the central control mechanism for determining precisely which
+software packages are allowed to update automatically and which are
+restricted. Located at
+<code>/etc/apt/apt.conf.d/50unattended-upgrades</code>, this
+configuration file enables system administrators to strike a balance
+between maintaining critical security patches and preventing unexpected
+system instability caused by automated software changes.</p>
+<h3 id="the-role-of-etcaptaptconfd50unattended-upgrades">The Role of
+<code>/etc/apt/apt.conf.d/50unattended-upgrades</code></h3>
+<p>By default, Ubuntu's <code>unattended-upgrades</code> utility is
+designed to download and install security updates without user
+intervention. However, applying updates blindly across an entire system
+can introduce breaking changes to databases, web servers, or custom
+application stacks. The configuration file provides granular filtering
+rules using two primary mechanisms: repository-level filtering and
+package-level filtering.</p>
+<h3 id="repository-filtering-allowed-origins">Repository Filtering:
+Allowed Origins</h3>
+<p>The configuration file defines the origins from which updates may be
+pulled using the <code>Allowed-Origins</code> (or
+<code>Origins-Pattern</code>) directive.</p>
+<p>This setting allows you to specify whether the system should
+apply:</p>
+<ul>
+<li><strong>Security updates only:</strong> By default, patterns like
+<code>"${distro_id}:${distro_codename}-security";</code> are enabled.
+This ensures that only packages released specifically to patch
+vulnerabilities are installed automatically.</li>
+<li><strong>Standard updates:</strong> Administrators can explicitly
+uncomment or add patterns for standard updates
+(<code>${distro_codename}-updates</code>) or proposed updates
+(<code>${distro_codename}-proposed</code>), though this increases the
+risk of functional changes.</li>
+</ul>
+<p>By filtering by origin, the configuration prevents major software
+version bumps while still addressing Common Vulnerabilities and
+Exposures (CVEs).</p>
+<h3 id="package-level-blocklisting">Package-Level Blocklisting</h3>
+<p>The <code>Package-Blacklist</code> directive provides explicit,
+package-specific exclusion rules. Any package listed in this section
+will never be automatically upgraded, even if an update is available
+from an allowed security repository.</p>
+<p>This is commonly used to freeze:</p>
+<ul>
+<li>Core database engines (e.g., <code>mysql-server</code>,
+<code>postgresql</code>) to avoid unexpected schema changes or service
+restarts.</li>
+<li>Web servers and proxies (e.g., <code>nginx</code>,
+<code>apache2</code>) to prevent downtime during peak production
+hours.</li>
+<li>Kernel updates, avoiding sudden changes to hardware drivers or
+reboot requirements.</li>
+</ul>
+<p>The blacklist supports regular expressions, allowing administrators
+to block entire families of packages using patterns like
+<code>"^linux-.*";</code>.</p>
+<h3 id="package-level-allowlisting">Package-Level Allowlisting</h3>
+<p>Conversely, the <code>Package-Whitelist</code> directive allows for
+an opt-in approach. When populated, the <code>unattended-upgrades</code>
+service restricts automated installations exclusively to the packages
+defined in this list, ignoring all other available updates. This
+provides the highest level of isolation for mission-critical servers
+where only a minimal set of non-disruptive packages should ever update
+automatically.</p>
+<h3 id="summary">Summary</h3>
+<p>The <code>unattended-upgrades</code> configuration file exists to
+give administrators deterministic control over automated maintenance. By
+leveraging repository origins alongside explicit package blacklists and
+whitelists, the file ensures security patches are applied reliably
+without risking unintended service disruption.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

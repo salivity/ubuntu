@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mount APFS Drive Read-Only on Ubuntu - ubuntu</title>
+    <meta name="description" content="Mounting an Apple File System (APFS) formatted storage device in Ubuntu requires third-party utilities because the Linux kernel does not include native read support for APFS out of the box. By using apfs-fuse, an open-source FUSE driver, you can securely">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mount-apfs-drive-read-only-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mount APFS Drive Read-Only on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mount-apfs-drive-read-only-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Mounting an Apple File System (APFS) formatted storage device in Ubuntu requires third-party utilities because the Linux kernel does not include native read support for APFS out of the box. By using apfs-fuse, an open-source FUSE driver, you can securely" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="mount-apfs-drive-read-only-on-ubuntu">Mount APFS Drive Read-Only
+on Ubuntu</h1>
+<p>Mounting an Apple File System (APFS) formatted storage device in
+Ubuntu requires third-party utilities because the Linux kernel does not
+include native read support for APFS out of the box. By using
+<code>apfs-fuse</code>, an open-source FUSE driver, you can securely
+access your macOS files in a read-only state, eliminating the risk of
+data corruption while retrieving documents, media, or backups.</p>
+<h3 id="step-1-install-required-dependencies">Step 1: Install Required
+Dependencies</h3>
+<p>Update your package index and install the necessary build tools,
+libraries, and FUSE development packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install build-essential cmake git libfuse3-dev libbz2-dev libz-dev <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-download-and-compile-apfs-fuse">Step 2: Download and
+Compile <code>apfs-fuse</code></h3>
+<p>Clone the <code>apfs-fuse</code> repository from GitHub along with
+its submodules, then compile the software:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="at">--recursive</span> https://github.com/sgan81/apfs-fuse.git</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> apfs-fuse</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> build</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> build</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> ..</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> make install</span></code></pre></div>
+<h3 id="step-3-identify-the-apfs-partition">Step 3: Identify the APFS
+Partition</h3>
+<p>Connect the APFS drive to your system and locate its device
+identifier using <code>lsblk</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span> <span class="at">-f</span></span></code></pre></div>
+<p>Look for the partition labeled with <code>apfs</code> (for example,
+<code>/dev/sdb2</code> or <code>/dev/nvme0n1p2</code>). Note the exact
+device path.</p>
+<h3 id="step-4-create-a-mount-point">Step 4: Create a Mount Point</h3>
+<p>Create a directory where the files will be accessible:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /media/apfs_drive</span></code></pre></div>
+<h3 id="step-5-mount-the-apfs-drive">Step 5: Mount the APFS Drive</h3>
+<p>Mount the partition to your designated directory. The driver runs
+read-only by default:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apfs-fuse /dev/sdb2 /media/apfs_drive</span></code></pre></div>
+<p><em>Note: Replace <code>/dev/sdb2</code> with your actual device
+identifier.</em></p>
+<p>If your drive contains multiple APFS volumes within a single
+container, you can list them or mount a specific volume number using the
+<code>-v</code> flag:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apfs-fuse <span class="at">-v</span> 0 /dev/sdb2 /media/apfs_drive</span></code></pre></div>
+<p>You can now navigate to <code>/media/apfs_drive</code> using your
+file manager or terminal to read and copy files.</p>
+<h3 id="step-6-unmount-the-drive">Step 6: Unmount the Drive</h3>
+<p>Once you finish accessing your data, safely unmount the drive using
+<code>fusermount</code> or <code>umount</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount /media/apfs_drive</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

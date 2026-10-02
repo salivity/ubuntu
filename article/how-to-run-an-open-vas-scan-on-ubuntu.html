@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Run an OpenVAS Scan on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to initiate and automate a vulnerability scan against a target using OpenVAS and the Greenbone Vulnerability Management (GVM) framework on Ubuntu. It covers the primary command-line tool, gvm-cli, which interacts with the manage">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-run-an-open-vas-scan-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Run an OpenVAS Scan on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-run-an-open-vas-scan-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to initiate and automate a vulnerability scan against a target using OpenVAS and the Greenbone Vulnerability Management (GVM) framework on Ubuntu. It covers the primary command-line tool, gvm-cli, which interacts with the manage" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-run-an-openvas-scan-on-ubuntu">How to Run an OpenVAS Scan
+on Ubuntu</h1>
+<p>This article explains how to initiate and automate a vulnerability
+scan against a target using OpenVAS and the Greenbone Vulnerability
+Management (GVM) framework on Ubuntu. It covers the primary command-line
+tool, <code>gvm-cli</code>, which interacts with the management daemon
+to define targets, create scan tasks, and execute security
+assessments.</p>
+<h3 id="understanding-openvas-command-line-scanning">Understanding
+OpenVAS Command-Line Scanning</h3>
+<p>In modern installations of OpenVAS (now part of Greenbone Community
+Edition / GVM), the scanner runs as a background service managed by the
+Greenbone Vulnerability Manager (<code>gvmd</code>). Direct command-line
+scanning is performed using the <code>gvm-tools</code> suite,
+specifically the <code>gvm-cli</code> command, which communicates with
+<code>gvmd</code> via the Greenbone Management Protocol (GMP).</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure <code>gvm-tools</code> is installed on your Ubuntu system:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gvm-tools</span></code></pre></div>
+<p>Ensure the GVM services are running and that you have valid
+administrator credentials configured.</p>
+<h3 id="step-1-create-a-scan-target">Step 1: Create a Scan Target</h3>
+<p>To scan a remote host, first define the target using GMP via
+<code>gvm-cli</code>.</p>
+<p>Run the following command, replacing <code>&lt;admin_user&gt;</code>,
+<code>&lt;password&gt;</code>, and <code>&lt;target_ip&gt;</code> with
+your details:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm-cli</span> socket <span class="at">--xml</span> <span class="st">&quot;&lt;create_target&gt;&lt;name&gt;Target Host&lt;/name&gt;&lt;hosts&gt;&lt;target_ip&gt;&lt;/hosts&gt;&lt;/create_target&gt;&quot;</span> <span class="at">--gmp-username</span> <span class="op">&lt;</span>admin_user<span class="op">&gt;</span> --gmp-password <span class="op">&lt;</span>password<span class="op">&gt;</span></span></code></pre></div>
+<p>This returns an XML response containing the newly created target's
+unique ID (<code>target_id</code>).</p>
+<h3 id="step-2-retrieve-the-scan-configuration-id">Step 2: Retrieve the
+Scan Configuration ID</h3>
+<p>A scan task requires a configuration profile (such as "Full and
+fast"). List the available scan configs to retrieve their IDs:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm-cli</span> socket <span class="at">--xml</span> <span class="st">&quot;&lt;get_configs/&gt;&quot;</span> <span class="at">--gmp-username</span> <span class="op">&lt;</span>admin_user<span class="op">&gt;</span> --gmp-password <span class="op">&lt;</span>password<span class="op">&gt;</span></span></code></pre></div>
+<p>Identify the <code>id</code> attribute of the configuration you
+intend to use.</p>
+<h3 id="step-3-create-the-scan-task">Step 3: Create the Scan Task</h3>
+<p>Combine the <code>target_id</code> and <code>config_id</code> to
+generate a new scan task:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm-cli</span> socket <span class="at">--xml</span> <span class="st">&quot;&lt;create_task&gt;&lt;name&gt;Ubuntu Audit&lt;/name&gt;&lt;config id=</span><span class="dt">\&quot;</span><span class="st">&lt;config_id&gt;</span><span class="dt">\&quot;</span><span class="st">/&gt;&lt;target id=</span><span class="dt">\&quot;</span><span class="st">&lt;target_id&gt;</span><span class="dt">\&quot;</span><span class="st">/&gt;&lt;/create_task&gt;&quot;</span> <span class="at">--gmp-username</span> <span class="op">&lt;</span>admin_user<span class="op">&gt;</span> --gmp-password <span class="op">&lt;</span>password<span class="op">&gt;</span></span></code></pre></div>
+<p>The output will contain a <code>task_id</code>.</p>
+<h3 id="step-4-execute-the-scan">Step 4: Execute the Scan</h3>
+<p>To launch the vulnerability scan against the target, run:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm-cli</span> socket <span class="at">--xml</span> <span class="st">&quot;&lt;start_task task_id=</span><span class="dt">\&quot;</span><span class="st">&lt;task_id&gt;</span><span class="dt">\&quot;</span><span class="st">/&gt;&quot;</span> <span class="at">--gmp-username</span> <span class="op">&lt;</span>admin_user<span class="op">&gt;</span> --gmp-password <span class="op">&lt;</span>password<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="step-5-monitor-scan-progress">Step 5: Monitor Scan Progress</h3>
+<p>To check the execution status and completion percentage of the
+running scan, query the task:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm-cli</span> socket <span class="at">--xml</span> <span class="st">&quot;&lt;get_tasks task_id=</span><span class="dt">\&quot;</span><span class="st">&lt;task_id&gt;</span><span class="dt">\&quot;</span><span class="st">/&gt;&quot;</span> <span class="at">--gmp-username</span> <span class="op">&lt;</span>admin_user<span class="op">&gt;</span> --gmp-password <span class="op">&lt;</span>password<span class="op">&gt;</span></span></code></pre></div>
+<p>The response includes the task's current status (such as
+<code>Requested</code>, <code>Running</code>, or <code>Done</code>)
+along with the progress percentage.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

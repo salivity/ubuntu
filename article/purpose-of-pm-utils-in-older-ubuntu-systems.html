@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purpose of pm-utils in Older Ubuntu Systems - ubuntu</title>
+    <meta name="description" content="The pm-utils (Power Management Utilities) package was the foundational framework used in older Ubuntu releases to control power state transitions, specifically suspending, hibernating, and resuming the operating system. Before the widespread adoption of">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/purpose-of-pm-utils-in-older-ubuntu-systems">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Purpose of pm-utils in Older Ubuntu Systems - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/purpose-of-pm-utils-in-older-ubuntu-systems" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The pm-utils (Power Management Utilities) package was the foundational framework used in older Ubuntu releases to control power state transitions, specifically suspending, hibernating, and resuming the operating system. Before the widespread adoption of" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="purpose-of-pm-utils-in-older-ubuntu-systems">Purpose of pm-utils
+in Older Ubuntu Systems</h1>
+<p>The <code>pm-utils</code> (Power Management Utilities) package was
+the foundational framework used in older Ubuntu releases to control
+power state transitions, specifically suspending, hibernating, and
+resuming the operating system. Before the widespread adoption of modern
+init systems like systemd, <code>pm-utils</code> provided the
+command-line binaries and modular scripting structure necessary to
+safely pause system operations, preserve hardware state, and reliably
+restore the computer when awakened.</p>
+<h3 id="core-functions-and-binaries">Core Functions and Binaries</h3>
+<p>At its core, <code>pm-utils</code> offered straightforward commands
+that bridged the gap between user space and the Linux kernel's power
+management interfaces (such as <code>/sys/power/state</code>). The
+package provided three primary commands:</p>
+<ul>
+<li><strong><code>pm-suspend</code></strong>: Saved the system state to
+RAM and put the machine into a low-power sleep mode.</li>
+<li><strong><code>pm-hibernate</code></strong>: Wrote the contents of
+RAM to swap space on disk and powered down the machine completely.</li>
+<li><strong><code>pm-suspend-hybrid</code></strong>: Wrote system state
+to disk while keeping RAM powered, ensuring data was preserved even if
+battery power failed during suspend.</li>
+</ul>
+<h3 id="the-hook-architecture">The Hook Architecture</h3>
+<p>The primary value of <code>pm-utils</code> was not merely signaling
+the kernel to sleep, but coordinating the software and hardware
+environments before and after the sleep state. It achieved this through
+an extensible hook directory system located in
+<code>/etc/pm/sleep.d/</code> (for user-defined scripts) and
+<code>/usr/lib/pm-utils/sleep.d/</code> (for distribution-provided
+scripts).</p>
+<p>These hooks were numbered sequentially (e.g.,
+<code>00powersave</code>, <code>50unload_alpm</code>,
+<code>99video</code>) to determine their execution order. When a sleep
+command was triggered, <code>pm-utils</code> ran these scripts in
+numerical order with arguments like <code>suspend</code> or
+<code>hibernate</code>. Upon resume, the scripts ran in reverse order
+with arguments like <code>resume</code> or <code>thaw</code>.</p>
+<h3 id="common-tasks-managed-by-pm-utils-scripts">Common Tasks Managed
+by pm-utils Scripts</h3>
+<p>Older hardware and drivers frequently struggled with power
+transitions. The script hooks within <code>pm-utils</code> resolved
+these issues by executing essential pre-sleep and post-wake maintenance
+tasks:</p>
+<ul>
+<li><strong>Kernel Module Management</strong>: Unloading problematic
+device drivers (such as legacy Wi-Fi or graphics drivers) before sleep
+and reloading them upon waking to prevent kernel panics.</li>
+<li><strong>Network and Service Handling</strong>: Disconnecting
+NetworkManager connections or stopping specific background daemons
+cleanly to avoid hanging sockets.</li>
+<li><strong>Hardware Re-initialization</strong>: Resetting the video
+card state using utilities like <code>vbetool</code>, restoring audio
+mixer settings via ALSA, or resetting USB controller states.</li>
+<li><strong>Screen Locking</strong>: Invoking desktop environment lock
+screens before the system entered suspend to maintain user
+security.</li>
+</ul>
+<h3 id="obsolescence-and-replacement">Obsolescence and Replacement</h3>
+<p>As Ubuntu transitioned to <code>systemd</code> (fully realized in
+Ubuntu 15.04 and 16.04 LTS), the responsibilities of
+<code>pm-utils</code> were superseded. Modern Ubuntu systems utilize
+<code>systemd-logind</code> and <code>systemd-suspend.service</code> to
+control power states. While <code>systemd</code> supports its own
+drop-in script directory (<code>/lib/systemd/system-sleep/</code>),
+modern Linux kernel drivers manage their own sleep and resume lifecycles
+far more reliably, largely eliminating the need for the extensive
+userspace workarounds that <code>pm-utils</code> previously handled.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Kdump Captures Kernel Crash Dumps on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains the role of the kdump service in capturing kernel crash dumps on Ubuntu systems. It outlines the core mechanics of how kdump operates during a fatal system failure, highlights its reliance on kexec and secondary memory reservation,">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-kdump-captures-kernel-crash-dumps-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Kdump Captures Kernel Crash Dumps on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-kdump-captures-kernel-crash-dumps-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of the kdump service in capturing kernel crash dumps on Ubuntu systems. It outlines the core mechanics of how kdump operates during a fatal system failure, highlights its reliance on kexec and secondary memory reservation," />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-kdump-captures-kernel-crash-dumps-on-ubuntu">How Kdump
+Captures Kernel Crash Dumps on Ubuntu</h1>
+<p>This article explains the role of the kdump service in capturing
+kernel crash dumps on Ubuntu systems. It outlines the core mechanics of
+how kdump operates during a fatal system failure, highlights its
+reliance on kexec and secondary memory reservation, and covers the
+essential tools used to preserve, compress, and analyze system memory
+for post-mortem diagnostics.</p>
+<h2 id="what-is-kdump">What is Kdump?</h2>
+<p>Kdump is the standard kernel crash-dumping mechanism used in Linux
+environments, including Ubuntu. Its primary role is to reliably capture
+the contents of the system's memory (known as a <code>vmcore</code>) at
+the exact moment a kernel panic, hardware exception, or fatal crash
+occurs. This memory snapshot is crucial for system administrators and
+developers to determine the root cause of the failure using debugging
+utilities like <code>crash</code> or <code>gdb</code>.</p>
+<h2 id="how-kdump-works">How Kdump Works</h2>
+<p>Traditional crash-dumping methods often fail because attempting to
+write a dump file using the already corrupted or panicked kernel can
+lead to data corruption or a complete system freeze. Kdump circumvents
+this risk through a two-kernel architecture:</p>
+<ol type="1">
+<li><strong>Memory Reservation:</strong> During normal boot, Ubuntu
+reserves a dedicated region of physical memory via the
+<code>crashkernel</code> boot parameter in GRUB. The primary production
+kernel runs normally and cannot touch this reserved space.</li>
+<li><strong>Kexec Mechanism:</strong> When a kernel panic triggers,
+kdump utilizes the <code>kexec</code> system call. <code>kexec</code>
+allows the system to instantly boot a new, lightweight capture kernel
+from the reserved memory space without passing through the BIOS or UEFI
+firmware initialization stages.</li>
+<li><strong>Capture and Dump:</strong> The newly booted capture kernel
+accesses the primary kernel's memory space via <code>/proc/vmcore</code>
+in a read-only state. It copies this data to a persistent storage
+location, such as a local disk partition (<code>/var/crash/</code>) or a
+remote network server (NFS/SSH).</li>
+<li><strong>Reboot:</strong> Once the dump collection is finished, the
+capture kernel automatically reboots the system back into the primary
+production environment, minimizing total downtime.</li>
+</ol>
+<h2 id="key-kdump-components-on-ubuntu">Key Kdump Components on
+Ubuntu</h2>
+<p>On Ubuntu, kdump functionality is primarily managed by the
+<code>linux-crashdump</code> package, which configures several
+interrelated tools:</p>
+<ul>
+<li><strong>kexec-tools:</strong> Provides the <code>kexec</code> binary
+required to load and boot the secondary capture kernel directly from
+memory.</li>
+<li><strong>kdump-tools:</strong> The Ubuntu-specific service layer that
+manages configuration, checks kernel reservation status, and initiates
+dump generation upon failure.</li>
+<li><strong>makedumpfile:</strong> A utility used by the capture kernel
+to optimize the dump file. It filters out unnecessary pages (such as
+free pages, zero-filled pages, and user-space cache) and compresses the
+remaining memory data to drastically reduce dump file size and save
+storage space.</li>
+</ul>
+<h2 id="importance-in-production-environments">Importance in Production
+Environments</h2>
+<p>The kdump service transforms unrecoverable kernel crashes into
+actionable diagnostic data. Without kdump, transient hardware faults,
+driver bugs, or kernel regressions would leave no trace other than an
+abrupt freeze or reboot. By isolating the capture process in a clean
+kernel environment, Ubuntu systems maintain dump integrity, ensuring
+high availability infrastructure can be quickly diagnosed and
+stabilized.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

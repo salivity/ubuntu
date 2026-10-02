@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expose Port from LXD Container to Ubuntu Host - ubuntu</title>
+    <meta name="description" content="Exposing a specific network port from an LXD container to its Ubuntu host allows external traffic to access services running inside the containerized environment. This guide explains how to map ports directly using LXD's native proxy device mechanism, wh">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/expose-port-from-lxd-container-to-ubuntu-host">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Expose Port from LXD Container to Ubuntu Host - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/expose-port-from-lxd-container-to-ubuntu-host" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Exposing a specific network port from an LXD container to its Ubuntu host allows external traffic to access services running inside the containerized environment. This guide explains how to map ports directly using LXD's native proxy device mechanism, wh" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="expose-port-from-lxd-container-to-ubuntu-host">Expose Port from
+LXD Container to Ubuntu Host</h1>
+<p>Exposing a specific network port from an LXD container to its Ubuntu
+host allows external traffic to access services running inside the
+containerized environment. This guide explains how to map ports directly
+using LXD's native <code>proxy</code> device mechanism, which acts as a
+built-in TCP/UDP forwarding layer without requiring manual
+<code>iptables</code> or NAT firewall configurations.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have the following ready before configuring port
+forwarding:</p>
+<ul>
+<li>An active LXD container running on an Ubuntu host.</li>
+<li>The name of the container and the port number the service is
+listening on inside the container.</li>
+<li>Administrative (<code>sudo</code> or <code>lxd</code> group) access
+to the host.</li>
+</ul>
+<h3 id="step-1-add-a-proxy-device">Step 1: Add a Proxy Device</h3>
+<p>The standard and recommended method to expose a port in LXD is the
+<code>proxy</code> device type. This device binds a port on the host and
+forwards incoming traffic directly to a designated port inside the
+container.</p>
+<p>Run the following command on the Ubuntu host:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config device add <span class="op">&lt;</span>container_name<span class="op">&gt;</span> <span class="op">&lt;</span>device_name<span class="op">&gt;</span> proxy listen=tcp:<span class="op">&lt;</span>host_ip<span class="op">&gt;</span>:<span class="op">&lt;</span>host_port<span class="op">&gt;</span> connect=tcp:127.0.0.1:<span class="op">&lt;</span>container_port<span class="op">&gt;</span></span></code></pre></div>
+<p><strong>Parameter Breakdown:</strong></p>
+<ul>
+<li><code>&lt;container_name&gt;</code>: The name of your running LXD
+container.</li>
+<li><code>&lt;device_name&gt;</code>: A unique name for this device
+configuration (e.g., <code>web-proxy</code> or
+<code>port8080</code>).</li>
+<li><code>listen=tcp:&lt;host_ip&gt;:&lt;host_port&gt;</code>: The
+protocol, IP address, and port on the Ubuntu host. To listen on all
+network interfaces of the host, use <code>0.0.0.0</code> (e.g.,
+<code>listen=tcp:0.0.0.0:80</code>).</li>
+<li><code>connect=tcp:127.0.0.1:&lt;container_port&gt;</code>: The
+address and port within the container that handles the traffic. Using
+<code>127.0.0.1</code> forwards traffic to the container's localhost
+interface.</li>
+</ul>
+<h4 id="example-forwarding-http-traffic">Example: Forwarding HTTP
+Traffic</h4>
+<p>To forward traffic from port <code>80</code> on the host to port
+<code>80</code> inside a container named <code>web-server</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config device add web-server http-proxy proxy listen=tcp:0.0.0.0:80 connect=tcp:127.0.0.1:80</span></code></pre></div>
+<h3 id="step-2-verify-the-configuration">Step 2: Verify the
+Configuration</h3>
+<ol type="1">
+<li><strong>Verify the device was added to the container
+configuration:</strong></li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config device show <span class="op">&lt;</span>container_name<span class="op">&gt;</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Check that the host is listening on the configured
+port:</strong></li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ss <span class="at">-tulpn</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span>host_port<span class="op">&gt;</span></span></code></pre></div>
+<p>You should see a process owned by LXD listening on that port.</p>
+<ol start="3" type="1">
+<li><strong>Test connectivity:</strong> Send a request to the host IP on
+the exposed port from a remote machine or the host itself:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://<span class="op">&lt;</span>host_ip<span class="op">&gt;</span>:<span class="op">&lt;</span>host_port<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="step-3-removing-the-port-forwarding-optional">Step 3: Removing
+the Port Forwarding (Optional)</h3>
+<p>If you no longer need the port exposed to the host, delete the proxy
+device using the device name you defined:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config device remove <span class="op">&lt;</span>container_name<span class="op">&gt;</span> <span class="op">&lt;</span>device_name<span class="op">&gt;</span></span></code></pre></div>
+<p>For example:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config device remove web-server http-proxy</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

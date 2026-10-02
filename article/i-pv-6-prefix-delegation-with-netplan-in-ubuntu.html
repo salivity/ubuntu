@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPv6 Prefix Delegation with Netplan in Ubuntu - ubuntu</title>
+    <meta name="description" content="IPv6 Prefix Delegation (DHCPv6-PD) allows an upstream router or ISP to assign an entire IPv6 prefix to a downstream router, which then distributes subnets to local network segments. In Ubuntu, Netplan operates alongside systemd-networkd to request a pref">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/i-pv-6-prefix-delegation-with-netplan-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="IPv6 Prefix Delegation with Netplan in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/i-pv-6-prefix-delegation-with-netplan-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="IPv6 Prefix Delegation (DHCPv6-PD) allows an upstream router or ISP to assign an entire IPv6 prefix to a downstream router, which then distributes subnets to local network segments. In Ubuntu, Netplan operates alongside systemd-networkd to request a pref" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ipv6-prefix-delegation-with-netplan-in-ubuntu">IPv6 Prefix
+Delegation with Netplan in Ubuntu</h1>
+<p>IPv6 Prefix Delegation (DHCPv6-PD) allows an upstream router or ISP
+to assign an entire IPv6 prefix to a downstream router, which then
+distributes subnets to local network segments. In Ubuntu, Netplan
+operates alongside <code>systemd-networkd</code> to request a prefix on
+an upstream WAN interface, assign a sliced subnet to a downstream LAN
+interface, and advertise that prefix to local clients using Router
+Advertisements (RA). This guide provides the complete configuration to
+achieve IPv6 prefix delegation using Netplan and
+<code>systemd-networkd</code>.</p>
+<h3 id="step-1-set-the-renderer-to-systemd-networkd">Step 1: Set the
+Renderer to systemd-networkd</h3>
+<p>Netplan requires the <code>networkd</code> backend to handle advanced
+IPv6 lifecycle features such as Prefix Delegation. Open your primary
+Netplan configuration file, typically located in
+<code>/etc/netplan/</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/netplan/01-netcfg.yaml</span></code></pre></div>
+<p>Ensure the <code>renderer</code> directive is set to
+<code>networkd</code> at the top level:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">network</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">renderer</span><span class="kw">:</span><span class="at"> networkd</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ethernets</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    # Interfaces will be configured below</span></span></code></pre></div>
+<h3
+id="step-2-configure-upstream-wan-and-downstream-lan-interfaces">Step 2:
+Configure Upstream (WAN) and Downstream (LAN) Interfaces</h3>
+<p>Define your WAN interface to request an IPv6 prefix via DHCPv6, and
+configure your LAN interface to wait for delegation. Replace
+<code>eth0</code> (WAN) and <code>eth1</code> (LAN) with your actual
+interface names.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">network</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">renderer</span><span class="kw">:</span><span class="at"> networkd</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ethernets</span><span class="kw">:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">eth0</span><span class="kw">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp4</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp6</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">ipv6-privacy</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">eth1</span><span class="kw">:</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp4</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp6</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">link-local</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> ipv6 </span><span class="kw">]</span></span></code></pre></div>
+<p>Save and exit the file.</p>
+<h3
+id="step-3-enable-downstream-prefix-delegation-via-systemd-networkd">Step
+3: Enable Downstream Prefix Delegation via systemd-networkd</h3>
+<p>Because Netplan does not yet expose every granular
+<code>systemd-networkd</code> prefix delegation directive natively in
+YAML, you must supply drop-in configuration files to complete the
+assignment and router advertisements.</p>
+<p>Create the systemd-networkd drop-in directory for the WAN interface
+(<code>eth0</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/systemd/network/10-netplan-eth0.network.d</span></code></pre></div>
+<p>Create
+<code>/etc/systemd/network/10-netplan-eth0.network.d/pd.conf</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[DHCPv6]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">PrefixDelegationHint</span><span class="ot">=</span><span class="st">::/56</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">WithoutRA</span><span class="ot">=</span><span class="st">solicit</span></span></code></pre></div>
+<p><em>Note: Change <code>::/56</code> to the prefix size requested by
+your ISP, or omit <code>PrefixDelegationHint</code> to accept whatever
+size the provider assigns.</em></p>
+<p>Next, create the drop-in directory for the downstream LAN interface
+(<code>eth1</code>):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/systemd/network/10-netplan-eth1.network.d</span></code></pre></div>
+<p>Create
+<code>/etc/systemd/network/10-netplan-eth1.network.d/pd.conf</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Network]</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">IPv6SendRA</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">DHCPPrefixDelegation</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[IPv6PrefixDelegation]</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="dt">SubnetId</span><span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Announce</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[IPv6SendRA]</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="dt">Managed</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="dt">OtherInformation</span><span class="ot">=</span><span class="kw">no</span></span></code></pre></div>
+<ul>
+<li><code>DHCPPrefixDelegation=yes</code> assigns a sub-prefix from the
+upstream delegated pool to this interface.</li>
+<li><code>SubnetId=1</code> specifies which subnet index to bind to this
+interface.</li>
+<li><code>IPv6SendRA=yes</code> and <code>Announce=yes</code> enable
+Router Advertisements (SLAAC) to connected downstream hosts.</li>
+</ul>
+<h3 id="step-4-enable-ipv6-forwarding">Step 4: Enable IPv6
+Forwarding</h3>
+<p>Downstream routing requires kernel-level packet forwarding. Enable
+IPv6 forwarding by creating or editing
+<code>/etc/sysctl.d/99-ipv6-forwarding.conf</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv6.conf.all.forwarding</span><span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv6.conf.default.forwarding</span><span class="ot">=</span><span class="dv">1</span></span></code></pre></div>
+<p>Apply the sysctl configuration immediately:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">--system</span></span></code></pre></div>
+<h3 id="step-5-apply-and-verify-configuration">Step 5: Apply and Verify
+Configuration</h3>
+<p>Apply the Netplan settings and reload
+<code>systemd-networkd</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netplan apply</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-networkd</span></code></pre></div>
+<p>Verify that the upstream interface obtained a prefix and that the
+downstream interface acquired a delegated IPv6 address:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">networkctl</span> status eth0</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">networkctl</span> status eth1</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> <span class="at">-6</span> addr show dev eth1</span></code></pre></div>
+<p>Under <code>eth1</code>, you should see a global IPv6 address derived
+from the delegated prefix with a <code>/64</code> subnet mask.
+Downstream clients connected to <code>eth1</code> will receive SLAAC
+configuration and route through the Ubuntu host.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

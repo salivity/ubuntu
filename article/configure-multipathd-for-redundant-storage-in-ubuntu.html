@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Multipathd for Redundant Storage in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a practical, step-by-step walkthrough for configuring multipathd (Device Mapper Multipathing) on Ubuntu to manage redundant storage fabric paths, such as Fibre Channel or iSCSI SAN connections. You will learn how to install the requir">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-multipathd-for-redundant-storage-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Multipathd for Redundant Storage in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-multipathd-for-redundant-storage-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a practical, step-by-step walkthrough for configuring multipathd (Device Mapper Multipathing) on Ubuntu to manage redundant storage fabric paths, such as Fibre Channel or iSCSI SAN connections. You will learn how to install the requir" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-multipathd-for-redundant-storage-in-ubuntu">Configure
+Multipathd for Redundant Storage in Ubuntu</h1>
+<p>This guide provides a practical, step-by-step walkthrough for
+configuring <code>multipathd</code> (Device Mapper Multipathing) on
+Ubuntu to manage redundant storage fabric paths, such as Fibre Channel
+or iSCSI SAN connections. You will learn how to install the required
+multipath utilities, generate and customize the configuration file, map
+logical devices using World Wide Identifiers (WWIDs), and verify path
+aggregation and automatic failover.</p>
+<h3 id="1-install-multipath-tools">1. Install Multipath Tools</h3>
+<p>Update your package index and install the
+<code>multipath-tools</code> package:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install multipath-tools</span></code></pre></div>
+<h3 id="2-identify-device-wwids">2. Identify Device WWIDs</h3>
+<p>Device Mapper Multipathing relies on the unique World Wide Identifier
+(WWID) of a SCSI device to group multiple paths leading to the same
+logical unit (LUN).</p>
+<p>To list connected block devices and identify the paths to your SAN
+LUNs:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>To determine the WWID of an individual block device (for example,
+<code>/dev/sdb</code>):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /lib/udev/scsi_id <span class="at">-g</span> <span class="at">-u</span> <span class="at">-d</span> /dev/sdb</span></code></pre></div>
+<p>Record this WWID string; you will use it to assign friendly aliases
+and path-specific policies.</p>
+<h3 id="3-create-the-multipath-configuration-file">3. Create the
+Multipath Configuration File</h3>
+<p>If <code>/etc/multipath.conf</code> does not exist, create a clean
+configuration file.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> touch /etc/multipath.conf</span></code></pre></div>
+<p>Add the following base configuration:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">defaults {</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    user_friendly_names yes</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    find_multipaths     yes</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dt">    path_grouping_policy multibus</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dt">    path_checker        tur</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dt">    failback            immediate</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dt">    no_path_retry       queue</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dt">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="dt">blacklist {</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="dt">    </span><span class="co"># Exclude internal/boot drives by device node regex</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="dt">    devnode &quot;^(ram|raw|loop|fd|md|dm-|sr|scd|st)</span><span class="kw">[0-9]</span><span class="dt">*&quot;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="dt">    devnode &quot;^sda</span><span class="kw">[0-9]</span><span class="dt">*&quot;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="dt">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="dt">multipaths {</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="dt">    multipath {</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="dt">        wwid    36001405a1b2c3d4e5f60000000000000</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="dt">        alias   san_data_vol1</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="dt">    }</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="dt">}</span></span></code></pre></div>
+<h4 id="key-directives-explained">Key Directives Explained:</h4>
+<ul>
+<li><strong><code>find_multipaths yes</code></strong>: Automatically
+configures multipathing on devices that appear on more than one path,
+reducing the need to manually whitelist every drive.</li>
+<li><strong><code>path_grouping_policy multibus</code></strong>: Groups
+all valid paths into a single path group, allowing load balancing across
+all operational fabric links. Alternatively, use <code>failover</code>
+or <code>group_by_prio</code>.</li>
+<li><strong><code>path_checker tur</code></strong>: Uses the "Test Unit
+Ready" SCSI command to periodically check if a path is online.</li>
+<li><strong><code>no_path_retry queue</code></strong>: Queues I/O
+requests if all paths fail, preventing immediate data-corruption errors
+while fabric links recover.</li>
+<li><strong><code>blacklist</code></strong>: Prevents local operating
+system drives (like <code>/dev/sda</code>) from being placed into
+multipath maps.</li>
+</ul>
+<h3 id="4-enable-and-start-the-multipath-service">4. Enable and Start
+the Multipath Service</h3>
+<p>Reload the system systemd configuration and start the
+<code>multipathd</code> daemon:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart multipathd</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable multipathd</span></code></pre></div>
+<p>Update your initial RAM filesystem (initramfs) so that multipath
+configurations are applied during the early boot phase:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span> <span class="at">-k</span> all</span></code></pre></div>
+<h3 id="5-verify-the-multipath-topology">5. Verify the Multipath
+Topology</h3>
+<p>To confirm that <code>multipathd</code> has bound the redundant links
+to a single device mapper target, run:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> multipath <span class="at">-ll</span></span></code></pre></div>
+<p>A healthy output displays the alias, WWID, sysfs status, and grouped
+paths:</p>
+<pre class="text"><code>san_data_vol1 (36001405a1b2c3d4e5f60000000000000) dm-1 NETAPP,LUN C-Mode
+size=500G features=&#39;1 queue_if_no_path&#39; hwhandler=&#39;1 alua&#39; wp=rw
+`-+- policy=&#39;round-robin 0&#39; prio=50 status=active
+  |- 1:0:0:1 sdb 8:16 active ready running
+  `- 2:0:0:1 sdc 8:32 active ready running</code></pre>
+<p>In this output, <code>/dev/sdb</code> and <code>/dev/sdc</code> are
+two physical connections to the same LUN, unified under
+<code>/dev/mapper/san_data_vol1</code>.</p>
+<h3 id="6-format-and-mount-the-multipath-device">6. Format and Mount the
+Multipath Device</h3>
+<p>Never partition, format, or mount the individual underlying SCSI
+paths directly (such as <code>/dev/sdb</code>). Instead, only perform
+filesystem operations on the unified Device Mapper device:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Format the multipath target</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkfs.ext4 /dev/mapper/san_data_vol1</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mount point and mount the device</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /mnt/san_storage</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/mapper/san_data_vol1 /mnt/san_storage</span></code></pre></div>
+<p>For persistent mounting across reboots, obtain the filesystem UUID
+with <code>sudo blkid /dev/mapper/san_data_vol1</code> and add it to
+<code>/etc/fstab</code> using the <code>_netdev</code> mount option to
+ensure the network or fabric layer initializes before the volume
+mounts.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

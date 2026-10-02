@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Steam Proton Runs Windows Games on Ubuntu - ubuntu</title>
+    <meta name="description" content="Proton is an open-source compatibility tool developed by Valve that allows Ubuntu users to play Windows-exclusive games directly through the Linux Steam client. By combining customized versions of Wine with high-performance translation layers like DXVK a">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-steam-proton-runs-windows-games-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Steam Proton Runs Windows Games on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-steam-proton-runs-windows-games-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Proton is an open-source compatibility tool developed by Valve that allows Ubuntu users to play Windows-exclusive games directly through the Linux Steam client. By combining customized versions of Wine with high-performance translation layers like DXVK a" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-steam-proton-runs-windows-games-on-ubuntu">How Steam Proton
+Runs Windows Games on Ubuntu</h1>
+<p>Proton is an open-source compatibility tool developed by Valve that
+allows Ubuntu users to play Windows-exclusive games directly through the
+Linux Steam client. By combining customized versions of Wine with
+high-performance translation layers like DXVK and VKD3D, Proton
+translates Windows-specific API and graphics calls into Linux-native
+equivalents in real time. This integration eliminates the need for
+virtual machines, dual-boot setups, or complex manual emulator
+configurations, delivering native-like gaming performance on Ubuntu.</p>
+<h3 id="directx-to-vulkan-translation">DirectX to Vulkan
+Translation</h3>
+<p>At the core of Proton’s graphics pipeline are DXVK and VKD3D-Proton.
+Windows games typically rely on Microsoft DirectX 9, 10, 11, or 12 to
+render graphics. Because Linux does not support DirectX natively, Proton
+intercepts these calls and converts them into Vulkan, a modern,
+cross-platform graphics API supported natively on Ubuntu. DXVK handles
+DirectX 9 through 11, while VKD3D-Proton manages DirectX 12. Because
+Vulkan communicates closely with the underlying GPU drivers, this
+translation incurs minimal latency and often matches Windows frame
+rates.</p>
+<h3 id="system-call-and-api-emulation-via-wine">System Call and API
+Emulation via Wine</h3>
+<p>Beyond graphics rendering, Windows games rely on hundreds of
+proprietary Windows APIs for audio playback, input processing, network
+communications, and memory management. Proton incorporates a modified
+build of Wine (Wine Is Not an Emulator) to act as an intermediary layer.
+When an executable requests a Windows service—such as DirectSound,
+XAudio2, or Windows-specific threading—Proton intercepts the request and
+maps it to the corresponding Linux subsystem, such as PulseAudio,
+PipeWire, or the Linux kernel scheduler.</p>
+<h3 id="seamless-steam-integration">Seamless Steam Integration</h3>
+<p>Before Proton, running Windows games on Linux required third-party
+software like Lutris or manual Wine prefixes. Proton automates this
+process through the "Steam Play" feature inside the Steam client on
+Ubuntu. When a user installs a Windows game:</p>
+<ul>
+<li>Steam automatically creates an isolated directory structure (a Wine
+prefix) mimicking a standard Windows <code>C:</code> drive.</li>
+<li>Proton automatically configures the necessary libraries, dynamic
+link libraries (DLLs), and runtime files required by that specific
+title.</li>
+<li>Controller configurations, Steam Cloud saves, and the Steam Overlay
+operate just as they would on a native Linux game.</li>
+</ul>
+<h3 id="anti-cheat-and-drm-compatibility">Anti-Cheat and DRM
+Compatibility</h3>
+<p>Historically, anti-cheat software prevented Windows games from
+executing under Linux compatibility environments. Valve worked with
+major security vendors to integrate native support for Easy Anti-Cheat
+(EAC) and BattlEye directly into Proton. When game developers enable
+Linux/Proton support in their anti-cheat configurations, Proton bridges
+the integrity checks to Ubuntu, allowing players to join multiplayer
+lobbies without triggering false bans.</p>
+<h3 id="continuous-optimization-and-proton-ge">Continuous Optimization
+and Proton GE</h3>
+<p>Proton receives regular upstream updates from Valve to address
+regressions, patch game-specific bugs, and optimize day-one releases.
+For games requiring specialized media codecs or bleeding-edge community
+patches, Ubuntu users can also utilize community-maintained variants
+such as Proton GE (GloriousEggroll). Together, these layers ensure that
+the vast majority of the Windows Steam catalog runs smoothly on Ubuntu
+with minimal user intervention.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Instance Metadata Service on Ubuntu VMs - ubuntu</title>
+    <meta name="description" content="The Azure Instance Metadata Service (IMDS) provides essential runtime data to virtual machines directly from within the operating system. When queried from an Ubuntu VM, IMDS acts as a secure, locally accessible REST endpoint that supplies real-time comp">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/azure-instance-metadata-service-on-ubuntu-v-ms">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Azure Instance Metadata Service on Ubuntu VMs - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/azure-instance-metadata-service-on-ubuntu-v-ms" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Azure Instance Metadata Service (IMDS) provides essential runtime data to virtual machines directly from within the operating system. When queried from an Ubuntu VM, IMDS acts as a secure, locally accessible REST endpoint that supplies real-time comp" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="azure-instance-metadata-service-on-ubuntu-vms">Azure Instance
+Metadata Service on Ubuntu VMs</h1>
+<p>The Azure Instance Metadata Service (IMDS) provides essential runtime
+data to virtual machines directly from within the operating system. When
+queried from an Ubuntu VM, IMDS acts as a secure, locally accessible
+REST endpoint that supplies real-time compute specifications, network
+configurations, scheduled maintenance alerts, and authentication tokens
+for Azure resources, all without requiring credentials or external
+internet connectivity.</p>
+<h3 id="how-imds-works-on-ubuntu">How IMDS Works on Ubuntu</h3>
+<p>IMDS is accessed via a non-routable link-local IP address
+(<code>169.254.169.254</code>) that only the VM itself can communicate
+with. On an Ubuntu system, you typically interact with IMDS using tools
+like <code>curl</code> or system scripts by sending a <code>GET</code>
+request along with the required HTTP header
+<code>Metadata: true</code>.</p>
+<p>A basic query to retrieve compute details looks like this:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Metadata:true&quot;</span> <span class="st">&quot;http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01&quot;</span></span></code></pre></div>
+<h3 id="primary-purposes-of-imds-on-ubuntu">Primary Purposes of IMDS on
+Ubuntu</h3>
+<h4 id="1-dynamic-system-configuration-and-bootstrapping">1. Dynamic
+System Configuration and Bootstrapping</h4>
+<p>When an Ubuntu VM launches, configuration utilities like
+<code>cloud-init</code> or custom shell scripts query IMDS to discover
+the VM's environment. IMDS supplies:</p>
+<ul>
+<li><strong>Compute metadata:</strong> VM size, resource ID,
+location/region, subscription ID, and assigned tags.</li>
+<li><strong>Custom data:</strong> Scripts or configuration files passed
+during deployment. Using this information, initialization tools can
+automate system setup, register nodes into clusters, or alter behavior
+based on dynamic tags without manual intervention.</li>
+</ul>
+<h4 id="2-network-discovery">2. Network Discovery</h4>
+<p>IMDS provides granular network parameters directly to the guest OS.
+This includes private and public IP addresses, subnet masks, MAC
+addresses, and load balancer configurations. Scripts can read these
+endpoints to set up static route tables, bind specific services to
+private interfaces, or manage secondary network interfaces attached to
+the Ubuntu system.</p>
+<h4 id="3-acquiring-managed-identity-access-tokens">3. Acquiring Managed
+Identity Access Tokens</h4>
+<p>One of the most critical security uses of IMDS is token acquisition
+via Azure Managed Identities (formerly MSI). Instead of storing
+sensitive secrets or API keys on the Ubuntu file system, applications
+running on the VM can request short-lived Azure Active Directory
+(Microsoft Entra ID) access tokens from IMDS. These tokens enable secure
+interaction with Azure services such as Azure Key Vault, Azure Blob
+Storage, or Azure SQL Database.</p>
+<h4 id="4-handling-scheduled-maintenance-and-preemption">4. Handling
+Scheduled Maintenance and Preemption</h4>
+<p>High-availability systems and workloads running on Spot instances
+rely on the Scheduled Events feature of IMDS. By polling the
+<code>/metadata/scheduledevents</code> endpoint, an Ubuntu service can
+receive advance warnings about upcoming host reboots, live migrations,
+or node preemptions. This allows applications to gracefully drain
+traffic, flush caches, save state, or alert orchestration platforms
+before the VM goes offline.</p>
+<h4 id="5-system-attestation-and-security">5. System Attestation and
+Security</h4>
+<p>For Ubuntu VMs using Confidential Computing or Trusted Launch, IMDS
+exposes attestation metadata. The guest operating system can verify that
+it is running on genuine, secure Azure hardware and extract measured
+boot logs to confirm platform integrity.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

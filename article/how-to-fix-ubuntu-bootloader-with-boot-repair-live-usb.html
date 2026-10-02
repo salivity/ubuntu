@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Fix Ubuntu Bootloader with Boot-Repair Live USB - ubuntu</title>
+    <meta name="description" content="When an update, dual-boot installation, or drive partition error corrupts the GRUB bootloader, Ubuntu fails to start properly. This guide explains how to restore access to your system by booting into a temporary Ubuntu Live USB session, installing the de">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-fix-ubuntu-bootloader-with-boot-repair-live-usb">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Fix Ubuntu Bootloader with Boot-Repair Live USB - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-fix-ubuntu-bootloader-with-boot-repair-live-usb" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When an update, dual-boot installation, or drive partition error corrupts the GRUB bootloader, Ubuntu fails to start properly. This guide explains how to restore access to your system by booting into a temporary Ubuntu Live USB session, installing the de" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-fix-ubuntu-bootloader-with-boot-repair-live-usb">How to
+Fix Ubuntu Bootloader with Boot-Repair Live USB</h1>
+<p>When an update, dual-boot installation, or drive partition error
+corrupts the GRUB bootloader, Ubuntu fails to start properly. This guide
+explains how to restore access to your system by booting into a
+temporary Ubuntu Live USB session, installing the dedicated Boot-Repair
+utility, and executing an automated repair of the GRUB bootloader.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>To perform this repair, you need:</p>
+<ul>
+<li>A working computer to create a bootable Ubuntu USB drive (if you do
+not already have one).</li>
+<li>A bootable Ubuntu Live USB.</li>
+<li>An active internet connection on the target machine (via Wi-Fi or
+Ethernet) to download the repair packages.</li>
+</ul>
+<hr />
+<h3 id="step-1-boot-into-the-live-usb">Step 1: Boot into the Live
+USB</h3>
+<ol type="1">
+<li>Insert the Ubuntu Live USB into the affected computer.</li>
+<li>Turn on the machine and access the boot menu by pressing the
+appropriate key for your hardware (commonly <strong>F12</strong>,
+<strong>F11</strong>, <strong>F10</strong>, <strong>F2</strong>, or
+<strong>Esc</strong>).</li>
+<li>Select your USB drive from the boot options.</li>
+<li>When prompted by the Ubuntu installer, select <strong>Try
+Ubuntu</strong> (or <strong>Try Ubuntu without installing</strong>). Do
+not choose the install option.</li>
+</ol>
+<hr />
+<h3 id="step-2-connect-to-the-internet">Step 2: Connect to the
+Internet</h3>
+<p>Once the live desktop loads:</p>
+<ol type="1">
+<li>Click the system menu in the top-right corner.</li>
+<li>Connect to your local Wi-Fi network or plug in an Ethernet cable. An
+active connection is required to fetch the latest GRUB files and the
+Boot-Repair package.</li>
+</ol>
+<hr />
+<h3 id="step-3-install-the-boot-repair-utility">Step 3: Install the
+Boot-Repair Utility</h3>
+<p>Boot-Repair is not included by default in standard Ubuntu live
+images, so it must be added via its personal package archive (PPA).</p>
+<ol type="1">
+<li>Open the Terminal by pressing <strong>Ctrl + Alt + T</strong>.</li>
+<li>Add the Boot-Repair repository by entering:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:yannubuntu/boot-repair</span></code></pre></div></li>
+<li>Press <strong>Enter</strong> when prompted to confirm the
+addition.</li>
+<li>Update your package lists:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></li>
+<li>Install the Boot-Repair application:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> boot-repair</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-4-run-the-repair">Step 4: Run the Repair</h3>
+<ol type="1">
+<li><p>Launch the utility from the terminal:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">boot-repair</span></span></code></pre></div>
+<p><em>(Alternatively, search for "Boot Repair" in the application
+launcher.)</em></p></li>
+<li><p>The tool will scan your system's drives and partitions.</p></li>
+<li><p>Click the <strong>Recommended repair</strong> button. This option
+automatically detects your system configuration (UEFI or Legacy BIOS),
+reinstalls the GRUB bootloader to the correct partition, and rebuilds
+the boot configuration file (<code>grub.cfg</code>).</p></li>
+<li><p>If prompted to paste terminal commands during the process, open a
+new terminal window, copy and paste the displayed commands sequentially,
+and follow the on-screen prompts carefully.</p></li>
+</ol>
+<hr />
+<h3 id="step-5-finish-and-reboot">Step 5: Finish and Reboot</h3>
+<ol type="1">
+<li>Once the process finishes, Boot-Repair will display a URL (a
+Pastebin link containing the repair log). Note this URL down for
+troubleshooting in case the issue persists.</li>
+<li>Close Boot-Repair and shut down the computer.</li>
+<li>Remove the Live USB drive.</li>
+<li>Power the computer back on. The system should now display the GRUB
+menu or boot directly into Ubuntu.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

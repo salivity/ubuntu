@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Large Text Files with Less in Ubuntu Terminal - ubuntu</title>
+    <meta name="description" content="Viewing large text files in Ubuntu can quickly overwhelm system memory if opened with standard text editors or printed entirely to the screen with cat. The less command solves this by acting as a terminal pager that loads only the displayed portion of a">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/view-large-text-files-with-less-in-ubuntu-terminal">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="View Large Text Files with Less in Ubuntu Terminal - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/view-large-text-files-with-less-in-ubuntu-terminal" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Viewing large text files in Ubuntu can quickly overwhelm system memory if opened with standard text editors or printed entirely to the screen with cat. The less command solves this by acting as a terminal pager that loads only the displayed portion of a" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="view-large-text-files-with-less-in-ubuntu-terminal">View Large
+Text Files with Less in Ubuntu Terminal</h1>
+<p>Viewing large text files in Ubuntu can quickly overwhelm system
+memory if opened with standard text editors or printed entirely to the
+screen with <code>cat</code>. The <code>less</code> command solves this
+by acting as a terminal pager that loads only the displayed portion of a
+file, allowing you to read files of any size efficiently. This guide
+covers how to open large files, navigate through them page by page,
+search for text, and exit the utility cleanly.</p>
+<h2 id="opening-a-file">Opening a File</h2>
+<p>To open a file with the <code>less</code> pager, open your terminal
+and pass the file path as an argument:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> filename.txt</span></code></pre></div>
+<p>Unlike basic utilities, <code>less</code> does not wait to read the
+entire file before starting, ensuring instant access even with
+multi-gigabyte log files.</p>
+<h2 id="page-by-page-navigation">Page-by-Page Navigation</h2>
+<p>Once the file is open, use the following keyboard shortcuts to move
+through the content:</p>
+<ul>
+<li><strong>Next Page:</strong> Press <code>Space</code> or
+<code>Page Down</code> (or <code>Ctrl + F</code>) to move forward one
+full screen.</li>
+<li><strong>Previous Page:</strong> Press <code>b</code> or
+<code>Page Up</code> (or <code>Ctrl + B</code>) to move backward one
+full screen.</li>
+<li><strong>Half Page Down:</strong> Press <code>d</code> to scroll down
+half a window.</li>
+<li><strong>Half Page Up:</strong> Press <code>u</code> to scroll up
+half a window.</li>
+<li><strong>Line by Line:</strong> Use the <code>Down Arrow</code> (or
+<code>j</code>) to advance one line, and the <code>Up Arrow</code> (or
+<code>k</code>) to go back one line.</li>
+</ul>
+<h2 id="jumping-to-file-positions">Jumping to File Positions</h2>
+<p>To move quickly across large distances in the document:</p>
+<ul>
+<li><strong>Go to the Beginning:</strong> Press <code>g</code> or
+<code>Home</code>.</li>
+<li><strong>Go to the End:</strong> Press <code>G</code> or
+<code>End</code>.</li>
+<li><strong>Go to a Specific Line:</strong> Type the target line number
+and press <code>g</code> (for example, <code>150g</code> jumps directly
+to line 150).</li>
+</ul>
+<h2 id="searching-content">Searching Content</h2>
+<p>Searching in <code>less</code> is fast and behaves similarly to the
+<code>vi</code> editor:</p>
+<ol type="1">
+<li><strong>Search Forward:</strong> Type <code>/</code> followed by
+your search term and press <code>Enter</code>.</li>
+<li><strong>Search Backward:</strong> Type <code>?</code> followed by
+your search term and press <code>Enter</code>.</li>
+<li><strong>Next Match:</strong> Press <code>n</code> to move to the
+next occurrence in the search direction.</li>
+<li><strong>Previous Match:</strong> Press <code>N</code> to move to the
+previous occurrence.</li>
+</ol>
+<h2 id="useful-command-line-flags">Useful Command-Line Flags</h2>
+<p>You can customize how <code>less</code> presents data by adding flags
+when launching it:</p>
+<ul>
+<li><strong>Show Line Numbers:</strong>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> <span class="at">-N</span> filename.txt</span></code></pre></div></li>
+<li><strong>Case-Insensitive Search:</strong>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> <span class="at">-I</span> filename.txt</span></code></pre></div></li>
+<li><strong>Wrap Long Lines:</strong>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> <span class="at">-S</span> filename.txt</span></code></pre></div>
+<em>(The <code>-S</code> flag truncates long lines instead of wrapping
+them, allowing horizontal scrolling via the <code>Left</code> and
+<code>Right</code> arrow keys).</em></li>
+</ul>
+<h2 id="exiting-the-pager">Exiting the Pager</h2>
+<p>To close the file and return to your standard Ubuntu shell prompt at
+any time, press <code>q</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

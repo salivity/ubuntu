@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup RabbitMQ Cluster with Mirrored Queues on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide outlines the step-by-step process of building a high-availability RabbitMQ cluster across multiple Ubuntu nodes and configuring mirrored queues. By synchronizing the Erlang cookie across your instances, connecting the nodes into a unified clus">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-rabbit-mq-cluster-with-mirrored-queues-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup RabbitMQ Cluster with Mirrored Queues on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-rabbit-mq-cluster-with-mirrored-queues-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide outlines the step-by-step process of building a high-availability RabbitMQ cluster across multiple Ubuntu nodes and configuring mirrored queues. By synchronizing the Erlang cookie across your instances, connecting the nodes into a unified clus" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-rabbitmq-cluster-with-mirrored-queues-on-ubuntu">Setup
+RabbitMQ Cluster with Mirrored Queues on Ubuntu</h1>
+<p>This guide outlines the step-by-step process of building a
+high-availability RabbitMQ cluster across multiple Ubuntu nodes and
+configuring mirrored queues. By synchronizing the Erlang cookie across
+your instances, connecting the nodes into a unified cluster, and
+applying a high-availability (HA) policy, you ensure that your message
+queues are replicated and resilient against single-node failures.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>At least two Ubuntu 20.04 or 22.04 servers with non-root sudo
+users.</li>
+<li>Static internal IP addresses for all servers.</li>
+<li>Ports <code>4369</code> (Erlang discovery), <code>25672</code>
+(Erlang distribution), <code>5672</code> (AMQP), and <code>15672</code>
+(Management UI) open between the nodes.</li>
+</ul>
+<p>For this guide, we assume two nodes:</p>
+<ul>
+<li><strong>Node 1 (Primary):</strong> <code>192.168.1.10</code>
+(<code>node1</code>)</li>
+<li><strong>Node 2:</strong> <code>192.168.1.11</code>
+(<code>node2</code>)</li>
+</ul>
+<hr />
+<h2 id="step-1-configure-local-dns-on-all-nodes">Step 1: Configure Local
+DNS on All Nodes</h2>
+<p>RabbitMQ relies on hostnames for node communication. Open
+<code>/etc/hosts</code> on <strong>all nodes</strong>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/hosts</span></code></pre></div>
+<p>Add the IP addresses and hostnames of all cluster members:</p>
+<pre class="text"><code>192.168.1.10 node1
+192.168.1.11 node2</code></pre>
+<p>Save and exit. Ensure the hostname matches on each server:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On Node 1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> hostnamectl set-hostname node1</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># On Node 2</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> hostnamectl set-hostname node2</span></code></pre></div>
+<hr />
+<h2 id="step-2-install-rabbitmq-on-all-nodes">Step 2: Install RabbitMQ
+on All Nodes</h2>
+<p>Run the following commands on <strong>all nodes</strong> to install
+RabbitMQ and its Erlang runtime:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> rabbitmq-server</span></code></pre></div>
+<p>Enable and start the RabbitMQ service:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable rabbitmq-server</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start rabbitmq-server</span></code></pre></div>
+<hr />
+<h2 id="step-3-synchronize-the-erlang-cookie">Step 3: Synchronize the
+Erlang Cookie</h2>
+<p>Nodes in a RabbitMQ cluster must share the exact same Erlang magic
+cookie.</p>
+<ol type="1">
+<li><p>Stop RabbitMQ on <strong>Node 2</strong>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop rabbitmq-server</span></code></pre></div></li>
+<li><p>Copy the cookie from <strong>Node 1</strong> to <strong>Node
+2</strong>. You can view the cookie on Node 1:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cat /var/lib/rabbitmq/.erlang.cookie</span></code></pre></div></li>
+<li><p>Replace the contents of
+<code>/var/lib/rabbitmq/.erlang.cookie</code> on <strong>Node 2</strong>
+with the cookie value from Node 1:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /var/lib/rabbitmq/.erlang.cookie</span></code></pre></div></li>
+<li><p>Ensure proper ownership and restrictive permissions on
+<strong>Node 2</strong>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 400 /var/lib/rabbitmq/.erlang.cookie</span></code></pre></div></li>
+<li><p>Restart the RabbitMQ service on <strong>Node 2</strong>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start rabbitmq-server</span></code></pre></div></li>
+</ol>
+<hr />
+<h2 id="step-4-join-node-2-to-the-cluster">Step 4: Join Node 2 to the
+Cluster</h2>
+<p>On <strong>Node 2</strong>, run the following commands to connect to
+Node 1:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop the RabbitMQ application process</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl stop_app</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset the node configuration</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl reset</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Join the cluster</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl join_cluster rabbit@node1</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Restart the RabbitMQ application process</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl start_app</span></code></pre></div>
+<p>Verify the cluster status from either node:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl cluster_status</span></code></pre></div>
+<p>The output should list both <code>rabbit@node1</code> and
+<code>rabbit@node2</code> under <code>Running Nodes</code>.</p>
+<hr />
+<h2 id="step-5-configure-mirrored-queue-policies">Step 5: Configure
+Mirrored Queue Policies</h2>
+<p>By default, queues in a cluster reside on the node where they were
+declared. To mirror queues across all nodes, apply an HA policy.</p>
+<p>To mirror all queues whose names begin with <code>ha.</code> across
+all nodes in the cluster, run the following command on any node:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl set_policy ha-all <span class="st">&quot;^ha\.&quot;</span> <span class="st">&#39;{&quot;ha-mode&quot;:&quot;all&quot;}&#39;</span></span></code></pre></div>
+<p>To mirror <strong>all</strong> queues regardless of their name, use
+the <code>.*</code> regex pattern:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl set_policy ha-all <span class="st">&quot;.*&quot;</span> <span class="st">&#39;{&quot;ha-mode&quot;:&quot;all&quot;}&#39;</span></span></code></pre></div>
+<p>To enable automatic synchronization for queues when a node rejoins
+the cluster, include the <code>ha-sync-mode</code> parameter:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl set_policy ha-all <span class="st">&quot;.*&quot;</span> <span class="st">&#39;{&quot;ha-mode&quot;:&quot;all&quot;, &quot;ha-sync-mode&quot;:&quot;automatic&quot;}&#39;</span></span></code></pre></div>
+<hr />
+<h2 id="step-6-enable-the-management-web-interface-optional">Step 6:
+Enable the Management Web Interface (Optional)</h2>
+<p>To inspect your cluster and queue synchronization status visually,
+enable the RabbitMQ web management console on any node:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmq-plugins enable rabbitmq_management</span></code></pre></div>
+<p>Create an administrative user:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl add_user admin YourSecurePassword</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl set_user_tags admin administrator</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rabbitmqctl set_permissions <span class="at">-p</span> / admin <span class="st">&quot;.*&quot;</span> <span class="st">&quot;.*&quot;</span> <span class="st">&quot;.*&quot;</span></span></code></pre></div>
+<p>Access the dashboard via your browser at
+<code>http://192.168.1.10:15672/</code>. Under the
+<strong>Queues</strong> tab, queues matching your policy will now show
+an indicator such as <code>+1</code> under the <strong>Node</strong>
+column, confirming the queue is actively mirrored across cluster
+nodes.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

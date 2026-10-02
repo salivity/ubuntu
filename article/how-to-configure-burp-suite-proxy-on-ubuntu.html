@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Burp Suite Proxy on Ubuntu - ubuntu</title>
+    <meta name="description" content="Configuring Burp Suite to intercept HTTP and HTTPS traffic on an Ubuntu desktop allows developers and security analysts to inspect and modify web requests in real time. This guide outlines the necessary steps to configure the local proxy listener, direct">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-burp-suite-proxy-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Burp Suite Proxy on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-burp-suite-proxy-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring Burp Suite to intercept HTTP and HTTPS traffic on an Ubuntu desktop allows developers and security analysts to inspect and modify web requests in real time. This guide outlines the necessary steps to configure the local proxy listener, direct" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-configure-burp-suite-proxy-on-ubuntu">How to Configure
+Burp Suite Proxy on Ubuntu</h1>
+<p>Configuring Burp Suite to intercept HTTP and HTTPS traffic on an
+Ubuntu desktop allows developers and security analysts to inspect and
+modify web requests in real time. This guide outlines the necessary
+steps to configure the local proxy listener, direct web browser traffic
+through Burp Suite, and install the trusted Certificate Authority (CA)
+certificate to enable HTTPS inspection without security warnings.</p>
+<h3 id="1-verify-the-proxy-listener-in-burp-suite">1. Verify the Proxy
+Listener in Burp Suite</h3>
+<p>Burp Suite runs an HTTP proxy service on a local port by default.
+Ensure the listener is active:</p>
+<ol type="1">
+<li>Launch Burp Suite on your Ubuntu system.</li>
+<li>Navigate to the <strong>Proxy</strong> tab and select <strong>Proxy
+settings</strong> (or the <strong>Options</strong> tab in older
+versions).</li>
+<li>Under the <strong>Proxy Listeners</strong> table, verify that an
+entry exists for <code>127.0.0.1:8080</code> and that the
+<strong>Running</strong> checkbox is selected.</li>
+<li>If the listener is not running or needs modification, select it,
+click <strong>Edit</strong>, and configure the port (typically
+<code>8080</code>) and bind address (typically <code>127.0.0.1</code> or
+<code>Loopback only</code>).</li>
+</ol>
+<h3 id="2-using-the-pre-configured-embedded-browser-recommended">2.
+Using the Pre-Configured Embedded Browser (Recommended)</h3>
+<p>The simplest way to route traffic through Burp Suite without altering
+system-wide settings is to use the built-in Chromium browser:</p>
+<ol type="1">
+<li>Go to the <strong>Proxy</strong> tab and select the
+<strong>Intercept</strong> sub-tab.</li>
+<li>Click <strong>Open Browser</strong>.</li>
+<li>The embedded browser will launch automatically configured to route
+traffic through <code>127.0.0.1:8080</code> with the Burp CA certificate
+already trusted.</li>
+</ol>
+<h3 id="3-configuring-an-external-browser-eg-firefox">3. Configuring an
+External Browser (e.g., Firefox)</h3>
+<p>To intercept traffic from an external browser installed on
+Ubuntu:</p>
+<ol type="1">
+<li>Open Firefox and go to <strong>Settings</strong>.</li>
+<li>Scroll to the bottom of the <strong>General</strong> panel to find
+<strong>Network Settings</strong>, then click
+<strong>Settings...</strong>.</li>
+<li>Select <strong>Manual proxy configuration</strong>.</li>
+<li>Set the <strong>HTTP Proxy</strong> to <code>127.0.0.1</code> and
+the <strong>Port</strong> to <code>8080</code>.</li>
+<li>Check the box labeled <strong>Also use this proxy for
+HTTPS</strong>.</li>
+<li>Ensure the <strong>No proxy for</strong> field does not exclude
+domains you intend to test.</li>
+<li>Click <strong>OK</strong> to save the configuration.</li>
+</ol>
+<h3 id="4-installing-the-burp-ca-certificate-for-https">4. Installing
+the Burp CA Certificate for HTTPS</h3>
+<p>To intercept encrypted HTTPS traffic without certificate validation
+errors, the Burp CA certificate must be imported into the browser's
+trust store:</p>
+<ol type="1">
+<li>With the proxy running and your browser proxy settings enabled,
+navigate to <code>http://burpsuite</code> in your browser.</li>
+<li>Click on <strong>CA Certificate</strong> in the top-right corner of
+the web page to download <code>cacert.der</code>.</li>
+<li>In Firefox, return to <strong>Settings</strong> and search for
+<strong>Certificates</strong>, then click <strong>View
+Certificates...</strong>.</li>
+<li>In the <strong>Authorities</strong> tab, click
+<strong>Import...</strong>.</li>
+<li>Select the downloaded <code>cacert.der</code> file.</li>
+<li>Check the box labeled <strong>Trust this CA to identify
+websites</strong>, then click <strong>OK</strong>.</li>
+</ol>
+<h3 id="5-intercepting-web-traffic">5. Intercepting Web Traffic</h3>
+<ol type="1">
+<li>In Burp Suite, go to the <strong>Proxy</strong> tab and click
+<strong>Intercept</strong>.</li>
+<li>Toggle the <strong>Intercept is off</strong> button to
+<strong>Intercept is on</strong>.</li>
+<li>In your configured browser, visit any website. The request will
+pause, allowing you to view and modify headers and parameters in Burp
+Suite before clicking <strong>Forward</strong> to release the request to
+the destination server.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable IPv6 in Ubuntu via GRUB Bootloader - ubuntu</title>
+    <meta name="description" content="This guide explains how to permanently and completely disable the IPv6 networking stack on Ubuntu by configuring GRUB boot parameters. While tools like sysctl can disable IPv6 on active network interfaces, passing the disable instruction directly to the">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/disable-i-pv-6-in-ubuntu-via-grub-bootloader">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Disable IPv6 in Ubuntu via GRUB Bootloader - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/disable-i-pv-6-in-ubuntu-via-grub-bootloader" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to permanently and completely disable the IPv6 networking stack on Ubuntu by configuring GRUB boot parameters. While tools like sysctl can disable IPv6 on active network interfaces, passing the disable instruction directly to the" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="disable-ipv6-in-ubuntu-via-grub-bootloader">Disable IPv6 in
+Ubuntu via GRUB Bootloader</h1>
+<p>This guide explains how to permanently and completely disable the
+IPv6 networking stack on Ubuntu by configuring GRUB boot parameters.
+While tools like <code>sysctl</code> can disable IPv6 on active network
+interfaces, passing the disable instruction directly to the Linux kernel
+via GRUB stops the IPv6 module from loading entirely at boot time. Below
+are the direct steps required to modify the GRUB configuration, apply
+the changes, and verify that IPv6 is fully disabled.</p>
+<h3 id="step-1-open-the-grub-configuration-file">Step 1: Open the GRUB
+Configuration File</h3>
+<p>Open your terminal and launch the <code>/etc/default/grub</code>
+configuration file in a text editor with administrative privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/grub</span></code></pre></div>
+<h3 id="step-2-add-the-kernel-parameter">Step 2: Add the Kernel
+Parameter</h3>
+<p>Locate the line that begins with
+<code>GRUB_CMDLINE_LINUX_DEFAULT</code>. It typically looks like
+this:</p>
+<pre class="text"><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;maybe-ubiquity quiet splash&quot;</code></pre>
+<p><em>(Note: Your default parameters inside the quotes may vary
+slightly depending on your Ubuntu release).</em></p>
+<p>Append <code>ipv6.disable=1</code> inside the quotation marks:</p>
+<pre class="text"><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;maybe-ubiquity quiet splash ipv6.disable=1&quot;</code></pre>
+<p>If you also have a line named <code>GRUB_CMDLINE_LINUX=""</code>, you
+can place it there instead to ensure it applies even if you boot into
+recovery mode:</p>
+<pre class="text"><code>GRUB_CMDLINE_LINUX=&quot;ipv6.disable=1&quot;</code></pre>
+<p>Save your changes and exit the text editor (in <code>nano</code>,
+press <code>Ctrl + O</code>, hit <code>Enter</code>, and then press
+<code>Ctrl + X</code>).</p>
+<h3 id="step-3-update-grub">Step 3: Update GRUB</h3>
+<p>For the bootloader to read your changes on the next boot, regenerate
+the GRUB configuration file using the following command:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-grub</span></code></pre></div>
+<p>Wait for the terminal to confirm that the GRUB configuration file has
+been generated successfully.</p>
+<h3 id="step-4-reboot-the-system">Step 4: Reboot the System</h3>
+<p>Restart your Ubuntu machine to boot into the kernel with the new
+parameter applied:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<h3 id="step-5-verify-that-ipv6-is-disabled">Step 5: Verify That IPv6 Is
+Disabled</h3>
+<p>Once the system restarts, verify that the IPv6 stack has not been
+loaded.</p>
+<ol type="1">
+<li><p><strong>Check Network Interfaces:</strong> Run the address
+command:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> a</span></code></pre></div>
+<p>Inspect the output. You should only see <code>inet</code> (IPv4)
+entries; there should be no <code>inet6</code> entries listed under any
+network interface, including the loopback (<code>lo</code>)
+adapter.</p></li>
+<li><p><strong>Check the IPv6 System Directory:</strong> Alternatively,
+check for the presence of the IPv6 networking directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> /proc/sys/net/ipv6</span></code></pre></div>
+<p>If IPv6 is successfully disabled at the kernel level, this command
+will return an error stating
+<code>No such file or directory</code>.</p></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

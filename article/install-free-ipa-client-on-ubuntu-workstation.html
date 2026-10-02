@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install FreeIPA Client on Ubuntu Workstation - ubuntu</title>
+    <meta name="description" content="This guide explains how to install and configure the FreeIPA client on an Ubuntu workstation to enable centralized authentication and identity management. You will learn the required prerequisites, how to set a fully qualified domain name (FQDN), the ins">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-free-ipa-client-on-ubuntu-workstation">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install FreeIPA Client on Ubuntu Workstation - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-free-ipa-client-on-ubuntu-workstation" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to install and configure the FreeIPA client on an Ubuntu workstation to enable centralized authentication and identity management. You will learn the required prerequisites, how to set a fully qualified domain name (FQDN), the ins" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-freeipa-client-on-ubuntu-workstation">Install FreeIPA
+Client on Ubuntu Workstation</h1>
+<p>This guide explains how to install and configure the FreeIPA client
+on an Ubuntu workstation to enable centralized authentication and
+identity management. You will learn the required prerequisites, how to
+set a fully qualified domain name (FQDN), the installation of the
+necessary client packages, joining the system to the FreeIPA domain, and
+enabling automatic home directory creation for network users.</p>
+<h3 id="step-1-set-up-prerequisites-and-hostname">Step 1: Set Up
+Prerequisites and Hostname</h3>
+<p>FreeIPA requires a properly configured Fully Qualified Domain Name
+(FQDN) that resolves accurately, along with synchronized system
+time.</p>
+<ol type="1">
+<li><p>Set the static hostname to match your domain's FQDN:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> hostnamectl set-hostname workstation.example.com</span></code></pre></div></li>
+<li><p>Open <code>/etc/hosts</code> and map your local IP address to
+your FQDN:</p>
+<pre class="text"><code>127.0.1.1 workstation.example.com workstation</code></pre></li>
+<li><p>Ensure time synchronization is active, as Kerberos authentication
+will fail if clock drift exceeds five minutes:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-ntp true</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-install-the-freeipa-client-package">Step 2: Install the
+FreeIPA Client Package</h3>
+<p>Ubuntu repositories include the FreeIPA client package
+(<code>freeipa-client</code>). Update your package cache and install
+it:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install freeipa-client <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-3-run-the-freeipa-client-installation-script">Step 3: Run
+the FreeIPA Client Installation Script</h3>
+<p>Run the automated installer utility to enroll the Ubuntu workstation
+into your FreeIPA realm:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ipa-client-install <span class="at">--mkhomedir</span></span></code></pre></div>
+<p>The script will prompt for the following details:</p>
+<ul>
+<li><strong>IPA Server:</strong> The FQDN of your primary FreeIPA server
+(e.g., <code>ipa.example.com</code>).</li>
+<li><strong>IPA Domain:</strong> The DNS domain name (e.g.,
+<code>example.com</code>).</li>
+<li><strong>IPA Realm:</strong> The Kerberos realm, typically the domain
+in uppercase (e.g., <code>EXAMPLE.COM</code>).</li>
+<li><strong>Principal:</strong> An authorized administrative account
+with permission to enroll hosts (e.g., <code>admin</code>).</li>
+<li><strong>Password:</strong> The password for the specified
+administrative user.</li>
+</ul>
+<p>Alternatively, provide these details in a single non-interactive
+command:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ipa-client-install <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--server</span><span class="op">=</span>ipa.example.com <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--domain</span><span class="op">=</span>example.com <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--realm</span><span class="op">=</span>EXAMPLE.COM <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--principal</span><span class="op">=</span>admin <span class="dt">\</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--password</span><span class="op">=</span>YourAdminPassword <span class="dt">\</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--mkhomedir</span> <span class="dt">\</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--unattended</span></span></code></pre></div>
+<h3 id="step-4-configure-automatic-home-directory-creation">Step 4:
+Configure Automatic Home Directory Creation</h3>
+<p>If <code>--mkhomedir</code> was not applied or network users do not
+have home directories generated on their initial login, configure PAM
+explicitly:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pam-auth-update <span class="at">--enable</span> mkhomedir</span></code></pre></div>
+<h3 id="step-5-verify-freeipa-authentication">Step 5: Verify FreeIPA
+Authentication</h3>
+<ol type="1">
+<li><p>Confirm that the workstation can retrieve user records from the
+FreeIPA directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getent</span> passwd ipauser</span></code></pre></div></li>
+<li><p>Test Kerberos ticket granting:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kinit</span> ipauser</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">klist</span></span></code></pre></div></li>
+<li><p>Switch to the domain user account to verify home directory
+generation and local session initialization:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">su</span> <span class="at">-</span> ipauser</span></code></pre></div></li>
+</ol>
+<p>The Ubuntu workstation is now integrated with the FreeIPA domain for
+centralized authentication and access control.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

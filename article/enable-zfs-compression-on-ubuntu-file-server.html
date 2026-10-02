@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable ZFS Compression on Ubuntu File Server - ubuntu</title>
+    <meta name="description" content="Enabling transparent compression in ZFS allows your Ubuntu file server to automatically compress data before writing it to disk and decompress it on the fly when read, dramatically saving storage capacity while often improving read/write performance. Thi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/enable-zfs-compression-on-ubuntu-file-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enable ZFS Compression on Ubuntu File Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/enable-zfs-compression-on-ubuntu-file-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Enabling transparent compression in ZFS allows your Ubuntu file server to automatically compress data before writing it to disk and decompress it on the fly when read, dramatically saving storage capacity while often improving read/write performance. Thi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="enable-zfs-compression-on-ubuntu-file-server">Enable ZFS
+Compression on Ubuntu File Server</h1>
+<p>Enabling transparent compression in ZFS allows your Ubuntu file
+server to automatically compress data before writing it to disk and
+decompress it on the fly when read, dramatically saving storage capacity
+while often improving read/write performance. This guide demonstrates
+how to check current compression settings, select the best algorithm for
+your workload, apply transparent compression to a ZFS pool or dataset,
+and verify the resulting disk space savings.</p>
+<h3 id="step-1-check-current-compression-settings">Step 1: Check Current
+Compression Settings</h3>
+<p>Before making any changes, inspect the current compression status of
+your ZFS storage pools and datasets. Open a terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zfs</span> get compression</span></code></pre></div>
+<p>To view the setting for a specific pool or dataset, specify its
+name:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zfs</span> get compression poolname/dataset</span></code></pre></div>
+<p>By default, ZFS datasets may have compression set to
+<code>off</code>.</p>
+<h3 id="step-2-choose-a-compression-algorithm">Step 2: Choose a
+Compression Algorithm</h3>
+<p>ZFS supports multiple compression algorithms. The two most common and
+effective choices are:</p>
+<ul>
+<li><strong>lz4:</strong> The recommended default for most systems. It
+offers extremely fast compression and decompression speeds with very low
+CPU overhead. If a block cannot be compressed, LZ4 skips it without
+wasting CPU cycles.</li>
+<li><strong>zstd:</strong> Provides a higher compression ratio than LZ4,
+making it ideal for servers where maximizing storage savings is more
+important than absolute raw speed. It also supports customizable
+compression levels (from <code>zstd-1</code> to <code>zstd-19</code>,
+with <code>zstd</code> defaulting to level 3).</li>
+</ul>
+<h3 id="step-3-enable-transparent-compression">Step 3: Enable
+Transparent Compression</h3>
+<p>You can apply compression to an entire storage pool (which inherits
+down to all child datasets) or to a specific dataset.</p>
+<p>To enable <strong>LZ4</strong> compression on a dataset:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zfs set compression=lz4 poolname/dataset</span></code></pre></div>
+<p>To enable <strong>ZSTD</strong> compression on a dataset:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zfs set compression=zstd poolname/dataset</span></code></pre></div>
+<p>To enable it across the entire pool:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zfs set compression=lz4 poolname</span></code></pre></div>
+<p>The change takes effect immediately for all subsequent writes.</p>
+<h3 id="step-4-handling-existing-data">Step 4: Handling Existing
+Data</h3>
+<p>ZFS does not retroactively compress data already written to disk.
+Only newly created or modified files will be compressed. To compress
+existing data, you must rewrite it so ZFS processes it through the new
+compression engine:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> <span class="at">-a</span> /path/to/mountpoint/data /path/to/mountpoint/data-temp</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /path/to/mountpoint/data</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> /path/to/mountpoint/data-temp /path/to/mountpoint/data</span></code></pre></div>
+<h3 id="step-5-verify-space-savings">Step 5: Verify Space Savings</h3>
+<p>To verify that compression is functioning and to view your storage
+savings, check the <code>compressratio</code> property:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zfs</span> get compressratio poolname/dataset</span></code></pre></div>
+<p>A ratio of <code>1.00x</code> indicates no compression, while a ratio
+of <code>1.50x</code> means your data consumes roughly 33% less physical
+disk space than its uncompressed size. You can also view overall pool
+savings using:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zpool</span> list</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prioritize Local Users Over LDAP in Ubuntu nsswitch.conf - ubuntu</title>
+    <meta name="description" content="This guide explains how to configure the /etc/nsswitch.conf file on Ubuntu to ensure the operating system resolves local users and groups before querying an LDAP directory service. Prioritizing local authentication ensures critical system accounts remain">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/prioritize-local-users-over-ldap-in-ubuntu-nsswitch-conf">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Prioritize Local Users Over LDAP in Ubuntu nsswitch.conf - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/prioritize-local-users-over-ldap-in-ubuntu-nsswitch-conf" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to configure the /etc/nsswitch.conf file on Ubuntu to ensure the operating system resolves local users and groups before querying an LDAP directory service. Prioritizing local authentication ensures critical system accounts remain" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1
+id="prioritize-local-users-over-ldap-in-ubuntu-nsswitchconf">Prioritize
+Local Users Over LDAP in Ubuntu nsswitch.conf</h1>
+<p>This guide explains how to configure the
+<code>/etc/nsswitch.conf</code> file on Ubuntu to ensure the operating
+system resolves local users and groups before querying an LDAP directory
+service. Prioritizing local authentication ensures critical system
+accounts remain accessible during network outages, speeds up local
+command execution, and prevents directory service latency from affecting
+system performance.</p>
+<h2 id="understanding-the-name-service-switch">Understanding the Name
+Service Switch</h2>
+<p>The Name Service Switch configuration file, located at
+<code>/etc/nsswitch.conf</code>, dictates the order in which Ubuntu
+queries various identity sources.</p>
+<p>When resolving user accounts, groups, and passwords, the system looks
+at three primary databases:</p>
+<ul>
+<li><code>passwd</code>: User account information.</li>
+<li><code>group</code>: Group membership definitions.</li>
+<li><code>shadow</code>: Secure password hashes.</li>
+</ul>
+<p>The sources specified for these databases are evaluated from left to
+right. To prioritize local users over LDAP users, the <code>files</code>
+directive (representing local files such as <code>/etc/passwd</code>)
+must precede the LDAP directive (typically <code>sss</code> for SSSD, or
+<code>ldap</code> for legacy <code>libnss-ldap</code>).</p>
+<h2 id="step-by-step-configuration">Step-by-Step Configuration</h2>
+<h3 id="1-back-up-the-existing-configuration">1. Back Up the Existing
+Configuration</h3>
+<p>Before editing system configuration files, create a backup to prevent
+unintended access issues:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/nsswitch.conf /etc/nsswitch.conf.bak</span></code></pre></div>
+<h3 id="2-edit-etcnsswitchconf">2. Edit
+<code>/etc/nsswitch.conf</code></h3>
+<p>Open the file in a text editor with administrative privileges:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nsswitch.conf</span></code></pre></div>
+<h3 id="3-reorder-the-lookup-sources">3. Reorder the Lookup Sources</h3>
+<p>Locate the lines beginning with <code>passwd:</code>,
+<code>group:</code>, and <code>shadow:</code>.</p>
+<p>Ensure that <code>files</code> appears before <code>sss</code> or
+<code>ldap</code>.</p>
+<p><strong>For modern Ubuntu systems using SSSD (System Security
+Services Daemon):</strong></p>
+<pre class="text"><code>passwd:         files systemd sss
+group:          files [SUCCESS=merge] systemd sss
+shadow:         files sss
+gshadow:        files</code></pre>
+<p><em>Note: The <code>[SUCCESS=merge]</code> entry on the
+<code>group</code> line ensures that if a group exists both locally and
+in LDAP, memberships from both sources are merged rather than stopping
+search evaluation immediately.</em></p>
+<p><strong>For systems using traditional
+<code>libnss-ldap</code>:</strong></p>
+<pre class="text"><code>passwd:         files ldap
+group:          files ldap
+shadow:         files ldap</code></pre>
+<p>Save the file and exit the editor (in <code>nano</code>, press
+<code>CTRL+O</code>, <code>Enter</code>, then <code>CTRL+X</code>).</p>
+<h3 id="4-restart-name-caching-services">4. Restart Name Caching
+Services</h3>
+<p>Changes to <code>/etc/nsswitch.conf</code> take effect immediately
+for new processes. However, if a caching daemon such as
+<code>nscd</code> or <code>sssd</code> is active, clear the cache or
+restart the service to apply changes consistently.</p>
+<p>If using SSSD:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart sssd</span></code></pre></div>
+<p>If using <code>nscd</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart nscd</span></code></pre></div>
+<h2 id="verification">Verification</h2>
+<p>To verify that local lookups take precedence:</p>
+<ol type="1">
+<li>Test user identity resolution for a local user:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getent</span> passwd <span class="op">&lt;</span>local_username<span class="op">&gt;</span></span></code></pre></div></li>
+<li>Test resolution for an LDAP user:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getent</span> passwd <span class="op">&lt;</span>ldap_username<span class="op">&gt;</span></span></code></pre></div></li>
+</ol>
+<p>Because <code>files</code> is listed first, the operating system will
+match any user defined in <code>/etc/passwd</code> before reaching out
+to the LDAP provider across the network.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Telegraf to Send Ubuntu Metrics to InfluxDB - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for collecting Ubuntu system performance data and transmitting it to an InfluxDB instance using the Telegraf agent. You will learn how to install Telegraf on Ubuntu, configure the output plugin for InfluxDB">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-telegraf-to-send-ubuntu-metrics-to-influx-db">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Telegraf to Send Ubuntu Metrics to InfluxDB - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-telegraf-to-send-ubuntu-metrics-to-influx-db" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for collecting Ubuntu system performance data and transmitting it to an InfluxDB instance using the Telegraf agent. You will learn how to install Telegraf on Ubuntu, configure the output plugin for InfluxDB" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-telegraf-to-send-ubuntu-metrics-to-influxdb">Configure
+Telegraf to Send Ubuntu Metrics to InfluxDB</h1>
+<p>This guide provides a step-by-step walkthrough for collecting Ubuntu
+system performance data and transmitting it to an InfluxDB instance
+using the Telegraf agent. You will learn how to install Telegraf on
+Ubuntu, configure the output plugin for InfluxDB v2, enable default
+system monitoring inputs, and verify the continuous stream of telemetry
+metrics.</p>
+<h3 id="step-1-install-telegraf-on-ubuntu">Step 1: Install Telegraf on
+Ubuntu</h3>
+<p>First, update your local package lists, install prerequisite tools,
+and add the official InfluxData repository.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> wget gnupg software-properties-common</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add InfluxData GPG key</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-q</span> https://repos.influxdata.com/influxdata-archive_compat.key</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;393eadd023e38720281b5a542b8618b6d821a4e8fb6ec3e3f67266492e8c4149 influxdata-archive_compat.key&#39;</span> <span class="kw">|</span> <span class="fu">sha256sum</span> <span class="at">-c</span> <span class="kw">&amp;&amp;</span> <span class="fu">cat</span> influxdata-archive_compat.key <span class="kw">|</span> <span class="ex">gpg</span> <span class="at">--dearmor</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg <span class="op">&gt;</span> /dev/null</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> influxdata-archive_compat.key</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the repository to apt sources</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/ubuntu focal stable&#39;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/influxdata.list</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Update package list and install Telegraf</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> telegraf</span></code></pre></div>
+<h3 id="step-2-configure-the-influxdb-output-plugin">Step 2: Configure
+the InfluxDB Output Plugin</h3>
+<p>Telegraf uses <code>/etc/telegraf/telegraf.conf</code> as its primary
+configuration file. Back up the original file, then open it in your
+preferred text editor.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf.bak</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/telegraf/telegraf.conf</span></code></pre></div>
+<p>Locate or define the <code>[[outputs.influxdb_v2]]</code> section to
+connect to your InfluxDB v2 instance. Supply your server URL, API token,
+organization name, and target bucket:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode toml"><code class="sourceCode toml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[[outputs.influxdb_v2]]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">urls</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;http://&lt;YOUR_INFLUXDB_HOST&gt;:8086&quot;</span><span class="op">]</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">token</span> <span class="op">=</span> <span class="st">&quot;YOUR_API_TOKEN&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">organization</span> <span class="op">=</span> <span class="st">&quot;YOUR_ORG_NAME&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bucket</span> <span class="op">=</span> <span class="st">&quot;YOUR_BUCKET_NAME&quot;</span></span></code></pre></div>
+<p>Replace the placeholders (<code>urls</code>, <code>token</code>,
+<code>organization</code>, and <code>bucket</code>) with your actual
+InfluxDB connection details.</p>
+<h3 id="step-3-configure-system-metrics-inputs">Step 3: Configure System
+Metrics Inputs</h3>
+<p>By default, Telegraf includes core input plugins for monitoring host
+performance. Ensure the following input plugins are enabled in your
+configuration to capture essential Ubuntu metrics:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode toml"><code class="sourceCode toml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about CPU usage</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.cpu]]</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">percpu</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">totalcpu</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">collect_cpu_time</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">report_active</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about system load &amp; uptime</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.system]]</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about memory usage</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.mem]]</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about disk usage</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.disk]]</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">ignore_fs</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;tmpfs&quot;</span><span class="op">,</span> <span class="st">&quot;devtmpfs&quot;</span><span class="op">,</span> <span class="st">&quot;devfs&quot;</span><span class="op">,</span> <span class="st">&quot;iso9660&quot;</span><span class="op">,</span> <span class="st">&quot;overlay&quot;</span><span class="op">,</span> <span class="st">&quot;aufs&quot;</span><span class="op">,</span> <span class="st">&quot;squashfs&quot;</span><span class="op">]</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about disk IO</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.diskio]]</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about network interfaces</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.net]]</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Read metrics about processes</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">[[inputs.processes]]</span></span></code></pre></div>
+<h3 id="step-4-validate-the-configuration">Step 4: Validate the
+Configuration</h3>
+<p>Before starting the daemon, run a single-pass test to ensure Telegraf
+parses the configuration correctly and outputs the collected metrics to
+<code>stdout</code>.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">telegraf</span> <span class="at">--config</span> /etc/telegraf/telegraf.conf <span class="at">--test</span></span></code></pre></div>
+<p>If configured properly, Telegraf will print system metrics (such as
+CPU, memory, and disk statistics) to the terminal without errors.</p>
+<h3 id="step-5-start-and-enable-the-telegraf-service">Step 5: Start and
+Enable the Telegraf Service</h3>
+<p>Once the validation test succeeds, enable Telegraf to run on system
+boot and start the service immediately.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> telegraf</span></code></pre></div>
+<p>Check the status of the service to verify that it is running:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status telegraf</span></code></pre></div>
+<p>Your Ubuntu machine is now continuously gathering system metrics and
+sending them directly to your specified InfluxDB bucket. You can verify
+incoming data by visiting the Data Explorer interface inside
+InfluxDB.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

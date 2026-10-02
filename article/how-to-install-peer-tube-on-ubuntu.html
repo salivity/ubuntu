@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install PeerTube on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a direct walkthrough of how to deploy your own PeerTube decentralized video sharing instance on an Ubuntu server. You will learn the necessary prerequisites, how to install system dependencies, and the exact commands required to downl">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-peer-tube-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install PeerTube on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-peer-tube-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a direct walkthrough of how to deploy your own PeerTube decentralized video sharing instance on an Ubuntu server. You will learn the necessary prerequisites, how to install system dependencies, and the exact commands required to downl" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-peertube-on-ubuntu">How to Install PeerTube on
+Ubuntu</h1>
+<p>This guide provides a direct walkthrough of how to deploy your own
+PeerTube decentralized video sharing instance on an Ubuntu server. You
+will learn the necessary prerequisites, how to install system
+dependencies, and the exact commands required to download, configure,
+and launch the PeerTube service.</p>
+<h3 id="1-install-system-dependencies">1. Install System
+Dependencies</h3>
+<p>PeerTube relies on Node.js, PostgreSQL, Redis, FFmpeg, and Nginx.
+Update your package lists and install the core dependencies by
+running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install <span class="at">-y</span> curl gnupg ffmpeg postgresql postgresql-contrib redis-server nginx certbot python3-certbot-nginx unzip</span></code></pre></div>
+<p>Next, install Node.js (version 18 or 20) and Yarn:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://deb.nodesource.com/setup_20.x <span class="kw">|</span> <span class="fu">sudo</span> <span class="at">-E</span> bash <span class="at">-</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nodejs</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> npm install <span class="at">-g</span> yarn</span></code></pre></div>
+<h3 id="2-configure-postgresql">2. Configure PostgreSQL</h3>
+<p>Create a dedicated database and database user for PeerTube:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres createuser <span class="at">-P</span> peertube</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres createdb <span class="at">-O</span> peertube peertube_prod</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;CREATE EXTENSION pg_trgm;&quot;</span> peertube_prod</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;CREATE EXTENSION unaccent;&quot;</span> peertube_prod</span></code></pre></div>
+<h3 id="3-create-the-peertube-system-user-and-directories">3. Create the
+PeerTube System User and Directories</h3>
+<p>Create a dedicated <code>peertube</code> user with a home
+directory:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> useradd <span class="at">-m</span> <span class="at">-d</span> /var/www/peertube <span class="at">-s</span> /bin/bash <span class="at">-p</span> <span class="st">&#39;*&#39;</span> peertube</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube mkdir <span class="at">-p</span> /var/www/peertube/config /var/www/peertube/storage /var/www/peertube/versions</span></code></pre></div>
+<h3 id="4-download-and-install-peertube">4. Download and Install
+PeerTube</h3>
+<p>Fetch the latest release version, extract it, and install production
+dependencies:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">VERSION</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> https://api.github.com/repos/Chocobozzz/PeerTube/releases/latest <span class="kw">|</span> <span class="fu">grep</span> tag_name <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span> <span class="st">&#39;&quot;&#39;</span> <span class="at">-f</span> 4<span class="va">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /var/www/peertube/versions</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube wget <span class="at">-q</span> <span class="st">&quot;https://github.com/Chocobozzz/PeerTube/releases/download/</span><span class="va">${VERSION}</span><span class="st">/peertube-</span><span class="va">${VERSION}</span><span class="st">.zip&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube unzip <span class="at">-q</span> <span class="st">&quot;peertube-</span><span class="va">${VERSION}</span><span class="st">.zip&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube rm <span class="st">&quot;peertube-</span><span class="va">${VERSION}</span><span class="st">.zip&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /var/www/peertube</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube ln <span class="at">-s</span> <span class="st">&quot;versions/peertube-</span><span class="va">${VERSION}</span><span class="st">&quot;</span> ./peertube-latest</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ./peertube-latest</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube yarn install <span class="at">--production</span> <span class="at">--pure-lockfile</span></span></code></pre></div>
+<h3 id="5-configure-the-instance">5. Configure the Instance</h3>
+<p>Copy the default production configuration template to your
+configuration directory:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> peertube cp /var/www/peertube/peertube-latest/config/production.yaml.example /var/www/peertube/config/production.yaml</span></code></pre></div>
+<p>Edit <code>/var/www/peertube/config/production.yaml</code> using a
+text editor to set your domain name, PostgreSQL credentials, and
+administrator email address.</p>
+<h3 id="6-set-up-nginx-and-systemd">6. Set Up Nginx and Systemd</h3>
+<p>Copy the systemd service file to manage the PeerTube daemon:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /var/www/peertube/peertube-latest/support/systemd/peertube.service /etc/systemd/system/</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span></code></pre></div>
+<p>Copy the Nginx template to route web traffic to your application:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /var/www/peertube/peertube-latest/support/nginx/peertube /etc/nginx/sites-available/peertube</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/${WEBSERVER_HOST}/your-domain.com/g&#39;</span> /etc/nginx/sites-available/peertube</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> /etc/nginx/sites-available/peertube /etc/nginx/sites-enabled/</span></code></pre></div>
+<p>Generate an SSL certificate via Certbot and reload Nginx:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> certbot <span class="at">--nginx</span> <span class="at">-d</span> your-domain.com</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart nginx</span></code></pre></div>
+<h3 id="7-start-peertube">7. Start PeerTube</h3>
+<p>Enable and start the PeerTube service:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> peertube</span></code></pre></div>
+<p>Once running, retrieve your generated administrator password directly
+from the system logs:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> journalctl <span class="at">-u</span> peertube <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Administrator username&quot;</span> <span class="at">-A</span> 1</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

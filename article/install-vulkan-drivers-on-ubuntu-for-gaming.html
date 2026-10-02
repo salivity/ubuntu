@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Vulkan Drivers on Ubuntu for Gaming - ubuntu</title>
+    <meta name="description" content="Vulkan is a low-overhead, cross-platform graphics API that maximizes hardware performance for modern Linux gaming. This guide covers how to install and configure the necessary Vulkan packages and proprietary or open-source drivers on Ubuntu for AMD, Inte">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-vulkan-drivers-on-ubuntu-for-gaming">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install Vulkan Drivers on Ubuntu for Gaming - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-vulkan-drivers-on-ubuntu-for-gaming" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Vulkan is a low-overhead, cross-platform graphics API that maximizes hardware performance for modern Linux gaming. This guide covers how to install and configure the necessary Vulkan packages and proprietary or open-source drivers on Ubuntu for AMD, Inte" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-vulkan-drivers-on-ubuntu-for-gaming">Install Vulkan
+Drivers on Ubuntu for Gaming</h1>
+<p>Vulkan is a low-overhead, cross-platform graphics API that maximizes
+hardware performance for modern Linux gaming. This guide covers how to
+install and configure the necessary Vulkan packages and proprietary or
+open-source drivers on Ubuntu for AMD, Intel, and NVIDIA graphics
+hardware. Following these steps will prepare your system to run modern
+native Linux games, Steam Proton, and Wine with optimal graphical
+performance.</p>
+<h2 id="1-update-your-system">1. Update Your System</h2>
+<p>Before installing new graphics packages, ensure your system packages
+are up to date:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<p>Enable 32-bit architecture support, which is essential for many Steam
+and Wine/Proton games:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">--add-architecture</span> i386</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<h2 id="2-install-drivers-based-on-your-gpu">2. Install Drivers Based on
+Your GPU</h2>
+<h3 id="for-amd-and-intel-gpus-mesa-drivers">For AMD and Intel GPUs
+(Mesa Drivers)</h3>
+<p>Both AMD and modern Intel integrated or discrete GPUs use the
+open-source Mesa drivers, which provide fully conformant Vulkan
+implementations (RADV for AMD, ANV for Intel).</p>
+<p>Install the 64-bit and 32-bit Vulkan packages:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libvulkan1 libvulkan1:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386 <span class="at">-y</span></span></code></pre></div>
+<h3 id="for-nvidia-gpus-proprietary-drivers">For NVIDIA GPUs
+(Proprietary Drivers)</h3>
+<p>NVIDIA handles Vulkan support directly through its proprietary driver
+stack.</p>
+<ol type="1">
+<li>Identify the recommended driver for your card:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ubuntu-drivers</span> devices</span></code></pre></div></li>
+<li>Install the recommended proprietary driver (replace <code>XXX</code>
+with the recommended version number, such as <code>535</code> or
+<code>550</code>):
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nvidia-driver-XXX <span class="at">-y</span></span></code></pre></div></li>
+<li>Install the 32-bit driver libraries and Vulkan support packages:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libvulkan1 libvulkan1:i386 <span class="at">-y</span></span></code></pre></div></li>
+<li>Reboot your system to apply the driver changes:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+</ol>
+<h2 id="3-install-vulkan-verification-utilities">3. Install Vulkan
+Verification Utilities</h2>
+<p>Install <code>vulkan-tools</code> to test and inspect your Vulkan
+setup:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install vulkan-tools <span class="at">-y</span></span></code></pre></div>
+<h2 id="4-verify-the-installation">4. Verify the Installation</h2>
+<p>Run <code>vkcube</code> to ensure hardware acceleration is
+active:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vkcube</span></span></code></pre></div>
+<p>A window rendering a rotating 3D cube should appear. If it runs
+smoothly without errors, your Vulkan installation is working
+properly.</p>
+<p>To inspect detailed device specifications and supported API
+extensions, run:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vulkaninfo</span> <span class="at">--summary</span></span></code></pre></div>
+<p>Check the output to confirm that your primary GPU name and correct
+driver versions are displayed under the device section.</p>
+<h2 id="5-configure-for-gaming">5. Configure for Gaming</h2>
+<p>Most modern gaming environments on Ubuntu, such as Steam, utilize
+translation layers like DXVK (DirectX 9/10/11 to Vulkan) and VKD3D
+(DirectX 12 to Vulkan).</p>
+<ul>
+<li><strong>Steam Proton:</strong> Open Steam, go to
+<strong>Settings</strong> &gt; <strong>Compatibility</strong>, and check
+<strong>Enable Steam Play for supported titles</strong> and
+<strong>Enable Steam Play for all other titles</strong>. Proton
+automatically targets your installed Vulkan runtime.</li>
+<li><strong>Lutris / Heroic Games Launcher:</strong> Ensure that the
+Vulkan ICD loader detects your specific driver. In system preferences
+within these launchers, confirm your discrete GPU is selected under
+Vulkan ICD options.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Invert Search Results with grep -v in Ubuntu - ubuntu</title>
+    <meta name="description" content="The grep command is one of the most widely used text-processing tools in Ubuntu and other Unix-like systems. While it typically outputs lines that match a specified pattern, the -v (or --invert-match) flag alters this behavior entirely by displaying only">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-invert-search-results-with-grep-v-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Invert Search Results with grep -v in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-invert-search-results-with-grep-v-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The grep command is one of the most widely used text-processing tools in Ubuntu and other Unix-like systems. While it typically outputs lines that match a specified pattern, the -v (or --invert-match) flag alters this behavior entirely by displaying only" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-invert-search-results-with-grep--v-in-ubuntu">How to
+Invert Search Results with grep -v in Ubuntu</h1>
+<p>The <code>grep</code> command is one of the most widely used
+text-processing tools in Ubuntu and other Unix-like systems. While it
+typically outputs lines that match a specified pattern, the
+<code>-v</code> (or <code>--invert-match</code>) flag alters this
+behavior entirely by displaying only the lines that do not match the
+search criteria. This article explains the purpose of
+<code>grep -v</code>, details its basic syntax, and demonstrates
+practical use cases for filtering logs, cleaning configuration files,
+and refining process lists.</p>
+<h3 id="the-purpose-of-the--v-flag">The Purpose of the <code>-v</code>
+Flag</h3>
+<p>By default, running <code>grep "pattern" filename</code> scans the
+target file and prints every line containing "pattern." When you add the
+<code>-v</code> option, <code>grep</code> reverses this logic. The
+primary purpose of this inversion is exclusion: it allows administrators
+and developers to filter out unwanted noise, suppress known errors, or
+strip non-essential information from files and command outputs.</p>
+<h3 id="basic-syntax">Basic Syntax</h3>
+<p>The basic syntax for using the invert-match option in Ubuntu is:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;pattern&quot;</span> filename</span></code></pre></div>
+<p>You can also pass text to <code>grep -v</code> via standard input
+using pipes:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">command</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;pattern&quot;</span></span></code></pre></div>
+<h3 id="common-practical-examples">Common Practical Examples</h3>
+<h4 id="1-stripping-comments-from-configuration-files">1. Stripping
+Comments from Configuration Files</h4>
+<p>Ubuntu configuration files (such as those in <code>/etc/</code>)
+frequently contain extensive comments starting with a <code>#</code>
+symbol. To view only the active configuration directives, you can invert
+the search to exclude comment lines:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^#&quot;</span> /etc/ssh/sshd_config</span></code></pre></div>
+<p>To simultaneously exclude both comments and blank lines, combine
+regular expressions with <code>-E</code> (extended grep):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-Ev</span> <span class="st">&quot;^(#|$)&quot;</span> /etc/ssh/sshd_config</span></code></pre></div>
+<h4 id="2-filtering-log-files">2. Filtering Log Files</h4>
+<p>When troubleshooting system issues using <code>/var/log/syslog</code>
+or application logs, recurring informational messages can obscure
+critical warnings. You can filter out benign notifications like
+<code>INFO</code> to focus on potential problems:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;INFO&quot;</span> /var/log/syslog</span></code></pre></div>
+<h4 id="3-excluding-the-grep-command-from-process-lists">3. Excluding
+the <code>grep</code> Command from Process Lists</h4>
+<p>A common annoyance when checking running processes with
+<code>ps aux | grep service_name</code> is that the <code>grep</code>
+command itself appears in the output. Piping through
+<code>grep -v grep</code> removes the search process from the
+results:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> nginx <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> grep</span></code></pre></div>
+<h4 id="4-case-insensitive-inversion">4. Case-Insensitive Inversion</h4>
+<p>You can combine the <code>-v</code> flag with other standard
+<code>grep</code> options. Combining it with <code>-i</code> ignores
+character case while inverting:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-vi</span> <span class="st">&quot;error&quot;</span> application.log</span></code></pre></div>
+<p>This command outputs every line that does not contain "error",
+"ERROR", "Error", or any other casing variation.</p>
+<h3 id="inverting-multiple-patterns">Inverting Multiple Patterns</h3>
+<p>If you need to exclude multiple distinct strings, you can use the
+<code>-E</code> flag with the pipe (<code>|</code>) delimiter inside the
+pattern string:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-Ev</span> <span class="st">&quot;warning|debug|notice&quot;</span> app.log</span></code></pre></div>
+<p>Alternatively, you can chain multiple <code>grep -v</code> commands
+together sequentially:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> app.log <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;warning&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;debug&quot;</span></span></code></pre></div>
+<p>Using <code>grep -v</code> simplifies text processing in Ubuntu by
+providing an efficient, straightforward mechanism to strip out unwanted
+data and isolate the exact information required for analysis.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

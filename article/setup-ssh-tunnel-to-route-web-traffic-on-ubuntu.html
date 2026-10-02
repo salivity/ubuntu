@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup SSH Tunnel to Route Web Traffic on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to create a secure SSH tunnel to route your local web browsing traffic through a remote Ubuntu server. By using SSH dynamic port forwarding, you can turn your remote server into a private SOCKS5 proxy, encrypting your local inte">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-ssh-tunnel-to-route-web-traffic-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup SSH Tunnel to Route Web Traffic on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-ssh-tunnel-to-route-web-traffic-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to create a secure SSH tunnel to route your local web browsing traffic through a remote Ubuntu server. By using SSH dynamic port forwarding, you can turn your remote server into a private SOCKS5 proxy, encrypting your local inte" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-ssh-tunnel-to-route-web-traffic-on-ubuntu">Setup SSH
+Tunnel to Route Web Traffic on Ubuntu</h1>
+<p>This article explains how to create a secure SSH tunnel to route your
+local web browsing traffic through a remote Ubuntu server. By using SSH
+dynamic port forwarding, you can turn your remote server into a private
+SOCKS5 proxy, encrypting your local internet traffic and masking your
+true IP address. Below, you will find the exact commands and
+configuration steps required for your local machine and web browser.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>A remote Ubuntu server with SSH access enabled.</li>
+<li>The server's public IP address and a user account with SSH
+credentials.</li>
+<li>A local machine (Linux, macOS, or Windows 10/11) equipped with an
+SSH client.</li>
+</ul>
+<hr />
+<h3 id="step-1-establish-the-ssh-dynamic-tunnel">Step 1: Establish the
+SSH Dynamic Tunnel</h3>
+<p>Dynamic port forwarding sets up an SSH tunnel that acts as a SOCKS
+proxy. Run the following command in your local terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-D</span> 1080 <span class="at">-C</span> <span class="at">-q</span> <span class="at">-N</span> username@your_remote_ip</span></code></pre></div>
+<p>Parameters breakdown:</p>
+<ul>
+<li><code>-D 1080</code>: Opens a local SOCKS port on
+<code>1080</code>.</li>
+<li><code>-C</code>: Compresses data to speed up transfer rates.</li>
+<li><code>-q</code>: Enables quiet mode to suppress non-fatal
+messages.</li>
+<li><code>-N</code>: Tells SSH not to execute a remote shell command
+(ideal for port forwarding only).</li>
+<li><code>username@your_remote_ip</code>: Replace these with your remote
+Ubuntu username and server IP.</li>
+</ul>
+<p>Keep this terminal window open. If you close it, the tunnel will
+terminate.</p>
+<hr />
+<h3 id="step-2-configure-your-web-browser">Step 2: Configure Your Web
+Browser</h3>
+<p>To route traffic through the tunnel, direct your browser to use the
+local SOCKS proxy.</p>
+<h4
+id="mozilla-firefox-recommended-for-application-specific-routing">Mozilla
+Firefox (Recommended for application-specific routing)</h4>
+<ol type="1">
+<li>Open Firefox and navigate to <strong>Settings</strong>.</li>
+<li>Scroll to the bottom and click <strong>Settings...</strong> under
+<strong>Network Settings</strong>.</li>
+<li>Select <strong>Manual proxy configuration</strong>.</li>
+<li>In the <strong>SOCKS Host</strong> field, enter
+<code>127.0.0.1</code> and set the <strong>Port</strong> to
+<code>1080</code>.</li>
+<li>Select <strong>SOCKS v5</strong>.</li>
+<li>Check the box labeled <strong>Proxy DNS when using SOCKS v5</strong>
+to prevent DNS leaks.</li>
+<li>Click <strong>OK</strong> to save.</li>
+</ol>
+<h4 id="google-chrome--system-wide-proxy">Google Chrome / System-Wide
+Proxy</h4>
+<p>Chrome uses your operating system’s proxy settings:</p>
+<ul>
+<li><strong>macOS:</strong> Go to <em>System Settings &gt; Network &gt;
+Wi-Fi/Ethernet &gt; Details &gt; Proxies</em>. Enable <strong>SOCKS
+Proxy</strong>, then set the server to <code>127.0.0.1</code> and port
+to <code>1080</code>.</li>
+<li><strong>Windows:</strong> Go to <em>Settings &gt; Network &amp;
+internet &gt; Proxy</em>. Configure a manual proxy server with the
+address <code>127.0.0.1</code> and port <code>1080</code>.</li>
+</ul>
+<hr />
+<h3 id="step-3-verify-the-tunnel">Step 3: Verify the Tunnel</h3>
+<ol type="1">
+<li>Open your configured browser and visit a public IP checker such as
+<code>https://icanhazip.com</code> or
+<code>https://whatismyipaddress.com</code>.</li>
+<li>Confirm that the displayed IP matches your remote Ubuntu server's IP
+address rather than your local connection's IP.</li>
+</ol>
+<p>To close the tunnel, return to your terminal and press
+<code>Ctrl + C</code>. Remember to turn off the proxy settings in your
+browser or operating system after terminating the connection.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

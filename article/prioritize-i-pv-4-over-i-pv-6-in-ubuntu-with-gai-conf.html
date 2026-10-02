@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prioritize IPv4 Over IPv6 in Ubuntu with gai.conf - ubuntu</title>
+    <meta name="description" content="This article explains the role of the /etc/gai.conf configuration file in Ubuntu, specifically how it controls network address resolution order. By modifying this file, system administrators can instruct the system resolver to favor IPv4 connections over">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/prioritize-i-pv-4-over-i-pv-6-in-ubuntu-with-gai-conf">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Prioritize IPv4 Over IPv6 in Ubuntu with gai.conf - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/prioritize-i-pv-4-over-i-pv-6-in-ubuntu-with-gai-conf" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of the /etc/gai.conf configuration file in Ubuntu, specifically how it controls network address resolution order. By modifying this file, system administrators can instruct the system resolver to favor IPv4 connections over" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="prioritize-ipv4-over-ipv6-in-ubuntu-with-gaiconf">Prioritize
+IPv4 Over IPv6 in Ubuntu with gai.conf</h1>
+<p>This article explains the role of the <code>/etc/gai.conf</code>
+configuration file in Ubuntu, specifically how it controls network
+address resolution order. By modifying this file, system administrators
+can instruct the system resolver to favor IPv4 connections over IPv6
+without completely disabling IPv6, effectively resolving latency issues
+and connection timeouts caused by misconfigured dual-stack networks.</p>
+<h2 id="the-role-of-etcgaiconf">The Role of
+<code>/etc/gai.conf</code></h2>
+<p>The <code>/etc/gai.conf</code> file is the configuration file for
+<code>getaddrinfo(3)</code>, the standard C library function used by
+Linux network applications to translate domain names into IP
+addresses.</p>
+<p>Modern operating systems, including Ubuntu, follow RFC 6724 standards
+for default address selection. Under these standards, the system
+prioritizes IPv6 addresses over IPv4 addresses whenever a dual-stack
+domain name provides both record types (AAAA and A).</p>
+<p>The <code>/etc/gai.conf</code> file allows administrators to alter
+this default sorting order. When an application queries a hostname,
+<code>getaddrinfo()</code> references this file to determine the
+precedence of the returned IP addresses.</p>
+<h2 id="why-prioritize-ipv4-over-ipv6">Why Prioritize IPv4 Over
+IPv6?</h2>
+<p>While IPv6 is the modern standard, many local networks or ISPs still
+have incomplete, unoptimized, or misconfigured IPv6 routing. In such
+environments, systems prioritizing IPv6 often suffer from noticeable
+performance degradation:</p>
+<ul>
+<li><strong>Connection Timeouts:</strong> Applications attempt to
+establish a connection via IPv6 first, wait for a timeout to occur, and
+only then fall back to IPv4.</li>
+<li><strong>Slow Updates:</strong> Package managers like
+<code>apt</code> may hang or crawl when attempting to download packages
+from mirrors via broken IPv6 routes.</li>
+<li><strong>Application Delays:</strong> CLI tools like
+<code>curl</code>, <code>wget</code>, or remote services like SSH
+experience multi-second delays during initial handshakes.</li>
+</ul>
+<p>Rather than completely disabling the IPv6 stack—which can break local
+services or software that requires the IPv6 loopback interface
+(<code>::1</code>)—adjusting precedence through
+<code>/etc/gai.conf</code> solves the issue gracefully.</p>
+<h2 id="how-the-precedence-mechanism-works">How the Precedence Mechanism
+Works</h2>
+<p>Inside <code>/etc/gai.conf</code>, the sorting order is managed using
+<code>precedence</code> rules. Each rule assigns a priority value to a
+specific network prefix. The higher the precedence value, the higher the
+sorting priority.</p>
+<p>By default, standard IPv6 addresses (<code>::/0</code>) hold a higher
+precedence than IPv4-mapped IPv6 addresses
+(<code>::ffff:0:0/96</code>).</p>
+<p>To make IPv4 preferred, you change the precedence value of
+IPv4-mapped addresses so it ranks higher than native IPv6 traffic.</p>
+<h2 id="step-by-step-configuration">Step-by-Step Configuration</h2>
+<p>To configure Ubuntu to prefer IPv4:</p>
+<ol type="1">
+<li><p>Open <code>/etc/gai.conf</code> in a text editor with
+administrative privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/gai.conf</span></code></pre></div></li>
+<li><p>Scroll through the file to locate the precedence table. Look for
+the following commented line:</p>
+<pre class="text"><code>#precedence ::ffff:0:0/96  100</code></pre></li>
+<li><p>Uncomment the line by removing the <code>#</code> symbol:</p>
+<pre class="text"><code>precedence ::ffff:0:0/96  100</code></pre></li>
+<li><p>Save the file and exit the editor.</p></li>
+</ol>
+<h2 id="applying-and-verifying-the-changes">Applying and Verifying the
+Changes</h2>
+<p>Changes made to <code>/etc/gai.conf</code> take effect immediately
+for any new process that calls <code>getaddrinfo()</code>. A system
+reboot or service restart is not required.</p>
+<p>To verify that the change is active, run a test query using
+<code>ping</code> or <code>curl</code> against a dual-stack host:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-c</span> 1 google.com</span></code></pre></div>
+<p>If the configuration is working as intended, the host will resolve to
+an IPv4 address by default instead of an IPv6 address. IPv6 remains
+fully functional and will still be used as a fallback if a destination
+host only provides an AAAA record.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

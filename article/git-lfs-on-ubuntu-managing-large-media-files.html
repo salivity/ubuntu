@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git LFS on Ubuntu: Managing Large Media Files - ubuntu</title>
+    <meta name="description" content="Git Large File Storage (Git LFS) is an open-source Git extension designed to manage large media assets and binary files efficiently within version control repositories on Ubuntu. By substituting heavy files—such as high-resolution video, audio, graphic">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/git-lfs-on-ubuntu-managing-large-media-files">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Git LFS on Ubuntu: Managing Large Media Files - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/git-lfs-on-ubuntu-managing-large-media-files" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Git Large File Storage (Git LFS) is an open-source Git extension designed to manage large media assets and binary files efficiently within version control repositories on Ubuntu. By substituting heavy files—such as high-resolution video, audio, graphic" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="git-lfs-on-ubuntu-managing-large-media-files">Git LFS on Ubuntu:
+Managing Large Media Files</h1>
+<p>Git Large File Storage (Git LFS) is an open-source Git extension
+designed to manage large media assets and binary files efficiently
+within version control repositories on Ubuntu. By substituting heavy
+files—such as high-resolution video, audio, graphics, and datasets—with
+lightweight text pointers inside the Git repository, Git LFS stores the
+actual binary payloads on a separate remote server. This approach
+prevents repository bloat, accelerates clone and fetch speeds, and
+ensures consistent development workflows without degrading Git's core
+performance.</p>
+<h3 id="the-problem-with-native-git-and-large-files">The Problem with
+Native Git and Large Files</h3>
+<p>Git is inherently distributed, meaning every user who clones a
+repository downloads its entire version history. When large media
+files—such as <code>.mp4</code>, <code>.psd</code>, <code>.wav</code>,
+or 3D assets—are added and modified, Git stores a complete copy of every
+new version in the <code>.git</code> folder. Over time, this causes the
+repository size to grow exponentially. On an Ubuntu workstation or
+server, this leads to:</p>
+<ul>
+<li>Excessively slow <code>git clone</code>, <code>git fetch</code>, and
+<code>git pull</code> operations.</li>
+<li>Wasted local disk space, as every historical version of a massive
+binary file remains stored locally.</li>
+<li>Exceeded file size limits enforced by popular hosting platforms like
+GitHub, GitLab, and Bitbucket.</li>
+</ul>
+<h3 id="how-git-lfs-solves-the-problem">How Git LFS Solves the
+Problem</h3>
+<p>Git LFS addresses these limitations by altering how Git tracks binary
+data. Instead of writing the full content of large media files directly
+into the Git object database, Git LFS does the following:</p>
+<ol type="1">
+<li><strong>Pointers Replace Binaries:</strong> Git commits only a small
+text file (a pointer) containing the file's cryptographic hash, size,
+and version metadata.</li>
+<li><strong>External Storage:</strong> The actual media payload is
+uploaded to dedicated LFS object storage (typically backed by cloud
+storage on services like GitHub or self-hosted GitLab servers).</li>
+<li><strong>On-Demand Downloads:</strong> When switching branches or
+checking out a commit on Ubuntu, Git LFS downloads only the specific
+binary versions required for your current working tree, rather than
+downloading the entire historical timeline of those files.</li>
+</ol>
+<h3 id="key-benefits-on-ubuntu">Key Benefits on Ubuntu</h3>
+<ul>
+<li><strong>Faster Clones and Bandwidth Efficiency:</strong> Ubuntu
+developers and CI/CD pipelines can clone repositories in seconds rather
+than hours, as they only download the pointer data until the current
+commit's binaries are requested.</li>
+<li><strong>Transparent Workflow:</strong> Git LFS hooks directly into
+standard Git operations. After initial configuration, commands like
+<code>git add</code>, <code>git commit</code>, and <code>git push</code>
+work identically to standard Git.</li>
+<li><strong>Reduced Local Disk Footprint:</strong> Developers only keep
+the active versions of large assets on their Ubuntu machine, saving
+valuable local drive space.</li>
+</ul>
+<h3 id="core-usage-on-ubuntu">Core Usage on Ubuntu</h3>
+<p>To set up Git LFS on an Ubuntu system, install the package via the
+official package manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install git-lfs</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> lfs install</span></code></pre></div>
+<p>Once installed, specify the types of media files Git LFS should
+track:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> lfs track <span class="st">&quot;*.mp4&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> lfs track <span class="st">&quot;*.zip&quot;</span></span></code></pre></div>
+<p>This generates or updates a <code>.gitattributes</code> file in the
+repository root. When this file is committed, Git automatically routes
+the specified media formats through Git LFS, keeping the main repository
+lightweight and fast.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

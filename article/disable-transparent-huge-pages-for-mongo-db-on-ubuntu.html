@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable Transparent Huge Pages for MongoDB on Ubuntu - ubuntu</title>
+    <meta name="description" content="Transparent Huge Pages (THP) is a Linux memory management system that frequently causes performance degradation, high memory fragmentation, and unexpected latency spikes when running database workloads such as MongoDB. Because MongoDB performs best with">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/disable-transparent-huge-pages-for-mongo-db-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Disable Transparent Huge Pages for MongoDB on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/disable-transparent-huge-pages-for-mongo-db-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Transparent Huge Pages (THP) is a Linux memory management system that frequently causes performance degradation, high memory fragmentation, and unexpected latency spikes when running database workloads such as MongoDB. Because MongoDB performs best with" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="disable-transparent-huge-pages-for-mongodb-on-ubuntu">Disable
+Transparent Huge Pages for MongoDB on Ubuntu</h1>
+<p>Transparent Huge Pages (THP) is a Linux memory management system that
+frequently causes performance degradation, high memory fragmentation,
+and unexpected latency spikes when running database workloads such as
+MongoDB. Because MongoDB performs best with standard 4KB memory pages,
+the vendor officially recommends completely disabling THP across your
+Ubuntu systems. This guide provides a direct, step-by-step procedure to
+check your current THP settings and create a persistent
+<code>systemd</code> service to disable THP permanently on Ubuntu.</p>
+<h3 id="1-check-current-thp-status">1. Check Current THP Status</h3>
+<p>To verify if Transparent Huge Pages are currently active, run the
+following commands in your terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/kernel/mm/transparent_hugepage/enabled</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/kernel/mm/transparent_hugepage/defrag</span></code></pre></div>
+<p>If the output shows <code>[always]</code> or <code>[madvise]</code>
+enclosed in brackets, THP is active. To optimize for MongoDB, the value
+must be set to <code>[never]</code>.</p>
+<h3 id="2-create-a-persistent-systemd-service">2. Create a Persistent
+systemd Service</h3>
+<p>Because changes made via sysfs do not persist across reboots, the
+most reliable method on Ubuntu is creating a <code>systemd</code> unit
+file that sets THP to <code>never</code> during system
+initialization.</p>
+<p>Create a new service file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/disable-transparent-huge-pages.service</span></code></pre></div>
+<p>Add the following configuration:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Disable Transparent Huge Pages (THP) for MongoDB</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">DefaultDependencies</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">sysinit.target local-fs.target</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="dt">Before</span><span class="ot">=</span><span class="st">mongod.service</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">oneshot</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/bin/sh -c &#39;echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled &amp;&amp; echo never &gt; /sys/kernel/mm/transparent_hugepage/defrag&#39;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">basic.target</span></span></code></pre></div>
+<p>Save and exit the text editor (<code>Ctrl+O</code>,
+<code>Enter</code>, then <code>Ctrl+X</code>).</p>
+<h3 id="3-enable-and-start-the-service">3. Enable and Start the
+Service</h3>
+<p>Reload the <code>systemd</code> daemon to register the new service,
+enable it to run automatically at boot, and start it immediately:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable disable-transparent-huge-pages.service</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start disable-transparent-huge-pages.service</span></code></pre></div>
+<h3 id="4-verify-the-new-settings">4. Verify the New Settings</h3>
+<p>Run the check commands again to ensure the changes took effect:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/kernel/mm/transparent_hugepage/enabled</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/kernel/mm/transparent_hugepage/defrag</span></code></pre></div>
+<p>The output for both should now appear as:</p>
+<pre class="text"><code>always madvise [never]</code></pre>
+<p>Once <code>[never]</code> is highlighted, THP is properly disabled,
+preventing memory allocation delays and ensuring optimal throughput and
+stability for MongoDB on Ubuntu.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using Ethtool to Troubleshoot Network Links on Ubuntu - ubuntu</title>
+    <meta name="description" content="The ethtool utility in Ubuntu is a command-line tool designed for querying and controlling network interface controllers (NICs) and their device drivers at the physical layer (OSI Layer 1) and data link layer (Layer 2). This article details how system ad">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-ethtool-to-troubleshoot-network-links-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using Ethtool to Troubleshoot Network Links on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-ethtool-to-troubleshoot-network-links-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The ethtool utility in Ubuntu is a command-line tool designed for querying and controlling network interface controllers (NICs) and their device drivers at the physical layer (OSI Layer 1) and data link layer (Layer 2). This article details how system ad" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-ethtool-to-troubleshoot-network-links-on-ubuntu">Using
+Ethtool to Troubleshoot Network Links on Ubuntu</h1>
+<p>The <code>ethtool</code> utility in Ubuntu is a command-line tool
+designed for querying and controlling network interface controllers
+(NICs) and their device drivers at the physical layer (OSI Layer 1) and
+data link layer (Layer 2). This article details how system
+administrators use <code>ethtool</code> to diagnose physical
+connectivity failures, detect cable and transceiver faults, identify
+speed and duplex mismatches, and review raw hardware performance metrics
+directly from the Linux terminal.</p>
+<h2 id="verifying-physical-carrier-status">Verifying Physical Carrier
+Status</h2>
+<p>The primary role of <code>ethtool</code> during a network outage is
+confirming whether a physical link actually exists between the host NIC
+and the switch or router. Running
+<code>ethtool &lt;interface_name&gt;</code> provides direct hardware
+status through the <code>Link detected</code> field.</p>
+<ul>
+<li><strong>Link detected: yes</strong>: Indicates electrical or optical
+carrier signal presence. The cable is connected, powered, and
+communicating with the link partner.</li>
+<li><strong>Link detected: no</strong>: Points directly to a
+physical-layer failure, such as an unplugged cable, broken fiber strand,
+faulty SFP/transceiver module, or a disabled switch port.</li>
+</ul>
+<h2 id="detecting-speed-and-duplex-mismatches">Detecting Speed and
+Duplex Mismatches</h2>
+<p>Hardware link negotiations can fail if auto-negotiation fails or if
+one end of the connection is hardcoded. <code>ethtool</code>
+displays:</p>
+<ul>
+<li><strong>Supported link modes</strong>: The speeds and duplex
+settings supported by the local NIC.</li>
+<li><strong>Speed</strong>: The actual operating speed negotiated (e.g.,
+1000Mb/s, 10000Mb/s).</li>
+<li><strong>Duplex</strong>: Whether the link operates in
+<code>Full</code> or <code>Half</code> duplex.</li>
+<li><strong>Auto-negotiation</strong>: Indicates whether dynamic
+negotiation is active (<code>on</code> or <code>off</code>).</li>
+</ul>
+<p>If an interface that should operate at 1000 Mbps drops to 100 Mbps or
+switches to half-duplex, <code>ethtool</code> reveals the issue
+immediately. These mismatches cause severe packet drops, high latency,
+and degraded throughput.</p>
+<h2 id="inspecting-hardware-level-error-counters">Inspecting
+Hardware-Level Error Counters</h2>
+<p>Standard tools like <code>ip</code> or <code>ifconfig</code>
+aggregate packet drops into generic counters. In contrast,
+<code>ethtool -S &lt;interface_name&gt;</code> reads registers directly
+from the physical controller to expose granular error types:</p>
+<ul>
+<li><strong>CRC errors (<code>rx_crc_errors</code>)</strong>: Typically
+caused by bad cabling, electromagnetic interference (EMI), damaged RJ45
+terminations, or faulty optical transceivers.</li>
+<li><strong>Frame errors (<code>rx_frame_errors</code>)</strong>: Often
+indicative of duplex mismatches or framing issues at the physical
+interface.</li>
+<li><strong>FIFO/Ring buffer drops (<code>rx_fifo_errors</code> /
+<code>rx_missed_errors</code>)</strong>: Show whether packets reach the
+physical layer but fail to enter host memory, ruling out external
+physical link problems.</li>
+</ul>
+<h2 id="physical-port-identification">Physical Port Identification</h2>
+<p>In multi-port server environments, mapping an operating system
+interface name (such as <code>eth0</code> or <code>enp3s0</code>) to the
+correct physical port on the chassis can be difficult. The command
+<code>ethtool -p &lt;interface_name&gt; [seconds]</code> physically
+blinks the LED light on the target network port, allowing technicians to
+locate the exact port requiring cable replacement or inspection without
+disrupting other active interfaces.</p>
+<h2 id="running-hardware-self-tests">Running Hardware Self-Tests</h2>
+<p>For supported network adapters,
+<code>ethtool -t &lt;interface_name&gt;</code> executes built-in
+hardware diagnostic routines (offline or online). This diagnostic checks
+the integrity of the physical loopback, internal memory registers, and
+hardware controller functions, determining whether persistent link
+dropouts stem from a physically degraded NIC rather than external
+network infrastructure.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

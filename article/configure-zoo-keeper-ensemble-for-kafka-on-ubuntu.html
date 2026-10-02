@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure ZooKeeper Ensemble for Kafka on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article provides a step-by-step guide to configuring a production-ready, three-node Apache ZooKeeper ensemble (quorum) on Ubuntu to manage an Apache Kafka cluster. You will learn how to prepare the Ubuntu environment, install the required dependenci">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-zoo-keeper-ensemble-for-kafka-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure ZooKeeper Ensemble for Kafka on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-zoo-keeper-ensemble-for-kafka-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a step-by-step guide to configuring a production-ready, three-node Apache ZooKeeper ensemble (quorum) on Ubuntu to manage an Apache Kafka cluster. You will learn how to prepare the Ubuntu environment, install the required dependenci" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-zookeeper-ensemble-for-kafka-on-ubuntu">Configure
+ZooKeeper Ensemble for Kafka on Ubuntu</h1>
+<p>This article provides a step-by-step guide to configuring a
+production-ready, three-node Apache ZooKeeper ensemble (quorum) on
+Ubuntu to manage an Apache Kafka cluster. You will learn how to prepare
+the Ubuntu environment, install the required dependencies, set up the
+ZooKeeper configuration files across multiple nodes, initialize the
+cluster state, and link your Kafka brokers to the newly created ensemble
+for fault-tolerant metadata management.</p>
+<hr />
+<h3 id="prerequisites">Prerequisites</h3>
+<p>A reliable ZooKeeper ensemble requires an odd number of nodes to
+avoid split-brain scenarios; three nodes is the standard minimum. Ensure
+you have:</p>
+<ul>
+<li>Three Ubuntu servers (e.g., Ubuntu 20.04 or 22.04 LTS).</li>
+<li>Static IP addresses or resolved hostnames for all nodes.</li>
+<li>A user account with <code>sudo</code> privileges on each node.</li>
+</ul>
+<p>Assign hostnames and map them in <code>/etc/hosts</code> on all three
+servers:</p>
+<pre class="text"><code>192.168.1.10 zk1
+192.168.1.11 zk2
+192.168.1.12 zk3</code></pre>
+<hr />
+<h3 id="step-1-install-java-openjdk">Step 1: Install Java OpenJDK</h3>
+<p>ZooKeeper runs on the JVM. Install OpenJDK 11 or 17 on all three
+nodes:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> openjdk-11-jdk</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-version</span></span></code></pre></div>
+<hr />
+<h3 id="step-2-create-a-dedicated-zookeeper-user-and-directories">Step
+2: Create a Dedicated ZooKeeper User and Directories</h3>
+<p>Run these commands on all nodes to run ZooKeeper under an
+unprivileged system user:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> useradd <span class="at">-r</span> <span class="at">-d</span> /opt/zookeeper <span class="at">-s</span> /bin/false zookeeper</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /var/lib/zookeeper /var/log/zookeeper</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> zookeeper:zookeeper /var/lib/zookeeper /var/log/zookeeper</span></code></pre></div>
+<hr />
+<h3 id="step-3-download-and-extract-zookeeper">Step 3: Download and
+Extract ZooKeeper</h3>
+<p>Download the stable Apache ZooKeeper release on each node (adjust the
+version number as needed):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://archive.apache.org/dist/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tar <span class="at">-xzf</span> apache-zookeeper-3.8.4-bin.tar.gz <span class="at">-C</span> /opt</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv /opt/apache-zookeeper-3.8.4-bin /opt/zookeeper</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> zookeeper:zookeeper /opt/zookeeper</span></code></pre></div>
+<hr />
+<h3 id="step-4-configure-the-ensemble-zoocfg">Step 4: Configure the
+Ensemble (<code>zoo.cfg</code>)</h3>
+<p>Create the main configuration file at
+<code>/opt/zookeeper/conf/zoo.cfg</code> on all three nodes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /opt/zookeeper/conf/zoo.cfg</span></code></pre></div>
+<p>Add the following configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Time unit in milliseconds</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">tickTime</span><span class="ot">=</span><span class="dv">2000</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Time allowed for initial synchronization</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">initLimit</span><span class="ot">=</span><span class="dv">10</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Time allowed for sync between follower and leader</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dt">syncLimit</span><span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ZooKeeper data directory</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="dt">dataDir</span><span class="ot">=</span><span class="st">/var/lib/zookeeper</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Client port</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="dt">clientPort</span><span class="ot">=</span><span class="dv">2181</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Limit on concurrent connections</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="dt">maxClientCnxns</span><span class="ot">=</span><span class="dv">60</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Automatic snapshot purge settings</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="dt">autopurge.snapRetainCount</span><span class="ot">=</span><span class="dv">3</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="dt">autopurge.purgeInterval</span><span class="ot">=</span><span class="dv">24</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensemble members: server.ID=IP:leader_port:election_port</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="dt">server.1</span><span class="ot">=</span><span class="st">zk1:2888:3888</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="dt">server.2</span><span class="ot">=</span><span class="st">zk2:2888:3888</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="dt">server.3</span><span class="ot">=</span><span class="st">zk3:2888:3888</span></span></code></pre></div>
+<ul>
+<li>Port <code>2888</code> is used for communication between followers
+and the leader.</li>
+<li>Port <code>3888</code> is used for leader election.</li>
+</ul>
+<p>Ensure local firewalls (<code>ufw</code>) allow traffic on ports
+<code>2181</code>, <code>2888</code>, and <code>3888</code> between
+these nodes.</p>
+<hr />
+<h3 id="step-5-assign-the-myid-file">Step 5: Assign the
+<code>myid</code> File</h3>
+<p>Each node in the ensemble must have a unique identifier stored in a
+file named <code>myid</code> inside the <code>dataDir</code>.</p>
+<ul>
+<li><p><strong>On Node 1 (zk1):</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;1&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /var/lib/zookeeper/myid</span></code></pre></div></li>
+<li><p><strong>On Node 2 (zk2):</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;2&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /var/lib/zookeeper/myid</span></code></pre></div></li>
+<li><p><strong>On Node 3 (zk3):</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;3&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /var/lib/zookeeper/myid</span></code></pre></div></li>
+</ul>
+<p>Ensure correct permissions:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown zookeeper:zookeeper /var/lib/zookeeper/myid</span></code></pre></div>
+<hr />
+<h3 id="step-6-create-systemd-service-and-start-zookeeper">Step 6:
+Create Systemd Service and Start ZooKeeper</h3>
+<p>Create a systemd service file to manage the ZooKeeper daemon on all
+nodes:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/zookeeper.service</span></code></pre></div>
+<p>Insert the following content:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Apache ZooKeeper</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">Documentation</span><span class="ot">=</span><span class="st">https://zookeeper.apache.org</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network.target</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">forking</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="dt">User</span><span class="ot">=</span><span class="st">zookeeper</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="dt">Group</span><span class="ot">=</span><span class="st">zookeeper</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/opt/zookeeper/bin/zkServer.sh start</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStop</span><span class="ot">=</span><span class="st">/opt/zookeeper/bin/zkServer.sh stop</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecReload</span><span class="ot">=</span><span class="st">/opt/zookeeper/bin/zkServer.sh restart</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="dt">Restart</span><span class="ot">=</span><span class="st">always</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="dt">RestartSec</span><span class="ot">=</span><span class="dv">10</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div>
+<p>Reload the systemd daemon, enable, and start the service on all
+nodes:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable zookeeper</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start zookeeper</span></code></pre></div>
+<hr />
+<h3 id="step-7-verify-ensemble-health">Step 7: Verify Ensemble
+Health</h3>
+<p>Check the status of each node using the <code>zkServer.sh</code>
+utility:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/zookeeper/bin/zkServer.sh</span> status</span></code></pre></div>
+<p>In a functioning three-node ensemble, one node will report
+<code>Mode: leader</code> and the other two will report
+<code>Mode: follower</code>.</p>
+<p>You can also send the four-letter word command:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> stat <span class="kw">|</span> <span class="ex">nc</span> localhost 2181</span></code></pre></div>
+<hr />
+<h3 id="step-8-configure-kafka-brokers-to-connect">Step 8: Configure
+Kafka Brokers to Connect</h3>
+<p>To point an Apache Kafka broker to this ZooKeeper ensemble, edit
+Kafka’s configuration file (<code>server.properties</code>) on each
+Kafka broker:</p>
+<pre class="properties"><code># Connect string pointing to all nodes in the ensemble
+zookeeper.connect=zk1:2181,zk2:2181,zk3:2181
+
+# Optional: Dedicated chroot path for Kafka metadata isolation
+# zookeeper.connect=zk1:2181,zk2:2181,zk3:2181/kafka
+
+# Timeout for ZooKeeper connection
+zookeeper.connection.timeout.ms=18000</code></pre>
+<p>Restart the Kafka service after updating this configuration. Kafka
+will automatically create its metadata structure across the ZooKeeper
+ensemble.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

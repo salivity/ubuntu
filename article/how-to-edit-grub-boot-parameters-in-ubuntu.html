@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Edit GRUB Boot Parameters in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to pass custom boot parameters to the Linux kernel in Ubuntu by modifying the Grand Unified Bootloader (GRUB) configuration. You will learn how to make permanent modifications by editing the system's primary GRUB configuration fil">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-edit-grub-boot-parameters-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Edit GRUB Boot Parameters in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-edit-grub-boot-parameters-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to pass custom boot parameters to the Linux kernel in Ubuntu by modifying the Grand Unified Bootloader (GRUB) configuration. You will learn how to make permanent modifications by editing the system's primary GRUB configuration fil" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-edit-grub-boot-parameters-in-ubuntu">How to Edit GRUB
+Boot Parameters in Ubuntu</h1>
+<p>This guide explains how to pass custom boot parameters to the Linux
+kernel in Ubuntu by modifying the Grand Unified Bootloader (GRUB)
+configuration. You will learn how to make permanent modifications by
+editing the system's primary GRUB configuration file, regenerate the
+bootloader files, and test parameters temporarily during the boot
+process for troubleshooting.</p>
+<h2 id="method-1-applying-permanent-kernel-boot-parameters">Method 1:
+Applying Permanent Kernel Boot Parameters</h2>
+<p>To ensure kernel parameters persist across system updates and
+reboots, you must edit the <code>/etc/default/grub</code> configuration
+file.</p>
+<h3 id="step-1-open-the-terminal-and-back-up-the-configuration">Step 1:
+Open the Terminal and Back Up the Configuration</h3>
+<p>Before making any modifications, create a backup copy of the current
+GRUB configuration:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/default/grub /etc/default/grub.bak</span></code></pre></div>
+<h3 id="step-2-edit-the-grub-configuration-file">Step 2: Edit the GRUB
+Configuration File</h3>
+<p>Open the file using a terminal text editor such as
+<code>nano</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/grub</span></code></pre></div>
+<h3 id="step-3-modify-the-kernel-parameter-line">Step 3: Modify the
+Kernel Parameter Line</h3>
+<p>Locate the line beginning with
+<code>GRUB_CMDLINE_LINUX_DEFAULT</code>. By default, it usually looks
+like this:</p>
+<pre class="text"><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet splash&quot;</code></pre>
+<p>Add your custom parameters inside the quotation marks, separated by
+spaces. For example, to add <code>nomodeset</code> and set the log
+level:</p>
+<pre class="text"><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet splash nomodeset loglevel=3&quot;</code></pre>
+<p><em>Note: If you want parameters to apply to both normal and recovery
+mode boots, add them to <code>GRUB_CMDLINE_LINUX</code>
+instead.</em></p>
+<h3 id="step-4-save-and-exit">Step 4: Save and Exit</h3>
+<p>In <code>nano</code>, save the file by pressing
+<code>Ctrl + O</code>, confirm with <code>Enter</code>, and exit using
+<code>Ctrl + X</code>.</p>
+<h3 id="step-5-update-grub">Step 5: Update GRUB</h3>
+<p>Ubuntu will not apply these changes until the main
+<code>/boot/grub/grub.cfg</code> file is regenerated. Run:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-grub</span></code></pre></div>
+<h3 id="step-6-reboot-and-verify">Step 6: Reboot and Verify</h3>
+<p>Restart your system:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>Once the system boots, verify that the custom parameters were applied
+by checking the kernel command line:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/cmdline</span></code></pre></div>
+<hr />
+<h2 id="method-2-applying-temporary-boot-parameters">Method 2: Applying
+Temporary Boot Parameters</h2>
+<p>If you need to test a parameter or cannot boot due to a driver issue,
+apply parameters temporarily at the GRUB boot menu without modifying
+configuration files.</p>
+<ol type="1">
+<li><strong>Reboot the system.</strong></li>
+<li><strong>Access the GRUB menu:</strong>
+<ul>
+<li>On BIOS systems: Hold down the <code>Shift</code> key immediately
+after the machine powers on.</li>
+<li>On UEFI systems: Tap the <code>Esc</code> key repeatedly after
+power-on.</li>
+</ul></li>
+<li><strong>Edit the boot entry:</strong> Use the arrow keys to
+highlight the default Ubuntu entry and press <code>e</code>.</li>
+<li><strong>Append the parameter:</strong>
+<ul>
+<li>Scroll down to the line that begins with <code>linux</code>.</li>
+<li>Move the cursor to the end of that line.</li>
+<li>Add a space and type your custom parameter (e.g.,
+<code>nomodeset</code> or <code>single</code>).</li>
+</ul></li>
+<li><strong>Boot the system:</strong> Press <code>Ctrl + X</code> or
+<code>F10</code> to boot immediately with the modified parameters.</li>
+</ol>
+<p>Parameters passed via this method are active only for the current
+session and will revert upon the next reboot.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

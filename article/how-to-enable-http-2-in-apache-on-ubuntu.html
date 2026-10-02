@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Enable HTTP/2 in Apache on Ubuntu - ubuntu</title>
+    <meta name="description" content="Enabling HTTP/2 on an Apache web server running Ubuntu significantly improves website loading speed and resource efficiency through multiplexing, header compression, and prioritized streaming. This guide walks you through the straightforward process of p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-enable-http-2-in-apache-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Enable HTTP/2 in Apache on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-enable-http-2-in-apache-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Enabling HTTP/2 on an Apache web server running Ubuntu significantly improves website loading speed and resource efficiency through multiplexing, header compression, and prioritized streaming. This guide walks you through the straightforward process of p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-enable-http2-in-apache-on-ubuntu">How to Enable HTTP/2 in
+Apache on Ubuntu</h1>
+<p>Enabling HTTP/2 on an Apache web server running Ubuntu significantly
+improves website loading speed and resource efficiency through
+multiplexing, header compression, and prioritized streaming. This guide
+walks you through the straightforward process of preparing your server
+environment, switching to an asynchronous multi-processing module,
+enabling Apache's <code>http2</code> module, and configuring your
+virtual hosts to serve traffic over HTTP/2 securely.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before proceeding, ensure you have:</p>
+<ul>
+<li>Ubuntu 18.04 LTS or newer with Apache 2.4.24 or higher
+installed.</li>
+<li>An active SSL/TLS certificate, as modern web browsers only support
+HTTP/2 over encrypted HTTPS connections.</li>
+<li>Root or <code>sudo</code> administrative access.</li>
+</ul>
+<hr />
+<h3 id="step-1-switch-the-mpm-to-event">Step 1: Switch the MPM to
+Event</h3>
+<p>HTTP/2 cannot run efficiently with the default
+<code>mpm_prefork</code> module because it processes requests using one
+thread per process. You must switch to <code>mpm_event</code>.</p>
+<p>If you use PHP via <code>mod_php</code>, you must first disable it
+and switch to PHP-FPM, as <code>mod_php</code> requires
+<code>mpm_prefork</code>.</p>
+<ol type="1">
+<li><p>Install PHP-FPM (replace <code>8.2</code> with your installed PHP
+version, if applicable):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install php-fpm</span></code></pre></div></li>
+<li><p>Enable the required proxy modules for PHP-FPM:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod proxy_fcgi setenvif</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enconf php8.2-fpm</span></code></pre></div></li>
+<li><p>Disable the prefork module and <code>mod_php</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2dismod php8.2</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2dismod mpm_prefork</span></code></pre></div></li>
+<li><p>Enable the event MPM:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod mpm_event</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-2-enable-the-http2-module">Step 2: Enable the HTTP/2
+Module</h3>
+<p>Enable the Apache HTTP/2 module by running:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod http2</span></code></pre></div>
+<hr />
+<h3 id="step-3-configure-apache-for-http2">Step 3: Configure Apache for
+HTTP/2</h3>
+<p>You can enable HTTP/2 globally or on specific virtual hosts.</p>
+<h4 id="option-a-enable-globally">Option A: Enable Globally</h4>
+<p>To apply HTTP/2 across all sites on your server, open the main
+configuration file:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apache2/apache2.conf</span></code></pre></div>
+<p>Add the following directive at the bottom of the file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Protocols h2 h2c http/1.1</span></code></pre></div>
+<ul>
+<li><code>h2</code>: HTTP/2 over TLS (encrypted)</li>
+<li><code>h2c</code>: HTTP/2 over cleartext (unencrypted, fallback)</li>
+<li><code>http/1.1</code>: Fallback for clients that do not support
+HTTP/2</li>
+</ul>
+<h4 id="option-b-enable-per-virtual-host">Option B: Enable Per Virtual
+Host</h4>
+<p>To apply HTTP/2 only to a specific SSL-enabled site, open your site's
+SSL configuration file (typically in
+<code>/etc/apache2/sites-available/</code>):</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apache2/sites-available/your-domain-le-ssl.conf</span></code></pre></div>
+<p>Inside the <code>&lt;VirtualHost *:443&gt;</code> block, add the
+directive:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:443</span><span class="fu">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> yourdomain.com</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Protocols h2 http/1.1</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Existing SSL and directory configurations...</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<p>Save and exit the editor.</p>
+<hr />
+<h3 id="step-4-test-and-restart-apache">Step 4: Test and Restart
+Apache</h3>
+<ol type="1">
+<li><p>Test your configuration for syntax errors:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apache2ctl configtest</span></code></pre></div>
+<p>Ensure the output returns <code>Syntax OK</code>.</p></li>
+<li><p>Restart Apache to apply all changes:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-5-verify-http2-support">Step 5: Verify HTTP/2 Support</h3>
+<p>Verify that HTTP/2 is active using <code>curl</code>:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> <span class="at">--http2</span> <span class="at">-s</span> https://yourdomain.com <span class="kw">|</span> <span class="fu">grep</span> HTTP</span></code></pre></div>
+<p>If HTTP/2 is successfully enabled, the output will display:</p>
+<pre class="text"><code>HTTP/2 200</code></pre>
+<p>Alternatively, open your browser's Developer Tools (Network tab),
+load your website, and check the "Protocol" column to confirm requests
+are being served over <code>h2</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

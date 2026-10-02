@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check passwd File Integrity Using pwck in Ubuntu - ubuntu</title>
+    <meta name="description" content="Maintaining system security and account consistency in Ubuntu requires regular verification of critical authentication files. This guide details how to use the built-in pwck (password check) utility to scan the /etc/passwd and /etc/shadow files for forma">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/check-passwd-file-integrity-using-pwck-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Check passwd File Integrity Using pwck in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/check-passwd-file-integrity-using-pwck-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Maintaining system security and account consistency in Ubuntu requires regular verification of critical authentication files. This guide details how to use the built-in pwck (password check) utility to scan the /etc/passwd and /etc/shadow files for forma" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="check-passwd-file-integrity-using-pwck-in-ubuntu">Check passwd
+File Integrity Using pwck in Ubuntu</h1>
+<p>Maintaining system security and account consistency in Ubuntu
+requires regular verification of critical authentication files. This
+guide details how to use the built-in <code>pwck</code> (password check)
+utility to scan the <code>/etc/passwd</code> and
+<code>/etc/shadow</code> files for formatting errors, duplicate entries,
+invalid user identifiers, and missing home directories. By following
+this process, administrators can identify and resolve user database
+corruption safely.</p>
+<h2 id="what-is-the-pwck-utility">What is the pwck Utility?</h2>
+<p>The <code>pwck</code> command verifies the integrity of user
+authentication files. It checks each entry in <code>/etc/passwd</code>
+and <code>/etc/shadow</code> to ensure valid field formatting, unique
+user IDs (UIDs), correct group assignments, and the existence of
+designated home directories and login shells.</p>
+<h2 id="step-1-run-pwck-in-read-only-mode">Step 1: Run pwck in Read-Only
+Mode</h2>
+<p>Before making any changes, run <code>pwck</code> in read-only mode to
+scan for errors without being prompted to make automatic modifications.
+Open your terminal and execute:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pwck <span class="at">-r</span></span></code></pre></div>
+<p>If the files are error-free, the command exits silently and returns
+to the prompt. If issues exist, <code>pwck</code> displays specific
+error messages describing the misconfigurations, such as invalid shells
+or non-existent directories.</p>
+<h2 id="step-2-run-pwck-in-interactive-mode-to-fix-errors">Step 2: Run
+pwck in Interactive Mode to Fix Errors</h2>
+<p>To fix detected issues interactively, execute the command with
+superuser privileges and without the read-only flag:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pwck</span></code></pre></div>
+<p>When <code>pwck</code> encounters an invalid or duplicate entry, it
+prompts you with a question, such as asking whether to delete the
+corrupted entry:</p>
+<pre class="text"><code>user &#39;testuser&#39;: directory &#39;/home/testuser&#39; does not exist
+delete member &#39;testuser&#39;? [y/N]</code></pre>
+<p>Type <code>y</code> and press <strong>Enter</strong> to accept the
+proposed fix, or press <code>n</code> to leave the record unchanged for
+manual inspection later.</p>
+<h2 id="step-3-check-alternate-files">Step 3: Check Alternate Files</h2>
+<p>If you are staging changes or working on a backup file, you can
+specify custom paths for both the passwd and shadow files instead of
+checking the live system files:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pwck /path/to/custom_passwd /path/to/custom_shadow</span></code></pre></div>
+<p>This prevents accidental modifications to active system accounts
+during testing.</p>
+<h2 id="common-checks-performed-by-pwck">Common Checks Performed by
+pwck</h2>
+<p>The utility flags several standard configuration errors:</p>
+<ul>
+<li><strong>Field Count:</strong> Verifies that every line contains
+exactly seven colon-separated fields.</li>
+<li><strong>Unique User Names and UIDs:</strong> Identifies duplicated
+usernames or duplicate numerical IDs.</li>
+<li><strong>Valid Groups:</strong> Confirms that the primary Group ID
+(GID) listed in <code>/etc/passwd</code> exists in
+<code>/etc/group</code>.</li>
+<li><strong>Home Directory Verification:</strong> Confirms that
+specified home directories exist on the filesystem.</li>
+<li><strong>Login Shell Validation:</strong> Ensures that the designated
+login shell exists and is executable.</li>
+</ul>
+<h2 id="exit-status-codes">Exit Status Codes</h2>
+<p>You can verify the result of the <code>pwck</code> run
+programmatically in shell scripts using its exit status
+(<code>echo $?</code>):</p>
+<ul>
+<li><strong>0:</strong> Success; no errors were found.</li>
+<li><strong>1:</strong> Syntax errors found in the password file.</li>
+<li><strong>2:</strong> One or more bad password entries found.</li>
+<li><strong>3:</strong> Unable to open the password files.</li>
+<li><strong>4:</strong> Unable to lock the password files.</li>
+<li><strong>5:</strong> Unable to update the password files.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

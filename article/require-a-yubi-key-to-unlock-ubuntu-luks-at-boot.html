@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Require a YubiKey to Unlock Ubuntu LUKS at Boot - ubuntu</title>
+    <meta name="description" content="Securing an Ubuntu system with Full Disk Encryption (LUKS) traditionally relies on a passphrase entered at boot. By pairing LUKS with a physical YubiKey, you can require hardware token authentication—either alongside or in place of a password—to decr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/require-a-yubi-key-to-unlock-ubuntu-luks-at-boot">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Require a YubiKey to Unlock Ubuntu LUKS at Boot - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/require-a-yubi-key-to-unlock-ubuntu-luks-at-boot" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing an Ubuntu system with Full Disk Encryption (LUKS) traditionally relies on a passphrase entered at boot. By pairing LUKS with a physical YubiKey, you can require hardware token authentication—either alongside or in place of a password—to decr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="require-a-yubikey-to-unlock-ubuntu-luks-at-boot">Require a
+YubiKey to Unlock Ubuntu LUKS at Boot</h1>
+<p>Securing an Ubuntu system with Full Disk Encryption (LUKS)
+traditionally relies on a passphrase entered at boot. By pairing LUKS
+with a physical YubiKey, you can require hardware token
+authentication—either alongside or in place of a password—to decrypt the
+root partition. This guide details how to leverage modern
+<code>systemd</code> tools and FIDO2 capabilities to configure your
+Ubuntu bootloader to require a physical YubiKey during startup.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>An existing installation of Ubuntu (22.04 LTS or newer) configured
+with LUKS Full Disk Encryption.</li>
+<li>A YubiKey that supports FIDO2 (YubiKey 5 Series or Security Key
+Series).</li>
+<li>Administrative (<code>sudo</code>) access.</li>
+</ul>
+<h3 id="step-1-identify-the-encrypted-luks-partition">Step 1: Identify
+the Encrypted LUKS Partition</h3>
+<p>Plug in your YubiKey and open a terminal. Identify the block device
+that hosts your LUKS container by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span> <span class="at">-f</span></span></code></pre></div>
+<p>Look for the partition labeled <code>crypto_LUKS</code> (for example,
+<code>/dev/nvme0n1p3</code> or <code>/dev/sda3</code>). Note this device
+path, as it will be referenced throughout the configuration.</p>
+<h3 id="step-2-enroll-the-yubikey-using-systemd-cryptenroll">Step 2:
+Enroll the YubiKey Using systemd-cryptenroll</h3>
+<p>Modern versions of Ubuntu use <code>systemd-cryptenroll</code> to
+bind hardware security keys directly to a free LUKS keyslot using the
+FIDO2 standard.</p>
+<p>Run the following command to register your YubiKey to the LUKS
+partition (replace <code>/dev/nvme0n1p3</code> with your actual
+partition):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cryptenroll <span class="at">--fido2-device</span><span class="op">=</span>auto /dev/nvme0n1p3</span></code></pre></div>
+<p>To require both user presence (touching the key) and user
+verification (entering the YubiKey's FIDO2 PIN), add the
+<code>--fido2-with-user-verification=true</code> flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemd-cryptenroll <span class="at">--fido2-device</span><span class="op">=</span>auto <span class="at">--fido2-with-user-verification</span><span class="op">=</span>true /dev/nvme0n1p3</span></code></pre></div>
+<p>You will be prompted to enter your existing disk encryption
+passphrase to authorize the addition of the new keyslot, followed by a
+prompt to touch your YubiKey.</p>
+<h3 id="step-3-configure-crypttab">Step 3: Configure crypttab</h3>
+<p>The <code>/etc/crypttab</code> file controls how encrypted block
+devices are unlocked during the early boot process.</p>
+<p>Open the file in a text editor:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/crypttab</span></code></pre></div>
+<p>Locate the entry corresponding to your root partition. It will
+resemble the following:</p>
+<pre class="text"><code>dm_crypt-0 UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx none luks</code></pre>
+<p>Modify the options column (the fourth field) to append
+<code>fido2-device=auto</code>. If you set up a PIN in Step 2, ensure
+the option is present:</p>
+<pre class="text"><code>dm_crypt-0 UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx none luks,fido2-device=auto</code></pre>
+<p>Save the changes and exit the editor.</p>
+<h3 id="step-4-update-the-initial-ram-filesystem-initramfs">Step 4:
+Update the Initial RAM Filesystem (initramfs)</h3>
+<p>For the bootloader and the kernel to utilize FIDO2 drivers prior to
+mounting the root filesystem, the initial RAM disk must be rebuilt.</p>
+<p>Execute:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span> <span class="at">-k</span> all</span></code></pre></div>
+<p>This ensures that the necessary FIDO2 libraries, cryptographic
+modules, and the updated <code>crypttab</code> rules are integrated into
+the boot image.</p>
+<h3 id="step-5-verify-and-test-the-configuration">Step 5: Verify and
+Test the Configuration</h3>
+<p>Reboot the system to test the setup:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>During startup, the system will detect the YubiKey and prompt you to
+touch the physical sensor (and enter the PIN if configured) to decrypt
+the drive. If the YubiKey is not inserted, the system will fall back to
+prompting for your original recovery passphrase after a brief
+timeout.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

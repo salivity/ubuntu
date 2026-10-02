@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up a Mastodon Server on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a Mastodon instance allows you to host an independent, federated social media node on the Fediverse using your own domain. This step-by-step guide outlines the complete process of installing and configuring a production-ready Mastodon server o">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-a-mastodon-server-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up a Mastodon Server on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-a-mastodon-server-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a Mastodon instance allows you to host an independent, federated social media node on the Fediverse using your own domain. This step-by-step guide outlines the complete process of installing and configuring a production-ready Mastodon server o" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-a-mastodon-server-on-ubuntu">How to Set Up a
+Mastodon Server on Ubuntu</h1>
+<p>Setting up a Mastodon instance allows you to host an independent,
+federated social media node on the Fediverse using your own domain. This
+step-by-step guide outlines the complete process of installing and
+configuring a production-ready Mastodon server on an Ubuntu machine. You
+will learn how to prepare the operating system, install system
+dependencies, configure PostgreSQL and Redis, install the Mastodon
+codebase, configure Nginx with SSL encryption, and manage background
+system services.</p>
+<h3 id="1-prerequisites-and-system-preparation">1. Prerequisites and
+System Preparation</h3>
+<p>Before beginning, ensure you have an Ubuntu 22.04 or 24.04 server
+with at least 2 vCPUs and 4 GB of RAM, a non-root user with
+<code>sudo</code> privileges, and a fully qualified domain name (FQDN)
+pointed via DNS A/AAAA records to your server's IP address.</p>
+<p>Update the base system and install the required utility packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> curl wget gnupg apt-transport-https lsb-release ca-certificates</span></code></pre></div>
+<h3 id="2-install-system-dependencies">2. Install System
+Dependencies</h3>
+<p>Mastodon requires Node.js, Ruby, PostgreSQL, Redis, and build
+essentials.</p>
+<h4 id="nodejs-and-yarn">Node.js and Yarn</h4>
+<p>Add the NodeSource repository for Node.js (v20 LTS) and enable
+corepack for Yarn:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://deb.nodesource.com/setup_20.x <span class="kw">|</span> <span class="fu">sudo</span> <span class="at">-E</span> bash <span class="at">-</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nodejs</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> corepack enable</span></code></pre></div>
+<h4 id="system-libraries-and-build-tools">System Libraries and Build
+Tools</h4>
+<p>Install compilation tools, ImageMagick, and libraries needed for
+media processing:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  git-core g++ libpq-dev libxml2-dev libxslt1-dev file <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  ffmpeg imagemagick libidn11-dev libprotobuf-dev protobuf-compiler <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  pkg-config gcc autoconf bison build-essential libssl-dev libyaml-dev <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev</span></code></pre></div>
+<h4 id="postgresql-and-redis">PostgreSQL and Redis</h4>
+<p>Install and enable PostgreSQL and Redis:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> postgresql postgresql-contrib redis-server redis-tools</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> redis-server postgresql</span></code></pre></div>
+<p>Configure PostgreSQL to create a user for Mastodon:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;CREATE USER mastodon CREATEDB;&quot;</span></span></code></pre></div>
+<h3 id="3-create-the-mastodon-system-user-and-install-ruby">3. Create
+the Mastodon System User and Install Ruby</h3>
+<p>Create a dedicated system user named <code>mastodon</code> with no
+shell login privileges:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser <span class="at">--disabled-login</span> mastodon</span></code></pre></div>
+<p>Switch to the <code>mastodon</code> user:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> mastodon</span></code></pre></div>
+<p>Install <code>rbenv</code> and <code>ruby-build</code> to manage the
+Ruby version:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/rbenv/rbenv.git ~/.rbenv</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39;</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;eval &quot;$(rbenv init -)&quot;&#39;</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build</span></code></pre></div>
+<p>Install the Ruby version required by Mastodon (e.g., 3.3.0) and set
+it globally:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rbenv</span> install 3.3.0</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">rbenv</span> global 3.3.0</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gem</span> install bundler <span class="at">--no-document</span></span></code></pre></div>
+<h3 id="4-download-and-configure-mastodon">4. Download and Configure
+Mastodon</h3>
+<p>Clone the latest stable release of the Mastodon repository:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/mastodon/mastodon.git live</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> live</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="va">$(</span><span class="fu">git</span> tag <span class="at">-l</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&#39;rc[0-9]*$&#39;</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-V</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> 1<span class="va">)</span></span></code></pre></div>
+<p>Install Ruby gems and JavaScript packages:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bundle</span> config deployment <span class="st">&#39;true&#39;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bundle</span> config without <span class="st">&#39;development test&#39;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bundle</span> install <span class="at">-j</span><span class="va">$(</span><span class="fu">nproc</span><span class="va">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">yarn</span> install <span class="at">--pure-lockfile</span></span></code></pre></div>
+<p>Run the interactive setup wizard:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">RAILS_ENV</span><span class="op">=</span>production <span class="ex">bundle</span> exec rake mastodon:setup</span></code></pre></div>
+<p>Follow the interactive prompts:</p>
+<ul>
+<li>Enter your domain name.</li>
+<li>Configure single-user or multi-user mode.</li>
+<li>Leave PostgreSQL and Redis connection details as default
+(localhost/ident-based authentication).</li>
+<li>Provide an active SMTP mail server configuration for transactional
+account emails.</li>
+<li>Allow the script to create the database schema and compile the web
+assets.</li>
+<li>Create your initial administrator account when prompted.</li>
+</ul>
+<p>Exit back to your <code>sudo</code> user:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span></span></code></pre></div>
+<h3 id="5-configure-nginx-and-ssl">5. Configure Nginx and SSL</h3>
+<p>Install Nginx and Certbot:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nginx certbot python3-certbot-nginx</span></code></pre></div>
+<p>Copy the Nginx configuration template provided by Mastodon:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /home/mastodon/live/dist/nginx.conf /etc/nginx/sites-available/mastodon</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> /etc/nginx/sites-available/mastodon /etc/nginx/sites-enabled/</span></code></pre></div>
+<p>Open <code>/etc/nginx/sites-available/mastodon</code> in a text
+editor:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nginx/sites-available/mastodon</span></code></pre></div>
+<p>Locate <code>server_name example.com;</code> and replace
+<code>example.com</code> with your actual domain name.</p>
+<p>Obtain an SSL certificate using Certbot:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> certbot <span class="at">--nginx</span> <span class="at">-d</span> yourdomain.com</span></code></pre></div>
+<p>Reload Nginx to apply the configuration:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nginx <span class="at">-t</span> <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> systemctl reload nginx</span></code></pre></div>
+<h3 id="6-set-up-systemd-services">6. Set Up Systemd Services</h3>
+<p>Copy the systemd unit files from the Mastodon directory:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /home/mastodon/live/dist/mastodon<span class="pp">*</span>.service /etc/systemd/system/</span></code></pre></div>
+<p>Reload the systemd daemon, then enable and start all three Mastodon
+services:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> mastodon-web mastodon-sidekiq mastodon-streaming</span></code></pre></div>
+<p>Your Mastodon instance is now running. Navigate to your domain in a
+web browser to log in with the administrator credentials generated
+during setup.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

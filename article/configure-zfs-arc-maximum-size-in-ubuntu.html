@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure ZFS ARC Maximum Size in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to limit the maximum size of the ZFS Adaptive Replacement Cache (ARC) on Ubuntu. By default, OpenZFS on Linux can consume up to 50% of your system's physical memory for caching, which can lead to memory pressure for other services">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-zfs-arc-maximum-size-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure ZFS ARC Maximum Size in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-zfs-arc-maximum-size-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to limit the maximum size of the ZFS Adaptive Replacement Cache (ARC) on Ubuntu. By default, OpenZFS on Linux can consume up to 50% of your system's physical memory for caching, which can lead to memory pressure for other services" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-zfs-arc-maximum-size-in-ubuntu">Configure ZFS ARC
+Maximum Size in Ubuntu</h1>
+<p>This guide explains how to limit the maximum size of the ZFS Adaptive
+Replacement Cache (ARC) on Ubuntu. By default, OpenZFS on Linux can
+consume up to 50% of your system's physical memory for caching, which
+can lead to memory pressure for other services. Below, you will find
+straightforward instructions to calculate the appropriate cache size,
+apply the limit temporarily for immediate effect, and make the
+configuration persistent across reboots.</p>
+<h3 id="step-1-calculate-the-desired-arc-size">Step 1: Calculate the
+Desired ARC Size</h3>
+<p>The ZFS ARC size parameter (<code>zfs_arc_max</code>) is defined in
+bytes. To determine your desired memory limit, multiply the number of
+gigabytes by <span class="math inline">\(1024^3\)</span>
+(1,073,741,824).</p>
+<p>Common sizes in bytes:</p>
+<ul>
+<li><strong>2 GB:</strong> <code>2147483648</code></li>
+<li><strong>4 GB:</strong> <code>4294967296</code></li>
+<li><strong>8 GB:</strong> <code>8589934592</code></li>
+<li><strong>16 GB:</strong> <code>17179869184</code></li>
+</ul>
+<h3 id="step-2-check-current-arc-usage-and-limits">Step 2: Check Current
+ARC Usage and Limits</h3>
+<p>You can view the current maximum ARC setting (<code>c_max</code>) and
+current cache size (<code>c</code>) using the <code>/proc</code>
+filesystem:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;c_min|c_max|size&quot;</span> /proc/spl/kstat/zfs/arcstats</span></code></pre></div>
+<p>Alternatively, run <code>arcstat</code> to see real-time cache
+statistics:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">arcstat</span></span></code></pre></div>
+<h3 id="step-3-apply-the-limit-temporarily-runtime">Step 3: Apply the
+Limit Temporarily (Runtime)</h3>
+<p>To change the ARC maximum limit immediately without rebooting, write
+the new byte value directly into the ZFS kernel module parameter:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> 4294967296 <span class="kw">|</span> <span class="fu">sudo</span> tee /sys/module/zfs/parameters/zfs_arc_max</span></code></pre></div>
+<p><em>(Replace <code>4294967296</code> with your chosen value in
+bytes.)</em></p>
+<p>This command takes effect instantly, and ZFS will begin releasing
+excess memory if the current cache exceeds this threshold. However, this
+change will be lost upon reboot.</p>
+<h3 id="step-4-make-the-configuration-permanent">Step 4: Make the
+Configuration Permanent</h3>
+<p>To ensure the new limit persists across system reboots, configure the
+ZFS module options via <code>modprobe.d</code>.</p>
+<ol type="1">
+<li>Create or edit the ZFS configuration file:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/zfs.conf</span></code></pre></div>
+<ol start="2" type="1">
+<li>Add the following line to define the maximum limit:</li>
+</ol>
+<pre class="text"><code>options zfs zfs_arc_max=4294967296</code></pre>
+<p><em>(Replace <code>4294967296</code> with your preferred
+value.)</em></p>
+<ol start="3" type="1">
+<li><p>Save the file and exit the editor (in nano, press
+<code>CTRL+O</code>, <code>Enter</code>, then
+<code>CTRL+X</code>).</p></li>
+<li><p>Update your initramfs image to ensure the setting applies early
+during the boot process:</p></li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span> <span class="at">-k</span> all</span></code></pre></div>
+<h3 id="step-5-verify-the-persistent-setting">Step 5: Verify the
+Persistent Setting</h3>
+<p>To confirm that the setting is applied correctly, check the value
+directly from the module parameter:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/module/zfs/parameters/zfs_arc_max</span></code></pre></div>
+<p>The output should match the exact number of bytes specified in your
+configuration.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

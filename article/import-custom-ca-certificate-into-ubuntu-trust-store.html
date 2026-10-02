@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Custom CA Certificate into Ubuntu Trust Store - ubuntu</title>
+    <meta name="description" content="Importing a custom internal Certificate Authority (CA) into Ubuntu's system-wide trust store allows your system and its command-line utilities to natively validate internal SSL/TLS certificates without throwing security warnings. This guide walks you thr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/import-custom-ca-certificate-into-ubuntu-trust-store">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Import Custom CA Certificate into Ubuntu Trust Store - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/import-custom-ca-certificate-into-ubuntu-trust-store" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Importing a custom internal Certificate Authority (CA) into Ubuntu's system-wide trust store allows your system and its command-line utilities to natively validate internal SSL/TLS certificates without throwing security warnings. This guide walks you thr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="import-custom-ca-certificate-into-ubuntu-trust-store">Import
+Custom CA Certificate into Ubuntu Trust Store</h1>
+<p>Importing a custom internal Certificate Authority (CA) into Ubuntu's
+system-wide trust store allows your system and its command-line
+utilities to natively validate internal SSL/TLS certificates without
+throwing security warnings. This guide walks you through the
+straightforward process of preparing your certificate file, copying it
+to the appropriate system directory, and updating Ubuntu's CA
+certificate bundle so all applications recognize your internal
+authority.</p>
+<h3 id="1-format-the-certificate">1. Format the Certificate</h3>
+<p>Ubuntu requires CA certificates to be in PEM format with a
+<code>.crt</code> extension. If your certificate is in DER format or
+uses the <code>.cer</code> or <code>.pem</code> extension, you must
+prepare it accordingly.</p>
+<p>To convert a DER-encoded certificate to PEM format:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> x509 <span class="at">-inform</span> DER <span class="at">-in</span> internalCA.cer <span class="at">-out</span> internalCA.crt</span></code></pre></div>
+<p>If your file is already PEM-encoded but has a <code>.pem</code>
+extension, simply rename it to <code>.crt</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> internalCA.pem internalCA.crt</span></code></pre></div>
+<h3 id="2-copy-the-certificate-to-the-system-store">2. Copy the
+Certificate to the System Store</h3>
+<p>Ubuntu uses the <code>/usr/local/share/ca-certificates/</code>
+directory for local and custom root certificates. Create a subdirectory
+to organize your custom certificates, or copy the file directly:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp internalCA.crt /usr/local/share/ca-certificates/</span></code></pre></div>
+<p>Ensure the file permissions allow read access:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 644 /usr/local/share/ca-certificates/internalCA.crt</span></code></pre></div>
+<h3 id="3-update-the-ca-trust-store">3. Update the CA Trust Store</h3>
+<p>Run the <code>update-ca-certificates</code> command to read the
+directory, generate symbolic links, and append your certificate to
+<code>/etc/ssl/certs/ca-certificates.crt</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-ca-certificates</span></code></pre></div>
+<p>If successful, the console output will display:</p>
+<pre class="text"><code>Updating certificates in /etc/ssl/certs...
+1 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.</code></pre>
+<h3 id="4-verify-the-import">4. Verify the Import</h3>
+<p>Verify that the certificate has been successfully added to the
+system-wide store by querying the compiled certificate file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;Your Certificate Common Name&quot;</span> /etc/ssl/certs/ca-certificates.crt</span></code></pre></div>
+<p>Alternatively, test a secure connection against an internal service
+using <code>curl</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://internal.example.com</span></code></pre></div>
+<p>If configured correctly, the request will complete without displaying
+<code>SSL certificate problem: unable to get local issuer certificate</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

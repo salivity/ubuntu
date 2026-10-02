@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuning Ubuntu Disk Caching with dirty_ratio - ubuntu</title>
+    <meta name="description" content="The /proc/sys/vm/dirtyratio file is a critical Linux kernel parameter used to manage memory and disk I/O performance in Ubuntu. This article explains the purpose of dirtyratio, how it controls the caching of unwritten data in RAM, its impact on system re">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/tuning-ubuntu-disk-caching-with-dirty-ratio">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tuning Ubuntu Disk Caching with dirty_ratio - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/tuning-ubuntu-disk-caching-with-dirty-ratio" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /proc/sys/vm/dirtyratio file is a critical Linux kernel parameter used to manage memory and disk I/O performance in Ubuntu. This article explains the purpose of dirtyratio, how it controls the caching of unwritten data in RAM, its impact on system re" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="tuning-ubuntu-disk-caching-with-dirty_ratio">Tuning Ubuntu Disk
+Caching with dirty_ratio</h1>
+<p>The <code>/proc/sys/vm/dirty_ratio</code> file is a critical Linux
+kernel parameter used to manage memory and disk I/O performance in
+Ubuntu. This article explains the purpose of <code>dirty_ratio</code>,
+how it controls the caching of unwritten data in RAM, its impact on
+system responsiveness, and how to safely adjust its value to optimize
+disk caching for your workload.</p>
+<p>When applications perform write operations on Ubuntu, the operating
+system does not immediately write the changes to physical storage.
+Instead, it writes the data to system RAM as "dirty pages" (modified
+data not yet committed to disk) to provide fast write speeds. The
+<code>/proc/sys/vm/dirty_ratio</code> parameter defines the absolute
+maximum percentage of total system memory that can be occupied by these
+dirty pages.</p>
+<p>Once the volume of dirty memory hits the threshold defined in
+<code>dirty_ratio</code>, the kernel forces any application generating
+new write requests to pause and write its data directly to disk. This is
+known as synchronous writeback. Unlike
+<code>dirty_background_ratio</code>—which wakes background kernel
+threads to flush data silently while applications continue
+running—exceeding <code>dirty_ratio</code> directly blocks active
+processes until memory usage drops below the limit.</p>
+<p>Setting an appropriate value involves balancing write throughput
+against system latency:</p>
+<ul>
+<li><strong>High values (e.g., 20–30%):</strong> Allow larger bursts of
+writes to be absorbed quickly in RAM, boosting throughput for
+write-heavy batch operations. However, this creates a risk of massive
+I/O bottlenecks and temporary system freezes when the kernel finally
+flushes gigabytes of data to slower storage devices. It also increases
+the window for potential data loss during sudden power outages or
+crashes.</li>
+<li><strong>Low values (e.g., 5–10%):</strong> Prevent large build-ups
+of unwritten data, ensuring smoother performance, lower disk latency,
+and reduced stalls on desktop systems or servers with fast, continuous
+writes. The tradeoff is lower burst-write speeds, as storage writes
+happen more frequently.</li>
+</ul>
+<p>To view the current <code>dirty_ratio</code> on an Ubuntu system,
+run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/sys/vm/dirty_ratio</span></code></pre></div>
+<p>Alternatively:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> vm.dirty_ratio</span></code></pre></div>
+<p>To test a new value temporarily, write directly to the interface:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-w</span> vm.dirty_ratio=10</span></code></pre></div>
+<p>To make the setting permanent across reboots, add or modify the
+following line in <code>/etc/sysctl.conf</code> or a dedicated file
+inside <code>/etc/sysctl.d/</code>:</p>
+<pre class="text"><code>vm.dirty_ratio = 10</code></pre>
+<p>Apply the permanent changes immediately by running
+<code>sudo sysctl -p</code>. Proper configuration of
+<code>dirty_ratio</code> prevents I/O starvation and ensures that
+write-heavy processes do not degrade overall system responsiveness.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

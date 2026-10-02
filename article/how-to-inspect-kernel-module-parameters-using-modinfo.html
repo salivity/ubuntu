@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Inspect Kernel Module Parameters Using modinfo - ubuntu</title>
+    <meta name="description" content="This guide explains how to inspect the configurable parameters of Linux kernel modules in Ubuntu using the modinfo command. By using specific flags, you can quickly list available parameters, their descriptions, and their accepted data types directly fro">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-inspect-kernel-module-parameters-using-modinfo">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Inspect Kernel Module Parameters Using modinfo - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-inspect-kernel-module-parameters-using-modinfo" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to inspect the configurable parameters of Linux kernel modules in Ubuntu using the modinfo command. By using specific flags, you can quickly list available parameters, their descriptions, and their accepted data types directly fro" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-inspect-kernel-module-parameters-using-modinfo">How to
+Inspect Kernel Module Parameters Using modinfo</h1>
+<p>This guide explains how to inspect the configurable parameters of
+Linux kernel modules in Ubuntu using the <code>modinfo</code> command.
+By using specific flags, you can quickly list available parameters,
+their descriptions, and their accepted data types directly from the
+module file, as well as locate the currently active values on a running
+system.</p>
+<h3 id="displaying-available-parameters-with-modinfo">Displaying
+Available Parameters with modinfo</h3>
+<p>To inspect the available parameters for a specific kernel module, use
+the <code>modinfo</code> command combined with the <code>-p</code> (or
+<code>--parameters</code>) flag:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">modinfo</span> <span class="at">-p</span> <span class="op">&lt;</span>module_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;module_name&gt;</code> with the name of the module
+you want to examine.</p>
+<p>For example, to view the parameters for the standard Intel Wi-Fi
+module (<code>iwlwifi</code>), run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">modinfo</span> <span class="at">-p</span> iwlwifi</span></code></pre></div>
+<p>The output displays each parameter name followed by its expected data
+type (such as <code>int</code>, <code>uint</code>, or <code>bool</code>)
+and a brief description of what the setting controls:</p>
+<pre class="text"><code>power_save:enable-global power save (default: true) (bool)
+power_level:default power level (1-5, 0 = default) (int)
+11n_disable:disable 11n functionality, 1=disable, 2=disable aggregations (uint)</code></pre>
+<p>If you omit the <code>-p</code> flag and run
+<code>modinfo &lt;module_name&gt;</code>, the utility will output the
+entire metadata record for the module, including its filename, license,
+author, aliases, dependencies, and parameters labeled under the
+<code>parm:</code> fields.</p>
+<h3 id="inspecting-parameters-on-currently-loaded-modules">Inspecting
+Parameters on Currently Loaded Modules</h3>
+<p>The <code>modinfo -p</code> command reads the module file directly
+from <code>/lib/modules/$(uname -r)/</code> to show what parameters can
+be set, but it does not display the values currently active in the
+running kernel.</p>
+<p>To check which modules are currently loaded in Ubuntu, first run:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lsmod</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span>module_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Once confirmed that the module is loaded, view the active runtime
+value of its parameters through the <code>sysfs</code> virtual
+filesystem located at <code>/sys/module/</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/module/<span class="op">&lt;</span>module_name<span class="op">&gt;</span>/parameters/<span class="op">&lt;</span>parameter_name<span class="op">&gt;</span></span></code></pre></div>
+<p>To list all current parameter values for a loaded module at once,
+run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> grep <span class="at">-H</span> <span class="st">&#39;&#39;</span> /sys/module/<span class="op">&lt;</span>module_name<span class="op">&gt;</span>/parameters/<span class="pp">*</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

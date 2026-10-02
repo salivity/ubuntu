@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set CPU Governor to Performance in Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to configure the CPU frequency scaling governor in Ubuntu to prioritize system performance over energy efficiency. By default, Ubuntu often utilizes governors like powersave or schedutil to conserve battery and reduce heat. Swit">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-cpu-governor-to-performance-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set CPU Governor to Performance in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-cpu-governor-to-performance-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to configure the CPU frequency scaling governor in Ubuntu to prioritize system performance over energy efficiency. By default, Ubuntu often utilizes governors like powersave or schedutil to conserve battery and reduce heat. Swit" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-cpu-governor-to-performance-in-ubuntu">How to Set CPU
+Governor to Performance in Ubuntu</h1>
+<p>This article explains how to configure the CPU frequency scaling
+governor in Ubuntu to prioritize system performance over energy
+efficiency. By default, Ubuntu often utilizes governors like
+<code>powersave</code> or <code>schedutil</code> to conserve battery and
+reduce heat. Switching to the <code>performance</code> governor forces
+the CPU cores to run at their maximum clock speeds, reducing execution
+latency and maximizing throughput for demanding workloads. The steps
+below cover checking current settings, switching governors immediately,
+and ensuring the configuration persists across system reboots.</p>
+<h2 id="1-check-available-and-active-governors">1. Check Available and
+Active Governors</h2>
+<p>Before making any changes, verify what governor is currently running
+and whether the <code>performance</code> governor is supported on your
+hardware.</p>
+<p>Open a terminal and view the active governor across all CPU
+cores:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/devices/system/cpu/cpu<span class="pp">*</span>/cpufreq/scaling_governor</span></code></pre></div>
+<p>Next, check which governors are supported by your kernel driver:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors</span></code></pre></div>
+<p>You should see options such as <code>performance</code>,
+<code>powersave</code>, <code>schedutil</code>, or
+<code>ondemand</code>.</p>
+<h2 id="2-install-linux-power-management-tools">2. Install Linux Power
+Management Tools</h2>
+<p>The easiest and most reliable tool for managing CPU scaling on Ubuntu
+is <code>cpupower</code>, which is part of the standard Linux kernel
+tools.</p>
+<p>Install the required packages for your current kernel:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install linux-tools-common linux-tools-generic linux-tools-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span></span></code></pre></div>
+<h2 id="3-switch-to-the-performance-governor-temporary">3. Switch to the
+Performance Governor (Temporary)</h2>
+<p>To set all CPU cores to the <code>performance</code> governor
+immediately, execute:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cpupower frequency-set <span class="at">-g</span> performance</span></code></pre></div>
+<p>Alternatively, if you prefer not to install extra packages, you can
+write directly to the kernel sysfs interface:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> performance <span class="kw">|</span> <span class="fu">sudo</span> tee /sys/devices/system/cpu/cpu<span class="pp">*</span>/cpufreq/scaling_governor</span></code></pre></div>
+<p>This change takes effect immediately, but it will revert back to the
+default governor upon restarting your computer.</p>
+<h2 id="4-make-the-performance-governor-persistent">4. Make the
+Performance Governor Persistent</h2>
+<p>To ensure the system automatically applies the
+<code>performance</code> governor on every boot, create a dedicated
+systemd service.</p>
+<h3 id="step-1-create-a-systemd-service-file">Step 1: Create a Systemd
+Service File</h3>
+<p>Create a new service file using a text editor such as
+<code>nano</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/cpu-governor-performance.service</span></code></pre></div>
+<h3 id="step-2-add-the-service-configuration">Step 2: Add the Service
+Configuration</h3>
+<p>Paste the following configuration into the file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Set CPU governor to performance</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">syslog.target</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">oneshot</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/usr/bin/cpupower frequency-set -g performance</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="dt">RemainAfterExit</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div>
+<p>Save the file and exit the editor (in <code>nano</code>, press
+<code>Ctrl+O</code>, <code>Enter</code>, and then
+<code>Ctrl+X</code>).</p>
+<h3 id="step-3-enable-and-start-the-service">Step 3: Enable and Start
+the Service</h3>
+<p>Reload the systemd daemon to recognize the new file, enable it to run
+at boot, and start it:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable cpu-governor-performance.service</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start cpu-governor-performance.service</span></code></pre></div>
+<h2 id="5-verify-the-changes">5. Verify the Changes</h2>
+<p>Confirm that the service is running and all cores are successfully
+operating under the <code>performance</code> governor:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cpupower</span> frequency-info</span></code></pre></div>
+<p>Look for the line displaying <code>current CPU frequency</code> and
+ensure the active governor is listed as <code>performance</code>. The
+system will now maintain peak clock rates under all operating
+conditions.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

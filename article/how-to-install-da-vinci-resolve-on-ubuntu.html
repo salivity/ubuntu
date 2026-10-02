@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install DaVinci Resolve on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for installing Blackmagic Design's DaVinci Resolve on an Ubuntu workstation. You will learn how to verify hardware requirements, install essential system dependencies and GPU drivers, unpack the official">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-da-vinci-resolve-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install DaVinci Resolve on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-da-vinci-resolve-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for installing Blackmagic Design's DaVinci Resolve on an Ubuntu workstation. You will learn how to verify hardware requirements, install essential system dependencies and GPU drivers, unpack the official" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-davinci-resolve-on-ubuntu">How to Install DaVinci
+Resolve on Ubuntu</h1>
+<p>This guide provides a straightforward walkthrough for installing
+Blackmagic Design's DaVinci Resolve on an Ubuntu workstation. You will
+learn how to verify hardware requirements, install essential system
+dependencies and GPU drivers, unpack the official installer, and resolve
+common runtime library conflicts to ensure the software runs
+smoothly.</p>
+<h3 id="1-verify-gpu-drivers-and-openclcuda-support">1. Verify GPU
+Drivers and OpenCL/CUDA Support</h3>
+<p>DaVinci Resolve strictly requires a dedicated GPU with proprietary
+drivers supporting OpenCL or CUDA.</p>
+<p>For <strong>NVIDIA</strong> users, ensure the proprietary driver and
+CUDA toolkit are installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nvidia-driver-535 nvidia-cuda-toolkit</span></code></pre></div>
+<p>For <strong>AMD</strong> users, install the proprietary AMDGPU-PRO
+driver with OpenCL support following AMD's official ROCm/AMDGPU
+deployment instructions for your specific GPU architecture.</p>
+<p>Reboot your system after driver installation to ensure all modules
+load properly:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<h3 id="2-install-required-system-dependencies">2. Install Required
+System Dependencies</h3>
+<p>DaVinci Resolve relies on several legacy libraries that may not be
+present on modern Ubuntu installations. Install them using the
+terminal:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libapr1 libaprutil1 libasound2 libgl1-mesa-glx libxcb-xinerama0 libxcb-shape0 libxcb-render0 libglu1-mesa</span></code></pre></div>
+<h3 id="3-download-and-extract-the-installer">3. Download and Extract
+the Installer</h3>
+<ol type="1">
+<li>Navigate to the official Blackmagic Design website and download the
+Linux version of DaVinci Resolve (it will download as a
+<code>.zip</code> archive).</li>
+<li>Open your terminal, navigate to your <code>Downloads</code>
+directory, and extract the installer:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> DaVinci_Resolve_<span class="pp">*</span>_Linux.zip</span></code></pre></div>
+<ol start="3" type="1">
+<li>Make the extracted <code>.run</code> file executable:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x DaVinci_Resolve_<span class="pp">*</span>_Linux.run</span></code></pre></div>
+<h3 id="4-run-the-installation-script">4. Run the Installation
+Script</h3>
+<p>Execute the installer with root privileges:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ./DaVinci_Resolve_<span class="pp">*</span>_Linux.run <span class="at">-i</span></span></code></pre></div>
+<p>Follow the on-screen graphical prompts to complete the installation.
+The software will be installed into the <code>/opt/resolve/</code>
+directory.</p>
+<h3 id="5-fix-common-library-conflicts-if-needed">5. Fix Common Library
+Conflicts (If Needed)</h3>
+<p>Modern Ubuntu versions often ship with newer versions of certain
+libraries (such as <code>glib</code>) that conflict with the bundled
+libraries packaged inside DaVinci Resolve. If the application fails to
+launch, move the conflicting bundled libraries out of the way so Resolve
+uses your system's versions:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /opt/resolve/libs</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir disabled-libraries</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv libglib-2.0.so<span class="pp">*</span> disabled-libraries/</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv libgio-2.0.so<span class="pp">*</span> disabled-libraries/</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv libgmodule-2.0.so<span class="pp">*</span> disabled-libraries/</span></code></pre></div>
+<h3 id="6-launch-davinci-resolve">6. Launch DaVinci Resolve</h3>
+<p>Once the installation is complete and library conflicts are
+addressed, you can launch DaVinci Resolve from your Ubuntu application
+menu or by running the following command in the terminal:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/resolve/bin/resolve</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

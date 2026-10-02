@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup HA NFS with DRBD and Pacemaker on Ubuntu - ubuntu</title>
+    <meta name="description" content="High Availability (HA) NFS eliminates single points of failure in shared storage environments by combining continuous data replication with automated cluster failover. This guide details the process of building an active/passive HA NFS cluster on Ubuntu">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-ha-nfs-with-drbd-and-pacemaker-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup HA NFS with DRBD and Pacemaker on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-ha-nfs-with-drbd-and-pacemaker-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="High Availability (HA) NFS eliminates single points of failure in shared storage environments by combining continuous data replication with automated cluster failover. This guide details the process of building an active/passive HA NFS cluster on Ubuntu" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-ha-nfs-with-drbd-and-pacemaker-on-ubuntu">Setup HA NFS
+with DRBD and Pacemaker on Ubuntu</h1>
+<p>High Availability (HA) NFS eliminates single points of failure in
+shared storage environments by combining continuous data replication
+with automated cluster failover. This guide details the process of
+building an active/passive HA NFS cluster on Ubuntu using Distributed
+Replicated Block Device (DRBD) for block-level replication, Corosync for
+cluster membership, and Pacemaker to manage cluster resources, including
+the virtual IP and file-locking daemons.</p>
+<h3 id="1-prerequisites-and-network-preparation">1. Prerequisites and
+Network Preparation</h3>
+<p>Deploy two identical Ubuntu servers (e.g., <code>node1</code> with IP
+<code>192.168.1.11</code> and <code>node2</code> with IP
+<code>192.168.1.12</code>). Ensure each node has a secondary,
+unformatted disk or partition (e.g., <code>/dev/sdb</code>) dedicated to
+DRBD.</p>
+<p>Configure <code>/etc/hosts</code> identically on both nodes:</p>
+<pre class="text"><code>192.168.1.11 node1
+192.168.1.12 node2
+192.168.1.100 nfs-vip</code></pre>
+<h3 id="2-install-and-configure-drbd">2. Install and Configure DRBD</h3>
+<p>Install the DRBD utilities on both nodes:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> drbd-utils</span></code></pre></div>
+<p>Create the resource configuration file
+<code>/etc/drbd.d/r0.res</code> on both nodes:</p>
+<pre class="text"><code>resource r0 {
+    protocol C;
+    startup {
+        wfc-timeout 15;
+        degr-wfc-timeout 60;
+    }
+    net {
+        cram-hmac-alg sha1;
+        shared-secret &quot;ClusterSecretPass&quot;;
+    }
+    on node1 {
+        device /dev/drbd0;
+        disk /dev/sdb;
+        address 192.168.1.11:7788;
+        meta-disk internal;
+    }
+    on node2 {
+        device /dev/drbd0;
+        disk /dev/sdb;
+        address 192.168.1.12:7788;
+        meta-disk internal;
+    }
+}</code></pre>
+<p>Initialize the metadata and bring up the device on
+<strong>both</strong> nodes:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> drbdadm create-md r0</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> drbdadm up r0</span></code></pre></div>
+<p>On <strong>node1 only</strong>, force the node to be primary and
+format the device:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> drbdadm primary <span class="at">--force</span> r0</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkfs.ext4 /dev/drbd0</span></code></pre></div>
+<p>Create a mount point on both nodes:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /srv/nfs_share</span></code></pre></div>
+<h3 id="3-install-nfs-utilities">3. Install NFS Utilities</h3>
+<p>Install the NFS server packages on both nodes. Once installed,
+disable systemd from managing the service at boot, as Pacemaker must
+handle start/stop routines:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nfs-kernel-server</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop nfs-server</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable nfs-server</span></code></pre></div>
+<p>Create the export directory configuration in
+<code>/etc/exports</code> identically on both nodes:</p>
+<pre class="text"><code>/srv/nfs_share 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)</code></pre>
+<h3 id="4-install-and-initialize-pacemaker-and-corosync">4. Install and
+Initialize Pacemaker and Corosync</h3>
+<p>Install Pacemaker, Corosync, and PCS on both nodes:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> pacemaker corosync pcs</span></code></pre></div>
+<p>Set a password for the cluster system account
+(<code>hacluster</code>) on both nodes:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;hacluster:StrongClusterPassword&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> chpasswd</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> pcsd</span></code></pre></div>
+<p>Authenticate the cluster from <strong>node1</strong>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs host auth node1 node2 <span class="at">-u</span> hacluster <span class="at">-p</span> StrongClusterPassword</span></code></pre></div>
+<p>Create and start the cluster on <strong>node1</strong>:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster setup ha_cluster node1 node2</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster start <span class="at">--all</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster enable <span class="at">--all</span></span></code></pre></div>
+<p>Disable STONITH (for testing environments without fencing hardware)
+and adjust quorum handling for a two-node architecture:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs property set stonith-enabled=false</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs property set no-quorum-policy=ignore</span></code></pre></div>
+<h3 id="5-configure-pacemaker-cluster-resources">5. Configure Pacemaker
+Cluster Resources</h3>
+<p>All cluster resources are managed via PCS on
+<strong>node1</strong>.</p>
+<h4 id="a-drbd-resource">A. DRBD Resource</h4>
+<p>Configure DRBD as a promotable resource:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create drbd_data ocf:linbit:drbd drbd_resource=r0 op monitor interval=15s</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource promotable drbd_data promoted-max=1 promoted-node-max=1 clone-max=2 clone-node-max=1 notify=true</span></code></pre></div>
+<h4 id="b-filesystem-resource">B. Filesystem Resource</h4>
+<p>Define the filesystem mount for <code>/dev/drbd0</code>:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create nfs_fs ocf:heartbeat:Filesystem <span class="dt">\</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    device=<span class="st">&quot;/dev/drbd0&quot;</span> directory=<span class="st">&quot;/srv/nfs_share&quot;</span> fstype=<span class="st">&quot;ext4&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    op monitor interval=20s</span></code></pre></div>
+<h4 id="c-virtual-ip-and-nfs-daemons">C. Virtual IP and NFS Daemons</h4>
+<p>Create the Virtual IP, NFS daemon, and NFS export resources:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create virtual_ip ocf:heartbeat:IPaddr2 <span class="dt">\</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    ip=192.168.1.100 cidr_netmask=24 op monitor interval=10s</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create nfs_daemon ocf:heartbeat:nfsserver <span class="dt">\</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    nfs_shared_infodir=<span class="st">&quot;/srv/nfs_share/nfsinfo&quot;</span> op monitor interval=30s</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create nfs_export ocf:heartbeat:exportfs <span class="dt">\</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    clientspec=<span class="st">&quot;192.168.1.0/24&quot;</span> options=<span class="st">&quot;rw,sync,no_root_squash&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    directory=<span class="st">&quot;/srv/nfs_share&quot;</span> fsid=1 op monitor interval=10s</span></code></pre></div>
+<h4 id="d-resource-grouping-and-ordering">D. Resource Grouping and
+Ordering</h4>
+<p>Group the dependent services to ensure they migrate together:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource group add nfs_group virtual_ip nfs_fs nfs_daemon nfs_export</span></code></pre></div>
+<p>Enforce colocation and start ordering relative to the DRBD master
+role:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs constraint colocation add nfs_group with master drbd_data-clone</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs constraint order promote drbd_data-clone then start nfs_group</span></code></pre></div>
+<h3 id="6-verify-and-test-failover">6. Verify and Test Failover</h3>
+<p>Check the cluster health:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs status</span></code></pre></div>
+<p>Verify that <code>drbd_data-clone</code> is Master on one node, and
+that <code>virtual_ip</code>, <code>nfs_fs</code>,
+<code>nfs_daemon</code>, and <code>nfs_export</code> are running on the
+same node.</p>
+<p>To test automatic failover, simulate a node failure by placing the
+active node into standby:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs node standby node1</span></code></pre></div>
+<p>Run <code>pcs status</code> to verify that <code>node2</code> assumes
+the master role and starts all NFS resources. Once verified, return the
+node to the cluster:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs node unstandby node1</span></code></pre></div>
+<p>Clients can now mount the exported share redundantly using the
+Virtual IP:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">-t</span> nfs 192.168.1.100:/srv/nfs_share /mnt</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

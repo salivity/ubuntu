@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install and Configure Cockpit on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="This guide explains how to install and configure Cockpit, an intuitive web-based management interface, on an Ubuntu server. You will learn how to prepare your system, install the necessary Cockpit packages using the default repositories, configure the UF">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-and-configure-cockpit-on-ubuntu-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install and Configure Cockpit on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-and-configure-cockpit-on-ubuntu-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to install and configure Cockpit, an intuitive web-based management interface, on an Ubuntu server. You will learn how to prepare your system, install the necessary Cockpit packages using the default repositories, configure the UF" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-and-configure-cockpit-on-ubuntu-server">Install and
+Configure Cockpit on Ubuntu Server</h1>
+<p>This guide explains how to install and configure Cockpit, an
+intuitive web-based management interface, on an Ubuntu server. You will
+learn how to prepare your system, install the necessary Cockpit packages
+using the default repositories, configure the UFW firewall to allow
+secure web traffic, and access the web console to monitor resources and
+manage system services remotely.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>A server running Ubuntu 20.04, 22.04, or 24.04 LTS.</li>
+<li>A user account with <code>sudo</code> administrative
+privileges.</li>
+<li>Access to a terminal session or SSH connection.</li>
+</ul>
+<hr />
+<h3 id="step-1-update-the-system-packages">Step 1: Update the System
+Packages</h3>
+<p>Ensure your package index is up to date before installing new
+software. Open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<hr />
+<h3 id="step-2-install-cockpit">Step 2: Install Cockpit</h3>
+<p>Cockpit is available in the official Ubuntu repositories. Install the
+base package with the following command:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cockpit <span class="at">-y</span></span></code></pre></div>
+<hr />
+<h3 id="step-3-enable-and-start-the-cockpit-service">Step 3: Enable and
+Start the Cockpit Service</h3>
+<p>Cockpit relies on systemd socket activation to run. Start and enable
+the Cockpit socket so it automatically loads upon system reboot:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start cockpit.socket</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable cockpit.socket</span></code></pre></div>
+<p>Verify that the socket is active:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status cockpit.socket</span></code></pre></div>
+<p>You should see an output indicating the status is
+<code>active (listening)</code>.</p>
+<hr />
+<h3 id="step-4-configure-the-firewall">Step 4: Configure the
+Firewall</h3>
+<p>Cockpit communicates over port <code>9090</code> via HTTPS. If you
+have the Uncomplicated Firewall (UFW) enabled, you must open this port
+to allow incoming connections:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 9090/tcp</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div>
+<p>Verify that the rule has been added:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status</span></code></pre></div>
+<hr />
+<h3 id="step-5-access-the-cockpit-web-interface">Step 5: Access the
+Cockpit Web Interface</h3>
+<ol type="1">
+<li>Open a web browser on your local computer.</li>
+<li>Navigate to your server's IP address or domain name followed by port
+9090:
+<pre class="text"><code>https://your_server_ip:9090</code></pre></li>
+<li>Your browser may display an SSL warning because Cockpit generates a
+self-signed certificate by default. Proceed past the warning (e.g.,
+click "Advanced" and then "Proceed to site").</li>
+<li>Enter your Ubuntu user credentials at the login prompt. Check the
+box to reuse your password for administrative tasks if prompted.</li>
+</ol>
+<hr />
+<h3 id="step-6-install-additional-cockpit-modules-optional">Step 6:
+Install Additional Cockpit Modules (Optional)</h3>
+<p>Cockpit's functionality can be extended using modular plugins for
+storage management, network configuration, and virtual machine
+management:</p>
+<ul>
+<li><strong>Storage Management:</strong>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cockpit-storaged <span class="at">-y</span></span></code></pre></div></li>
+<li><strong>Virtual Machine Management (KVM/QEMU):</strong>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cockpit-machines <span class="at">-y</span></span></code></pre></div></li>
+<li><strong>Container Management (Podman):</strong>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cockpit-podman <span class="at">-y</span></span></code></pre></div></li>
+</ul>
+<p>After installing any extension, refresh your browser session to
+access the new tabs in the left sidebar menu.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

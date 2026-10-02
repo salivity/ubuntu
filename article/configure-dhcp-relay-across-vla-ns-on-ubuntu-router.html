@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure DHCP Relay Across VLANs on Ubuntu Router - ubuntu</title>
+    <meta name="description" content="A DHCP relay agent allows devices residing on separated VLANs or subnets to obtain dynamic IP configurations from a centralized DHCP server. By default, DHCP broadcast requests cannot cross network boundaries created by VLANs. This guide explains how to">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-dhcp-relay-across-vla-ns-on-ubuntu-router">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure DHCP Relay Across VLANs on Ubuntu Router - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-dhcp-relay-across-vla-ns-on-ubuntu-router" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A DHCP relay agent allows devices residing on separated VLANs or subnets to obtain dynamic IP configurations from a centralized DHCP server. By default, DHCP broadcast requests cannot cross network boundaries created by VLANs. This guide explains how to" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-dhcp-relay-across-vlans-on-ubuntu-router">Configure
+DHCP Relay Across VLANs on Ubuntu Router</h1>
+<p>A DHCP relay agent allows devices residing on separated VLANs or
+subnets to obtain dynamic IP configurations from a centralized DHCP
+server. By default, DHCP broadcast requests cannot cross network
+boundaries created by VLANs. This guide explains how to install,
+configure, and verify the <code>isc-dhcp-relay</code> service
+(<code>dhcrelay</code>) on an Ubuntu router to forward DHCP broadcasts
+as unicast traffic to a central server across multiple network
+interfaces.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>An Ubuntu system configured as a router with at least two network or
+VLAN interfaces (e.g., <code>vlan10</code>, <code>vlan20</code>, or
+interface sub-interfaces like <code>eth0.10</code>).</li>
+<li>A functioning DHCP server reachable by the Ubuntu router with
+defined address pools for each VLAN subnet.</li>
+<li>Root or <code>sudo</code> privileges.</li>
+</ul>
+<h3 id="step-1-enable-ipv4-packet-forwarding">Step 1: Enable IPv4 Packet
+Forwarding</h3>
+<p>To ensure your Ubuntu machine can route traffic between subnets,
+enable kernel packet forwarding:</p>
+<ol type="1">
+<li>Open <code>/etc/sysctl.conf</code> in a text editor:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div></li>
+<li>Locate and uncomment or add the following line:
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre></li>
+<li>Apply the changes immediately:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-2-install-the-dhcp-relay-package">Step 2: Install the DHCP
+Relay Package</h3>
+<p>Ubuntu provides the <code>dhcrelay</code> utility through the
+<code>isc-dhcp-relay</code> package. Install it via
+<code>apt</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install isc-dhcp-relay <span class="at">-y</span></span></code></pre></div>
+<p>During installation, an interactive prompt will ask for DHCP server
+IP addresses and interfaces. You can leave these blank and configure
+them manually in the configuration file in the next step.</p>
+<h3 id="step-3-configure-isc-dhcp-relay">Step 3: Configure
+isc-dhcp-relay</h3>
+<p>Open the relay configuration file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/isc-dhcp-relay</span></code></pre></div>
+<p>Set the appropriate values for your network topology:</p>
+<ul>
+<li><strong><code>SERVERS</code></strong>: The IP address of your
+central DHCP server.</li>
+<li><strong><code>INTERFACES</code></strong>: A space-separated list of
+interfaces on which <code>dhcrelay</code> should listen and forward
+traffic. This must include both the client-facing VLAN interfaces and
+the upstream interface connecting to the DHCP server.</li>
+<li><strong><code>OPTIONS</code></strong>: Any additional flags (can
+typically be left empty).</li>
+</ul>
+<p>Example configuration:</p>
+<pre class="text"><code># What servers should the DHCP relay forward requests to?
+SERVERS=&quot;192.168.1.100&quot;
+
+# On what interfaces should the DHCP relay forward requests to?
+INTERFACES=&quot;vlan10 vlan20 eth0&quot;
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=&quot;&quot;</code></pre>
+<p>Save the file and exit the editor.</p>
+<h3 id="step-4-configure-firewall-rules">Step 4: Configure Firewall
+Rules</h3>
+<p>DHCP relies on UDP ports 67 (server/relay) and 68 (client). If you
+are running UFW or <code>iptables</code>, allow this traffic across your
+interfaces:</p>
+<p>Using UFW:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 67/udp</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 68/udp</span></code></pre></div>
+<p>Using <code>iptables</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables <span class="at">-A</span> INPUT <span class="at">-p</span> udp <span class="at">--dport</span> 67:68 <span class="at">--sport</span> 67:68 <span class="at">-j</span> ACCEPT</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables <span class="at">-A</span> FORWARD <span class="at">-p</span> udp <span class="at">--dport</span> 67:68 <span class="at">--sport</span> 67:68 <span class="at">-j</span> ACCEPT</span></code></pre></div>
+<h3 id="step-5-start-and-enable-the-service">Step 5: Start and Enable
+the Service</h3>
+<p>Restart the relay daemon to apply the configuration and enable it to
+start on boot:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart isc-dhcp-relay</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable isc-dhcp-relay</span></code></pre></div>
+<p>Check the service status to verify that it is running without
+errors:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status isc-dhcp-relay</span></code></pre></div>
+<h3 id="step-6-verify-relay-operation">Step 6: Verify Relay
+Operation</h3>
+<ol type="1">
+<li>Connect a client device to one of the configured VLANs and initiate
+a DHCP request.</li>
+<li>Monitor DHCP packets in real time on the Ubuntu router using
+<code>tcpdump</code>:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tcpdump <span class="at">-i</span> any <span class="at">-n</span> port 67 or port 68</span></code></pre></div></li>
+<li>You should observe:
+<ul>
+<li>A broadcast <code>DHCP Discover</code> arriving from the client on
+the VLAN interface.</li>
+<li>A unicast packet forwarded by <code>dhcrelay</code> to the central
+DHCP server with the router's VLAN gateway IP in the <code>giaddr</code>
+(Gateway IP Address) field.</li>
+<li>A unicast <code>DHCP Offer</code> returning from the server, which
+the relay forwards back to the client.</li>
+</ul></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

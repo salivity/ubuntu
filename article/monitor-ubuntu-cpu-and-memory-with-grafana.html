@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Ubuntu CPU and Memory with Grafana - ubuntu</title>
+    <meta name="description" content="This guide explains how to build a custom Grafana dashboard to track CPU and memory metrics on an Ubuntu server. By using Prometheus Node Exporter to gather system metrics and Prometheus as a time-series database, you will learn how to configure data col">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/monitor-ubuntu-cpu-and-memory-with-grafana">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Monitor Ubuntu CPU and Memory with Grafana - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/monitor-ubuntu-cpu-and-memory-with-grafana" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to build a custom Grafana dashboard to track CPU and memory metrics on an Ubuntu server. By using Prometheus Node Exporter to gather system metrics and Prometheus as a time-series database, you will learn how to configure data col" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="monitor-ubuntu-cpu-and-memory-with-grafana">Monitor Ubuntu CPU
+and Memory with Grafana</h1>
+<p>This guide explains how to build a custom Grafana dashboard to track
+CPU and memory metrics on an Ubuntu server. By using Prometheus Node
+Exporter to gather system metrics and Prometheus as a time-series
+database, you will learn how to configure data collection, write the
+appropriate PromQL queries, and design clear visualization panels inside
+Grafana.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have Grafana and Prometheus installed and running. If
+Prometheus is not yet installed on your Ubuntu system, install it
+alongside Node Exporter to expose hardware metrics.</p>
+<h3 id="step-1-install-node-exporter-on-ubuntu">Step 1: Install Node
+Exporter on Ubuntu</h3>
+<p>Node Exporter collects machine-level metrics like CPU and memory
+usage.</p>
+<ol type="1">
+<li>Open your Ubuntu terminal and install the package:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install prometheus-node-exporter <span class="at">-y</span></span></code></pre></div></li>
+<li>Enable and start the service:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> prometheus-node-exporter</span></code></pre></div></li>
+<li>Verify that metrics are exposing locally on port 9100:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:9100/metrics</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-configure-prometheus-to-scrape-node-exporter">Step 2:
+Configure Prometheus to Scrape Node Exporter</h3>
+<p>Prometheus must be configured to scrape the metrics from Node
+Exporter.</p>
+<ol type="1">
+<li>Open <code>/etc/prometheus/prometheus.yml</code> in a text editor:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/prometheus/prometheus.yml</span></code></pre></div></li>
+<li>Add the Node Exporter target under <code>scrape_configs</code>:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">job_name</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;ubuntu_node&#39;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">static_configs</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">targets</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&#39;localhost:9100&#39;</span><span class="kw">]</span></span></code></pre></div></li>
+<li>Restart Prometheus to apply changes:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart prometheus</span></code></pre></div></li>
+</ol>
+<h3 id="step-3-add-prometheus-as-a-grafana-data-source">Step 3: Add
+Prometheus as a Grafana Data Source</h3>
+<ol type="1">
+<li>Log into your Grafana web interface (default:
+<code>http://&lt;your-server-ip&gt;:3000</code>).</li>
+<li>Navigate to <strong>Connections</strong> &gt; <strong>Data
+Sources</strong> &gt; <strong>Add data source</strong>.</li>
+<li>Select <strong>Prometheus</strong>.</li>
+<li>Set the <strong>Prometheus server URL</strong> (typically
+<code>http://localhost:9090</code>).</li>
+<li>Scroll to the bottom and click <strong>Save &amp;
+Test</strong>.</li>
+</ol>
+<h3 id="step-4-create-the-custom-dashboard">Step 4: Create the Custom
+Dashboard</h3>
+<ol type="1">
+<li>In Grafana, click the <strong>Dashboards</strong> menu and select
+<strong>New</strong> &gt; <strong>New Dashboard</strong>.</li>
+<li>Click <strong>Add visualization</strong> and select your Prometheus
+data source.</li>
+</ol>
+<h3 id="step-5-build-the-cpu-usage-panel">Step 5: Build the CPU Usage
+Panel</h3>
+<p>To monitor real-time CPU utilization, calculate the percentage of
+time the CPU is not idle:</p>
+<ol type="1">
+<li>In the <strong>Metric</strong> query field, enter the following
+PromQL query:
+<pre class="promql"><code>100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[5m])) * 100)</code></pre></li>
+<li>In the right-hand panel settings:
+<ul>
+<li><strong>Title</strong>: Set to <code>CPU Usage</code>.</li>
+<li><strong>Graph styles</strong>: Choose <strong>Time series</strong>
+or <strong>Gauge</strong>.</li>
+<li><strong>Standard options &gt; Unit</strong>: Select <strong>Misc
+&gt; Percent (0-100)</strong>.</li>
+<li><strong>Min / Max</strong>: Set <code>Min</code> to <code>0</code>
+and <code>Max</code> to <code>100</code>.</li>
+</ul></li>
+<li>Click <strong>Apply</strong> in the top-right corner.</li>
+</ol>
+<h3 id="step-6-build-the-memory-usage-panel">Step 6: Build the Memory
+Usage Panel</h3>
+<p>To monitor RAM consumption accurately, compare available memory
+against total memory:</p>
+<ol type="1">
+<li>Click <strong>Add</strong> &gt; <strong>Visualization</strong> to
+create a second panel.</li>
+<li>Enter the following PromQL query for percentage of memory used:
+<pre class="promql"><code>(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100</code></pre></li>
+<li>Alternatively, to monitor absolute memory usage in bytes, use:
+<pre class="promql"><code>node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes</code></pre></li>
+<li>In the right-hand settings:
+<ul>
+<li><strong>Title</strong>: Set to <code>Memory Usage</code>.</li>
+<li><strong>Standard options &gt; Unit</strong>:
+<ul>
+<li>If using the percentage query, select <strong>Misc &gt; Percent
+(0-100)</strong>.</li>
+<li>If using the absolute query, select <strong>Data (IEC) &gt;
+Bytes</strong>.</li>
+</ul></li>
+</ul></li>
+<li>Click <strong>Apply</strong>.</li>
+</ol>
+<h3 id="step-7-save-the-dashboard">Step 7: Save the Dashboard</h3>
+<ol type="1">
+<li>Arrange and resize the panels on the grid by dragging the
+edges.</li>
+<li>Click the <strong>Save dashboard</strong> disk icon in the top-right
+toolbar.</li>
+<li>Enter a name, such as <code>Ubuntu System Performance</code>, and
+choose a folder.</li>
+<li>Click <strong>Save</strong> to finish.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

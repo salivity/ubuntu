@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Ubuntu to Wake Up Automatically with rtcwake - ubuntu</title>
+    <meta name="description" content="This article explains how to use the built-in rtcwake utility on Ubuntu to put your computer into a suspended or powered-off state and automatically wake it up at a specified time. By leveraging your computer's Real-Time Clock (RTC), rtcwake allows you t">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/schedule-ubuntu-to-wake-up-automatically-with-rtcwake">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Schedule Ubuntu to Wake Up Automatically with rtcwake - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/schedule-ubuntu-to-wake-up-automatically-with-rtcwake" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to use the built-in rtcwake utility on Ubuntu to put your computer into a suspended or powered-off state and automatically wake it up at a specified time. By leveraging your computer's Real-Time Clock (RTC), rtcwake allows you t" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="schedule-ubuntu-to-wake-up-automatically-with-rtcwake">Schedule
+Ubuntu to Wake Up Automatically with rtcwake</h1>
+<p>This article explains how to use the built-in <code>rtcwake</code>
+utility on Ubuntu to put your computer into a suspended or powered-off
+state and automatically wake it up at a specified time. By leveraging
+your computer's Real-Time Clock (RTC), <code>rtcwake</code> allows you
+to conserve power while ensuring your system is online for scheduled
+tasks, backups, or daily start times.</p>
+<h3 id="understanding-the-rtcwake-command">Understanding the rtcwake
+Command</h3>
+<p>The <code>rtcwake</code> utility requires superuser privileges to
+access the system's hardware clock. The basic syntax is:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="at">-m</span> <span class="pp">[</span><span class="ss">mode</span><span class="pp">]</span> <span class="at">-s</span> <span class="pp">[</span><span class="ss">seconds</span><span class="pp">]</span> <span class="kw">|</span> <span class="ex">-t</span> <span class="pp">[</span><span class="ss">timestamp</span><span class="pp">]</span></span></code></pre></div>
+<p>The key flags include:</p>
+<ul>
+<li><strong><code>-m</code> (mode):</strong> Defines the power-saving
+state the machine enters.</li>
+<li><strong><code>-s</code> (seconds):</strong> Sets the alarm to wake
+the system after a specific number of seconds relative to the current
+time.</li>
+<li><strong><code>-t</code> (timestamp):</strong> Sets the alarm to wake
+the system at a specific date and time, represented as a Unix epoch
+timestamp.</li>
+</ul>
+<h3 id="supported-power-modes">Supported Power Modes</h3>
+<p>You can specify different suspend modes using the <code>-m</code>
+switch:</p>
+<ul>
+<li><code>mem</code>: Suspend to RAM (Sleep mode). This offers the
+quickest resume time and is the most widely supported.</li>
+<li><code>disk</code>: Hibernate to disk. Power is completely cut, and
+memory state is saved to the swap space.</li>
+<li><code>off</code>: Complete ACPI shutdown (Power off). Note that your
+motherboard's BIOS/UEFI must support RTC wake-from-power-off for this
+mode to work.</li>
+<li><code>no</code>: Does not put the computer to sleep. It only sets
+the RTC alarm, which is useful if you want to shut down or suspend the
+system through another method later.</li>
+</ul>
+<h3 id="wake-up-after-a-relative-duration">Wake Up After a Relative
+Duration</h3>
+<p>To put your system into suspend-to-RAM mode and have it automatically
+wake up after a set duration, use the <code>-s</code> flag followed by
+the number of seconds.</p>
+<p>For example, to sleep immediately and wake up after 2 hours (7,200
+seconds):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="at">-m</span> mem <span class="at">-s</span> 7200</span></code></pre></div>
+<h3 id="wake-up-at-a-specific-date-and-time">Wake Up at a Specific Date
+and Time</h3>
+<p>To specify an exact date and time, combine <code>rtcwake</code> with
+the <code>date</code> command using the <code>-t</code> option. The
+<code>date</code> command converts your human-readable time format into
+a Unix epoch timestamp.</p>
+<p>To suspend the system and wake up tomorrow at 07:00 AM:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="at">-m</span> mem <span class="at">-t</span> <span class="va">$(</span><span class="fu">date</span> <span class="at">-d</span> <span class="st">&quot;tomorrow 07:00&quot;</span> +%s<span class="va">)</span></span></code></pre></div>
+<p>To schedule a wake-up for a specific calendar date and time (e.g.,
+December 25 at 08:30 AM):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="at">-m</span> mem <span class="at">-t</span> <span class="va">$(</span><span class="fu">date</span> <span class="at">-d</span> <span class="st">&quot;2026-12-25 08:30:00&quot;</span> +%s<span class="va">)</span></span></code></pre></div>
+<p>To fully power off the machine and wake it up at 06:00 AM the next
+day:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="at">-m</span> off <span class="at">-t</span> <span class="va">$(</span><span class="fu">date</span> <span class="at">-d</span> <span class="st">&quot;tomorrow 06:00&quot;</span> +%s<span class="va">)</span></span></code></pre></div>
+<h3 id="automating-rtcwake-with-cron">Automating rtcwake with Cron</h3>
+<p>You can automate recurring wake alarms by combining
+<code>rtcwake</code> with the root user's <code>cron</code> daemon.</p>
+<ol type="1">
+<li>Open the root crontab:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> crontab <span class="at">-e</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Add a rule to set the RTC alarm daily. For instance, to ensure the
+system is armed to wake up every weekday at 08:00 AM without putting it
+to sleep immediately, run <code>rtcwake</code> with the
+<code>-m no</code> flag:</li>
+</ol>
+<pre class="cron"><code>0 23 * * 0-4 /usr/sbin/rtcwake -m no -t $(date -d &quot;tomorrow 08:00&quot; +\%s)</code></pre>
+<p><em>Note: In crontab entries, the percent sign (<code>%</code>) must
+be escaped with a backslash (<code>\%</code>).</em></p>
+<h3 id="checking-and-canceling-active-alarms">Checking and Canceling
+Active Alarms</h3>
+<p>To verify that an alarm has been registered in the hardware clock,
+check the RTC system status:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/driver/rtc</span></code></pre></div>
+<p>Look for the <code>alrm_time</code> and <code>alrm_date</code> fields
+to confirm the scheduled wake time.</p>
+<p>If you need to cancel a pending wake-up alarm before it triggers, use
+the <code>-u</code> or <code>--dry-run</code> modes, or disable it
+directly using:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rtcwake <span class="at">-m</span> disable</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

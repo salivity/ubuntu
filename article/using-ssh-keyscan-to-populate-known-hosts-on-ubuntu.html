@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using ssh-keyscan to Populate known_hosts on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains the role of the ssh-keyscan utility on Ubuntu systems, focusing on how it gathers public SSH host keys to automate the population of knownhosts files. Readers will learn the mechanics behind the command, practical syntax for individ">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-ssh-keyscan-to-populate-known-hosts-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using ssh-keyscan to Populate known_hosts on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-ssh-keyscan-to-populate-known-hosts-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of the ssh-keyscan utility on Ubuntu systems, focusing on how it gathers public SSH host keys to automate the population of knownhosts files. Readers will learn the mechanics behind the command, practical syntax for individ" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-ssh-keyscan-to-populate-known_hosts-on-ubuntu">Using
+ssh-keyscan to Populate known_hosts on Ubuntu</h1>
+<p>This article explains the role of the <code>ssh-keyscan</code>
+utility on Ubuntu systems, focusing on how it gathers public SSH host
+keys to automate the population of <code>known_hosts</code> files.
+Readers will learn the mechanics behind the command, practical syntax
+for individual and bulk host key retrieval, common use cases in
+automation pipelines, and the critical security implications of
+bypassing manual fingerprint verification.</p>
+<h2 id="what-is-ssh-keyscan">What Is ssh-keyscan?</h2>
+<p><code>ssh-keyscan</code> is a standard command-line utility bundled
+with the OpenSSH client package on Ubuntu. Its primary function is to
+query remote SSH servers over the network and retrieve their public host
+keys. Unlike the standard <code>ssh</code> client,
+<code>ssh-keyscan</code> does not attempt to authenticate a user or
+start an interactive login session; it strictly requests and displays
+the server's public key data.</p>
+<h2 id="the-role-of-ssh-keyscan-in-managing-known_hosts">The Role of
+ssh-keyscan in Managing known_hosts</h2>
+<p>When connecting to an SSH server for the first time, OpenSSH prompts
+the user to verify the authenticity of the remote host. Once accepted,
+the key fingerprint is recorded in the user's
+<code>~/.ssh/known_hosts</code> file (or the system-wide
+<code>/etc/ssh/ssh_known_hosts</code> file).</p>
+<p>In automated workflows, continuous integration/continuous deployment
+(CI/CD) pipelines, or large-scale infrastructure provisioning,
+interactive prompts cause scripts to hang or fail.
+<code>ssh-keyscan</code> resolves this by allowing administrators to
+fetch remote host keys programmatically and append them directly to the
+appropriate <code>known_hosts</code> file, pre-populating trusted keys
+and preventing "Host key verification failed" errors.</p>
+<h2 id="basic-syntax-and-practical-examples">Basic Syntax and Practical
+Examples</h2>
+<h3 id="scanning-a-single-host">Scanning a Single Host</h3>
+<p>To scan a remote host and append its public key to your local
+<code>known_hosts</code> file, use standard shell redirection:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> example.com <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span></code></pre></div>
+<p>To populate the system-wide file for all users on an Ubuntu
+machine:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh-keyscan example.com <span class="op">&gt;&gt;</span> /etc/ssh/ssh_known_hosts</span></code></pre></div>
+<h3 id="specifying-key-types">Specifying Key Types</h3>
+<p>By default, modern versions of <code>ssh-keyscan</code> request all
+available key algorithms (such as RSA, ECDSA, and Ed25519). You can
+limit the output to a specific, modern algorithm using the
+<code>-t</code> flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> <span class="at">-t</span> ed25519 example.com <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span></code></pre></div>
+<h3 id="scanning-non-standard-ports">Scanning Non-Standard Ports</h3>
+<p>If an SSH daemon listens on a port other than the default port 22,
+use the <code>-p</code> flag:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> <span class="at">-p</span> 2222 example.com <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span></code></pre></div>
+<h3 id="bulk-scanning-from-a-file">Bulk Scanning from a File</h3>
+<p>For fleets of servers, you can provide a list of IP addresses or
+hostnames inside a text file using the <code>-f</code> flag:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> <span class="at">-f</span> /path/to/server_list.txt <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span></code></pre></div>
+<h2 id="security-considerations">Security Considerations</h2>
+<p>While <code>ssh-keyscan</code> simplifies automation, it alters the
+default security model of SSH:</p>
+<ul>
+<li><strong>Trust on First Use (TOFU) Bypass:</strong>
+<code>ssh-keyscan</code> blindly accepts whatever public key the server
+provides at the moment of scanning. It does not authenticate that key
+against an authoritative source.</li>
+<li><strong>Man-in-the-Middle (MitM) Risks:</strong> If the scan is
+executed over an untrusted or compromised network, an attacker could
+intercept the connection and supply a malicious key.</li>
+</ul>
+<p>To mitigate this risk, <code>ssh-keyscan</code> should ideally be run
+over secure, isolated networks (such as private VPCs or management
+subnets), or the retrieved fingerprints should be validated against
+known out-of-band host key values before relying on them in production
+environments.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

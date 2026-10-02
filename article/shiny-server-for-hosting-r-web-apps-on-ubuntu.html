@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiny Server for Hosting R Web Apps on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explores the purpose and core capabilities of the shiny-server package for hosting interactive R web applications on Ubuntu. It details how the software manages R processes behind the scenes, facilitates multi-user access over standard web p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/shiny-server-for-hosting-r-web-apps-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Shiny Server for Hosting R Web Apps on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/shiny-server-for-hosting-r-web-apps-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores the purpose and core capabilities of the shiny-server package for hosting interactive R web applications on Ubuntu. It details how the software manages R processes behind the scenes, facilitates multi-user access over standard web p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="shiny-server-for-hosting-r-web-apps-on-ubuntu">Shiny Server for
+Hosting R Web Apps on Ubuntu</h1>
+<p>This article explores the purpose and core capabilities of the
+<code>shiny-server</code> package for hosting interactive R web
+applications on Ubuntu. It details how the software manages R processes
+behind the scenes, facilitates multi-user access over standard web
+protocols, and simplifies the deployment of multiple data applications
+on a single Linux machine.</p>
+<p>The <code>shiny-server</code> package is a backend program designed
+by Posit (formerly RStudio) to turn a Linux server into a web host for
+applications built with the R <code>shiny</code> library. While the
+standard R environment can only run a Shiny app locally for a single
+active user on a local port, <code>shiny-server</code> acts as a
+dedicated HTTP server and process manager, making those applications
+accessible to anyone on a network through a standard web browser.</p>
+<h3 id="process-and-session-management">Process and Session
+Management</h3>
+<p>At its core, <code>shiny-server</code> bridges the gap between web
+requests and R execution. When an end-user navigates to an application
+URL, the server automatically spawns an independent R process to handle
+the session. It monitors user activity and gracefully terminates idle R
+processes to free up system memory and CPU resources on your Ubuntu
+instance.</p>
+<h3 id="multi-user-and-multi-app-hosting">Multi-User and Multi-App
+Hosting</h3>
+<p>Without a dedicated server utility, R can only execute one task at a
+time per thread. The <code>shiny-server</code> package solves this
+by:</p>
+<ul>
+<li><strong>Serving Multiple Users:</strong> Routing different browser
+sessions to the appropriate R instances, allowing colleagues or the
+public to view dashboards simultaneously.</li>
+<li><strong>Hosting Multiple Applications:</strong> Serving an entire
+directory of apps (by default located at
+<code>/srv/shiny-server/</code>). You can deploy dozens of distinct
+Shiny projects under different subpaths (e.g.,
+<code>your-ip:3838/app1</code>, <code>your-ip:3838/app2</code>) from a
+single server configuration.</li>
+</ul>
+<h3 id="native-linux-and-ubuntu-integration">Native Linux and Ubuntu
+Integration</h3>
+<p>On Ubuntu, <code>shiny-server</code> installs directly as a
+<code>systemd</code> service. This architecture provides several
+operational advantages:</p>
+<ul>
+<li><strong>Service Reliability:</strong> It can be started, stopped, or
+enabled at boot using standard <code>systemctl</code> commands, ensuring
+web tools remain accessible after server restarts.</li>
+<li><strong>Logging and Debugging:</strong> It automatically captures R
+runtime errors, package warnings, and console logs, writing them to
+<code>/var/log/shiny-server/</code> to streamline troubleshooting.</li>
+<li><strong>Reverse Proxy Compatibility:</strong> It integrates
+seamlessly with production web servers like Nginx or Apache, making it
+easy to configure custom domain names, SSL/TLS certificates (HTTPS), and
+authentication layers.</li>
+</ul>
+<p>By managing the operational complexity of running R code in response
+to web traffic, the <code>shiny-server</code> package allows developers
+and data scientists to focus solely on building their R models,
+visualizations, and dashboards.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

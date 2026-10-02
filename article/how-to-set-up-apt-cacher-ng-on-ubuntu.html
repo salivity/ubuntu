@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up Apt-Cacher NG on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up an Apt-Cacher NG server allows you to create a local HTTP caching proxy for Debian and Ubuntu packages, drastically reducing internet bandwidth usage and cutting down package installation times across a local network. This guide covers how to">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-apt-cacher-ng-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up Apt-Cacher NG on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-apt-cacher-ng-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up an Apt-Cacher NG server allows you to create a local HTTP caching proxy for Debian and Ubuntu packages, drastically reducing internet bandwidth usage and cutting down package installation times across a local network. This guide covers how to" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-apt-cacher-ng-on-ubuntu">How to Set Up Apt-Cacher
+NG on Ubuntu</h1>
+<p>Setting up an Apt-Cacher NG server allows you to create a local HTTP
+caching proxy for Debian and Ubuntu packages, drastically reducing
+internet bandwidth usage and cutting down package installation times
+across a local network. This guide covers how to install and configure
+the Apt-Cacher NG package on a dedicated Ubuntu server, enable HTTPS
+support, configure client machines to route package requests through the
+proxy, and verify that the caching mechanism is working properly.</p>
+<h3 id="step-1-install-apt-cacher-ng-on-the-server">Step 1: Install
+Apt-Cacher NG on the Server</h3>
+<p>Choose an Ubuntu machine on your network to act as the central
+caching server. Ensure the system is updated, then install the
+package:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install apt-cacher-ng <span class="at">-y</span></span></code></pre></div>
+<p>During installation, the service starts automatically and listens on
+TCP port <code>3142</code> by default.</p>
+<h3 id="step-2-configure-apt-cacher-ng">Step 2: Configure Apt-Cacher
+NG</h3>
+<p>The default configuration file is located at
+<code>/etc/apt-cacher-ng/acng.conf</code>. For most environments, the
+default settings work out of the box. However, if you need to fetch
+repositories over HTTPS (which is common for third-party PPAs and
+repositories like Docker), enable HTTPS tunneling.</p>
+<p>Open the configuration file:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apt-cacher-ng/acng.conf</span></code></pre></div>
+<p>Find the following line:</p>
+<pre class="text"><code># PassThroughPattern: .*</code></pre>
+<p>Uncomment it to allow raw HTTPS pass-through traffic:</p>
+<pre class="text"><code>PassThroughPattern: .*</code></pre>
+<p>Save and exit the file (press <code>CTRL+O</code>,
+<code>Enter</code>, then <code>CTRL+X</code>).</p>
+<p>Restart the Apt-Cacher NG service to apply changes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apt-cacher-ng</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable apt-cacher-ng</span></code></pre></div>
+<p>If your server has an active firewall (UFW), allow incoming
+connections on port 3142:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 3142/tcp</span></code></pre></div>
+<h3 id="step-3-configure-client-machines">Step 3: Configure Client
+Machines</h3>
+<p>On each Ubuntu client machine that will use the cache, create a proxy
+configuration file for the APT package manager:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apt/apt.conf.d/00aptproxy</span></code></pre></div>
+<p>Add the following line, replacing <code>YOUR_SERVER_IP</code> with
+the local IP address of your Apt-Cacher NG server:</p>
+<pre class="text"><code>Acquire::http::Proxy &quot;http://YOUR_SERVER_IP:3142&quot;;
+Acquire::https::Proxy &quot;http://YOUR_SERVER_IP:3142&quot;;</code></pre>
+<p>Save and close the file.</p>
+<h3 id="step-4-verify-the-setup">Step 4: Verify the Setup</h3>
+<p>To verify that the proxy works, run a package update and installation
+on a configured client:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install curl <span class="at">-y</span></span></code></pre></div>
+<p>Next, open a web browser on any machine within the local network and
+navigate to the Apt-Cacher NG reporting dashboard:</p>
+<pre class="text"><code>http://YOUR_SERVER_IP:3142/acng-report.html</code></pre>
+<p>Click <strong>Count Data</strong> to view transfer statistics, cache
+hit rates, and total bandwidth saved. The first time a package is
+requested by any client, the server downloads and stores it; subsequent
+requests from other clients will be served instantly from local
+storage.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

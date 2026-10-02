@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serve Static Files from Redis with Nginx on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to configure Nginx to serve static files directly from an in-memory Redis cache on Ubuntu. By routing requests directly to Redis and falling back to the local filesystem only when a cache miss occurs, you eliminate disk I/O bottle">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/serve-static-files-from-redis-with-nginx-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Serve Static Files from Redis with Nginx on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/serve-static-files-from-redis-with-nginx-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to configure Nginx to serve static files directly from an in-memory Redis cache on Ubuntu. By routing requests directly to Redis and falling back to the local filesystem only when a cache miss occurs, you eliminate disk I/O bottle" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="serve-static-files-from-redis-with-nginx-on-ubuntu">Serve Static
+Files from Redis with Nginx on Ubuntu</h1>
+<p>This guide explains how to configure Nginx to serve static files
+directly from an in-memory Redis cache on Ubuntu. By routing requests
+directly to Redis and falling back to the local filesystem only when a
+cache miss occurs, you eliminate disk I/O bottlenecks and drastically
+reduce response times for static web assets.</p>
+<h3 id="step-1-install-nginx-and-redis">Step 1: Install Nginx and
+Redis</h3>
+<p>Update your package index and install Redis and Nginx. Ubuntu
+provides the standard <code>nginx</code> package which includes the
+<code>ngx_http_redis</code> module by default.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nginx redis-server <span class="at">-y</span></span></code></pre></div>
+<p>Ensure both services are enabled and running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> redis-server</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> nginx</span></code></pre></div>
+<h3 id="step-2-configure-redis">Step 2: Configure Redis</h3>
+<p>By default, Redis binds to localhost (<code>127.0.0.1:6379</code>),
+which is suitable for Nginx running on the same server. Verify Redis is
+active:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> ping</span></code></pre></div>
+<p>It should respond with <code>PONG</code>.</p>
+<h3 id="step-3-populate-redis-with-static-content">Step 3: Populate
+Redis with Static Content</h3>
+<p>The <code>ngx_http_redis</code> module retrieves raw strings from
+Redis based on a key (typically the request URI). You can test caching
+an asset by storing a sample HTML or CSS snippet using
+<code>redis-cli</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> SET /sample.html <span class="st">&quot;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Served directly from Redis!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span></span></code></pre></div>
+<h3 id="step-4-configure-nginx-to-query-redis">Step 4: Configure Nginx
+to Query Redis</h3>
+<p>Open or create an Nginx server block configuration file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/nginx/sites-available/default</span></code></pre></div>
+<p>Modify the configuration to look up incoming URIs in Redis before
+falling back to local files:</p>
+<pre class="nginx"><code>server {
+    listen 80;
+    server_name _;
+
+    root /var/www/html;
+    index index.html index.htm;
+
+    location / {
+        # Define the Redis key using the normalized request URI
+        set $redis_key $uri;
+
+        # Forward the lookup to the Redis server
+        redis_pass 127.0.0.1:6379;
+
+        # Fallback to local disk if key is missing (404) or Redis is down (502)
+        error_page 404 502 = @fallback;
+
+        # Default MIME type if not determined
+        default_type text/html;
+    }
+
+    # Fallback location block for disk retrieval
+    location @fallback {
+        try_files $uri $uri/ =404;
+    }
+}</code></pre>
+<h3 id="step-5-test-and-reload-nginx">Step 5: Test and Reload Nginx</h3>
+<p>Verify that the Nginx configuration syntax is correct:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nginx <span class="at">-t</span></span></code></pre></div>
+<p>If the test is successful, reload Nginx to apply the changes:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl reload nginx</span></code></pre></div>
+<h3 id="step-6-verify-the-setup">Step 6: Verify the Setup</h3>
+<ol type="1">
+<li><p>Request the cached key:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> http://localhost/sample.html</span></code></pre></div>
+<p>You will receive the content stored in Redis.</p></li>
+<li><p>Request an uncached file:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Served from disk&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /var/www/html/disk.html</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> http://localhost/disk.html</span></code></pre></div>
+<p>Nginx fails to find the key in Redis, triggers the
+<code>@fallback</code> block, and serves the file directly from
+<code>/var/www/html/</code>.</p></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

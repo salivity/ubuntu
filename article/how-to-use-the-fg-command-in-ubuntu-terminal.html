@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use the fg Command in Ubuntu Terminal - ubuntu</title>
+    <meta name="description" content="Managing multitasking directly from the command line is an essential skill for Linux users. This guide explains how to use the fg (foreground) command in the Ubuntu terminal to resume and bring background or suspended tasks back into your active workspac">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-use-the-fg-command-in-ubuntu-terminal">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use the fg Command in Ubuntu Terminal - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-use-the-fg-command-in-ubuntu-terminal" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing multitasking directly from the command line is an essential skill for Linux users. This guide explains how to use the fg (foreground) command in the Ubuntu terminal to resume and bring background or suspended tasks back into your active workspac" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-use-the-fg-command-in-ubuntu-terminal">How to Use the fg
+Command in Ubuntu Terminal</h1>
+<p>Managing multitasking directly from the command line is an essential
+skill for Linux users. This guide explains how to use the
+<code>fg</code> (foreground) command in the Ubuntu terminal to resume
+and bring background or suspended tasks back into your active workspace.
+You will learn how to identify active jobs, select specific tasks, and
+seamlessly switch between background and foreground processes.</p>
+<hr />
+<h3 id="managing-processes-background-to-foreground">Managing Processes:
+Background to Foreground</h3>
+<p>When you run a command in Ubuntu, it occupies the terminal in the
+foreground by default. If a command runs for a long time or if you need
+to use the terminal prompt immediately, you can send the process to the
+background or pause it. The <code>fg</code> command is the standard
+built-in shell utility used to return these tasks to the active
+screen.</p>
+<h4 id="step-1-pausing-or-backgrounding-a-task">Step 1: Pausing or
+Backgrounding a Task</h4>
+<p>To move a running task out of the foreground:</p>
+<ul>
+<li><strong>Suspend a running task:</strong> Press
+<code>Ctrl + Z</code>. This pauses the process and assigns it a job
+number.</li>
+<li><strong>Start a process in the background:</strong> Append an
+ampersand (<code>&amp;</code>) to the end of the command (e.g.,
+<code>sleep 100 &amp;</code>).</li>
+</ul>
+<h4 id="step-2-listing-current-background-jobs">Step 2: Listing Current
+Background Jobs</h4>
+<p>Before bringing a process back to the foreground, identify its job ID
+using the <code>jobs</code> command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">jobs</span></span></code></pre></div>
+<p>The output will display the status of your tasks:</p>
+<pre class="text"><code>[1]-  Stopped                 nano document.txt
+[2]+  Stopped                 ping google.com</code></pre>
+<ul>
+<li>The number inside the brackets (<code>[1]</code>, <code>[2]</code>)
+is the <strong>Job ID</strong>.</li>
+<li>The plus sign (<code>+</code>) indicates the default job that
+<code>fg</code> will target if run without arguments.</li>
+<li>The minus sign (<code>-</code>) indicates the job that would become
+the default if the current default job finishes.</li>
+</ul>
+<h4 id="step-3-bringing-the-job-to-the-foreground">Step 3: Bringing the
+Job to the Foreground</h4>
+<p>To restore a job to active control, use <code>fg</code>:</p>
+<ul>
+<li><p><strong>Bring the most recent job back:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">fg</span></span></code></pre></div>
+<p>Running <code>fg</code> without flags automatically restores the job
+marked with the <code>+</code> symbol.</p></li>
+<li><p><strong>Bring a specific job back by Job ID:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">fg</span> %1</span></code></pre></div>
+<p>Replace <code>1</code> with the specific Job ID shown in your
+<code>jobs</code> output. You can also omit the percent sign in most
+standard Ubuntu bash shells:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">fg</span> 1</span></code></pre></div></li>
+<li><p><strong>Bring a job back by command name:</strong> If you know
+the name of the command, you can use the command prefix:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">fg</span> %nano</span></code></pre></div></li>
+</ul>
+<h3 id="practical-walkthrough">Practical Walkthrough</h3>
+<ol type="1">
+<li>Open a text file in <code>nano</code>:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> notes.txt</span></code></pre></div></li>
+<li>Suspend the editor to return to the shell prompt by pressing
+<code>Ctrl + Z</code>.</li>
+<li>Check the job list:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">jobs</span> <span class="at">-l</span></span></code></pre></div></li>
+<li>Return to your editing session:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">fg</span> %1</span></code></pre></div></li>
+</ol>
+<p>Once executed, <code>nano</code> reopens in the terminal exactly
+where you left off, giving you full interactive control again.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

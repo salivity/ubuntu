@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install Cinnamon Desktop on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to install the Cinnamon desktop environment on a standard Ubuntu system. Originally developed for Linux Mint, Cinnamon offers a traditional, sleek, and highly customizable desktop layout featuring a familiar bottom panel and app">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-cinnamon-desktop-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install Cinnamon Desktop on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-cinnamon-desktop-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to install the Cinnamon desktop environment on a standard Ubuntu system. Originally developed for Linux Mint, Cinnamon offers a traditional, sleek, and highly customizable desktop layout featuring a familiar bottom panel and app" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-cinnamon-desktop-on-ubuntu">How to Install
+Cinnamon Desktop on Ubuntu</h1>
+<p>This article explains how to install the Cinnamon desktop environment
+on a standard Ubuntu system. Originally developed for Linux Mint,
+Cinnamon offers a traditional, sleek, and highly customizable desktop
+layout featuring a familiar bottom panel and application menu. By
+following the straightforward terminal-based steps below, you will learn
+how to update your repositories, install the necessary Cinnamon
+packages, switch desktop sessions at the login screen, and remove the
+environment if you ever wish to revert.</p>
+<h3 id="step-1-update-your-system">Step 1: Update Your System</h3>
+<p>Before installing any new desktop environment, ensure that your
+existing package lists and installed software are fully up to date. Open
+a terminal (<code>Ctrl</code> + <code>Alt</code> + <code>T</code>) and
+run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-install-the-cinnamon-desktop-environment">Step 2: Install
+the Cinnamon Desktop Environment</h3>
+<p>Ubuntu includes the Cinnamon desktop environment directly within its
+official universe repositories, meaning no third-party PPAs are
+required.</p>
+<p>To install the complete Cinnamon desktop with all standard utilities
+and default applications, run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install cinnamon-desktop-environment <span class="at">-y</span></span></code></pre></div>
+<p><em>Note: If you prefer a minimal installation containing only the
+core desktop components without the extra bundled applications, you can
+install the base package instead by running
+<code>sudo apt install cinnamon -y</code>.</em></p>
+<h3 id="step-3-log-out-and-select-the-cinnamon-session">Step 3: Log Out
+and Select the Cinnamon Session</h3>
+<p>Once the installation completes, you must log out of your current
+session to switch to Cinnamon:</p>
+<ol type="1">
+<li>Click the system menu in the top-right corner of your screen and
+select <strong>Log Out</strong>.</li>
+<li>On the login screen, click your username.</li>
+<li>Click the gear icon located in the bottom-right corner of the
+display manager.</li>
+<li>Select <strong>Cinnamon</strong> (or <strong>Cinnamon (Software
+Rendering)</strong> if you experience graphics driver issues).</li>
+<li>Enter your password and log in.</li>
+</ol>
+<p>Your system will now load the Cinnamon desktop interface.</p>
+<h3 id="step-4-customizing-cinnamon-optional">Step 4: Customizing
+Cinnamon (Optional)</h3>
+<p>You can customize themes, panels, desklets, and applets by opening
+the <strong>System Settings</strong> menu within Cinnamon. Under the
+"Appearance" and "Preferences" sections, you can download community
+themes, tweak hot corners, and adjust window behavior without affecting
+your default Ubuntu GNOME settings.</p>
+<h3 id="how-to-remove-cinnamon">How to Remove Cinnamon</h3>
+<p>If you decide to revert to Ubuntu's default GNOME desktop
+environment, log out, switch back to the standard
+<strong>Ubuntu</strong> session via the gear icon, and run the following
+commands in the terminal:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt purge cinnamon cinnamon-desktop-environment <span class="at">-y</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt autoremove <span class="at">-y</span></span></code></pre></div>
+<p>This will completely remove Cinnamon and any unused dependencies
+associated with it.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

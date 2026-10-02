@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Ubuntu Preseed for Automation - ubuntu</title>
+    <meta name="description" content="Preseed files provide a mechanism to automate the legacy Debian-Installer (d-i) historically used by Ubuntu, allowing administrators to perform unattended, reproducible operating system installations. This guide details how to construct a preseed.cfg fil">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-ubuntu-preseed-for-automation">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Ubuntu Preseed for Automation - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-ubuntu-preseed-for-automation" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Preseed files provide a mechanism to automate the legacy Debian-Installer (d-i) historically used by Ubuntu, allowing administrators to perform unattended, reproducible operating system installations. This guide details how to construct a preseed.cfg fil" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-configure-ubuntu-preseed-for-automation">How to Configure
+Ubuntu Preseed for Automation</h1>
+<p>Preseed files provide a mechanism to automate the legacy
+Debian-Installer (<code>d-i</code>) historically used by Ubuntu,
+allowing administrators to perform unattended, reproducible operating
+system installations. This guide details how to construct a
+<code>preseed.cfg</code> file, configure essential installation
+directives—including network setup, disk partitioning, user creation,
+and package installation—and pass the configuration to the installer at
+boot.</p>
+<h2 id="anatomy-of-a-preseed-file">Anatomy of a Preseed File</h2>
+<p>A preseed configuration file is a plain text file containing
+instructions that answer debconf prompts automatically. Each
+configuration line follows a strict format with four fields separated by
+whitespace:</p>
+<pre class="text"><code>&lt;owner&gt; &lt;question-name&gt; &lt;type&gt; &lt;value&gt;</code></pre>
+<ul>
+<li><strong>Owner:</strong> Identifies the subsystem or package handling
+the prompt (typically <code>d-i</code> for standard Debian installer
+questions).</li>
+<li><strong>Question Name:</strong> The specific prompt being
+answered.</li>
+<li><strong>Type:</strong> The data type of the answer (e.g.,
+<code>string</code>, <code>boolean</code>, <code>select</code>,
+<code>multiselect</code>).</li>
+<li><strong>Value:</strong> The desired configuration value.</li>
+</ul>
+<h2 id="essential-preseed-configuration-sections">Essential Preseed
+Configuration Sections</h2>
+<h3 id="1-localization-and-time-zone">1. Localization and Time Zone</h3>
+<p>Define the language, country, keyboard keymap, and time zone to
+eliminate initial interactive setup prompts:</p>
+<pre class="text"><code>d-i debian-installer/locale string en_US.UTF-8
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/xkb-keymap select us
+
+d-i time/zone string UTC
+d-i clock-setup/utc boolean true
+d-i clock-setup/ntp boolean true</code></pre>
+<h3 id="2-network-configuration">2. Network Configuration</h3>
+<p>Set network interfaces to automatically acquire addresses via DHCP or
+configure static addressing, along with the system hostname:</p>
+<pre class="text"><code>d-i netcfg/choose_interface select auto
+d-i netcfg/get_hostname string ubuntu-node
+d-i netcfg/get_domain string local</code></pre>
+<h3 id="3-mirror-settings">3. Mirror Settings</h3>
+<p>Specify the archive mirrors for package retrieval during
+installation:</p>
+<pre class="text"><code>d-i mirror/country string manual
+d-i mirror/http/hostname string archive.ubuntu.com
+d-i mirror/http/directory string /ubuntu
+d-i mirror/http/proxy string</code></pre>
+<h3 id="4-automated-disk-partitioning">4. Automated Disk
+Partitioning</h3>
+<p>Automate disk wiping and layout using <code>partman</code>. The
+following configures standard LVM partitioning across the first
+available disk without manual confirmation:</p>
+<pre class="text"><code>d-i partman-auto/method string lvm
+d-i partman-auto-lvm/guided_size string max
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+
+d-i partman-auto/choose_recipe select atomic
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true</code></pre>
+<h3 id="5-user-and-root-account-setup">5. User and Root Account
+Setup</h3>
+<p>Configure the administrative user account and set credentials:</p>
+<pre class="text"><code>d-i passwd/root-login boolean false
+d-i passwd/make-user boolean true
+d-i passwd/user-fullname string Admin User
+d-i passwd/username string adminuser
+d-i passwd/user-password password SecurePassword123!
+d-i passwd/user-password-again password SecurePassword123!
+d-i user-setup/allow-password-weak boolean false
+d-i user-setup/encrypt-home boolean false</code></pre>
+<h3 id="6-package-selection-and-updates">6. Package Selection and
+Updates</h3>
+<p>Select standard server tasks, include extra utility packages, and
+automate security update behavior:</p>
+<pre class="text"><code>tasksel tasksel/first multiselect standard, server
+d-i pkgsel/include string openssh-server curl vim
+d-i pkgsel/upgrade select full-upgrade
+d-i pkgsel/update-policy select unattended-upgrades</code></pre>
+<h3 id="7-bootloader-and-reboot">7. Bootloader and Reboot</h3>
+<p>Install GRUB to the Master Boot Record (MBR) automatically and reboot
+upon completion:</p>
+<pre class="text"><code>d-i grub-installer/only_debian boolean true
+d-i grub-installer/with_other_os boolean true
+d-i grub-installer/bootdev string default
+
+d-i finish-install/reboot_in_progress note</code></pre>
+<h3 id="8-custom-post-installation-scripts">8. Custom Post-Installation
+Scripts</h3>
+<p>Execute arbitrary shell commands in the newly installed environment
+before the system reboots using <code>preseed/late_command</code>:</p>
+<pre class="text"><code>d-i preseed/late_command string \
+    in-target sed -i &#39;s/#PermitRootLogin prohibit-password/PermitRootLogin no/&#39; /etc/ssh/sshd_config; \
+    in-target systemctl enable ssh</code></pre>
+<h2 id="applying-the-preseed-file">Applying the Preseed File</h2>
+<p>Host the resulting <code>preseed.cfg</code> file on an accessible
+HTTP server (e.g., <code>http://192.168.1.50/preseed.cfg</code>).</p>
+<p>To instruct the installer to fetch and execute the file, append the
+following kernel parameters to the bootloader (PXE, GRUB, or
+Syslinux):</p>
+<pre class="text"><code>auto=true priority=critical url=http://192.168.1.50/preseed.cfg</code></pre>
+<ul>
+<li><code>auto=true</code>: Suppresses non-essential prompts.</li>
+<li><code>priority=critical</code>: Ensures only questions of critical
+priority pause the installer if they are missing from the preseed
+file.</li>
+<li><code>url=...</code>: Points to the network location hosting the
+configuration.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

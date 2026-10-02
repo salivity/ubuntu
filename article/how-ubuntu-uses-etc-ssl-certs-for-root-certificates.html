@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Ubuntu Uses /etc/ssl/certs for Root Certificates - ubuntu</title>
+    <meta name="description" content="In Ubuntu and other Debian-based Linux distributions, the /etc/ssl/certs directory serves as the centralized, system-wide store for trusted Root Certificate Authorities (CAs). This directory enables applications, command-line utilities, and background se">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-ubuntu-uses-etc-ssl-certs-for-root-certificates">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Ubuntu Uses /etc/ssl/certs for Root Certificates - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-ubuntu-uses-etc-ssl-certs-for-root-certificates" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In Ubuntu and other Debian-based Linux distributions, the /etc/ssl/certs directory serves as the centralized, system-wide store for trusted Root Certificate Authorities (CAs). This directory enables applications, command-line utilities, and background se" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-ubuntu-uses-etcsslcerts-for-root-certificates">How Ubuntu
+Uses /etc/ssl/certs for Root Certificates</h1>
+<p>In Ubuntu and other Debian-based Linux distributions, the
+<code>/etc/ssl/certs</code> directory serves as the centralized,
+system-wide store for trusted Root Certificate Authorities (CAs). This
+directory enables applications, command-line utilities, and background
+services to verify TLS/SSL certificates presented by remote servers
+during encrypted connections. This article explains the architectural
+role of <code>/etc/ssl/certs</code>, how Ubuntu organizes individual and
+bundled certificates within it, and the automated tools used to maintain
+root trust safely.</p>
+<h2 id="the-core-function-of-etcsslcerts">The Core Function of
+/etc/ssl/certs</h2>
+<p>When a program such as <code>curl</code>, <code>wget</code>, or a
+Python script initiates a secure HTTPS or TLS connection, it must
+determine whether to trust the remote server's certificate. To do this,
+the client checks whether the server's certificate was issued by an
+entity in its local trust store.</p>
+<p>On Ubuntu, the standard location configured for OpenSSL and system
+libraries to find these trusted root certificates is
+<code>/etc/ssl/certs</code>. By centralizing root authority data in this
+directory, Ubuntu prevents individual applications from needing to
+implement and maintain their own proprietary trust databases.</p>
+<h2 id="internal-structure-bundles-and-hashed-symlinks">Internal
+Structure: Bundles and Hashed Symlinks</h2>
+<p>Inspecting <code>/etc/ssl/certs</code> reveals two primary mechanisms
+for certificate discovery:</p>
+<ol type="1">
+<li><p><strong>The Combined Bundle
+(<code>ca-certificates.crt</code>)</strong>:<br />
+Inside this directory sits <code>ca-certificates.crt</code>, a single
+concatenated file containing every trusted root certificate in PEM
+format. Many modern programming runtimes (like Go or Node.js) and
+utilities read this aggregated file directly to load all trusted roots
+into memory in a single read operation.</p></li>
+<li><p><strong>Hashed Symlinks
+(<code>&lt;hash&gt;.0</code>)</strong>:<br />
+OpenSSL provides a directory-lookup feature that avoids parsing
+thousands of certificates on every connection. It uses the
+<code>c_rehash</code> utility to generate an eight-character hash based
+on the subject name of each certificate, creating a symlink named
+<code>&lt;hash&gt;.&lt;integer&gt;</code> pointing to the certificate
+file. When an application queries a specific CA by name, OpenSSL
+computes the hash and reads only the matching file in
+<code>/etc/ssl/certs</code>.</p></li>
+</ol>
+<h2 id="automatic-population-via-update-ca-certificates">Automatic
+Population via update-ca-certificates</h2>
+<p>Administrators should not manually place or delete files directly in
+<code>/etc/ssl/certs</code>. The directory is dynamically generated and
+maintained by the <code>ca-certificates</code> package. The real sources
+of truth reside elsewhere in the filesystem:</p>
+<ul>
+<li><strong>/usr/share/ca-certificates/</strong>: Contains default root
+certificates vetted and maintained by Mozilla and distributed via
+standard Ubuntu package updates.</li>
+<li><strong>/usr/local/share/ca-certificates/</strong>: The designated
+location for custom, private, or internal enterprise root certificates
+added by system administrators.</li>
+</ul>
+<p>Whenever certificates are added, updated, or removed, the
+administrator runs:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-ca-certificates</span></code></pre></div>
+<p>This utility reads the certificates from the source directories,
+regenerates <code>/etc/ssl/certs/ca-certificates.crt</code>, and creates
+or removes the necessary symbolic links and hash links in
+<code>/etc/ssl/certs</code>.</p>
+<h2 id="managing-and-customizing-trust">Managing and Customizing
+Trust</h2>
+<p>To add an internal enterprise root certificate to the Ubuntu trust
+store:</p>
+<ol type="1">
+<li>Copy the certificate in <code>.crt</code> format to
+<code>/usr/local/share/ca-certificates/</code>.</li>
+<li>Execute <code>sudo update-ca-certificates</code>.</li>
+<li>Verify that the tool reports one added certificate and that a
+corresponding symlink appears inside <code>/etc/ssl/certs</code>.</li>
+</ol>
+<p>To untrust a default CA, administrators use
+<code>dpkg-reconfigure ca-certificates</code> or modify
+<code>/etc/ca-certificates.conf</code>, deselecting the unwanted
+authority before rebuilding the store. This workflow ensures that system
+updates do not accidentally restore disabled or compromised
+certificates.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

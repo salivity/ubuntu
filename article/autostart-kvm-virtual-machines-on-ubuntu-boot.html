@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autostart KVM Virtual Machines on Ubuntu Boot - ubuntu</title>
+    <meta name="description" content="Configuring an Ubuntu KVM host to launch specific virtual machines automatically upon system boot ensures that essential services recover without manual intervention after a reboot or power outage. This guide covers how to enable the virtualization manag">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/autostart-kvm-virtual-machines-on-ubuntu-boot">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Autostart KVM Virtual Machines on Ubuntu Boot - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/autostart-kvm-virtual-machines-on-ubuntu-boot" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring an Ubuntu KVM host to launch specific virtual machines automatically upon system boot ensures that essential services recover without manual intervention after a reboot or power outage. This guide covers how to enable the virtualization manag" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="autostart-kvm-virtual-machines-on-ubuntu-boot">Autostart KVM
+Virtual Machines on Ubuntu Boot</h1>
+<p>Configuring an Ubuntu KVM host to launch specific virtual machines
+automatically upon system boot ensures that essential services recover
+without manual intervention after a reboot or power outage. This guide
+covers how to enable the virtualization management daemon, use the
+<code>virsh</code> command-line utility to mark specific domains for
+autostart, verify their operational status, and manage safe shutdowns
+using the built-in <code>libvirt-guests</code> service.</p>
+<h3 id="1-enable-the-libvirt-service">1. Enable the Libvirt Service</h3>
+<p>Before configuring individual virtual machines (VMs), ensure the
+virtualization service is enabled to launch at system startup.</p>
+<p>Open a terminal on your Ubuntu host and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable libvirtd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start libvirtd</span></code></pre></div>
+<h3 id="2-identify-the-target-virtual-machines">2. Identify the Target
+Virtual Machines</h3>
+<p>To manage autostart, locate the exact names of the virtual machines
+defined on your host:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> list <span class="at">--all</span></span></code></pre></div>
+<p>Note the names of the VMs you want to start automatically from the
+output list.</p>
+<h3 id="3-configure-the-vm-to-autostart">3. Configure the VM to
+Autostart</h3>
+<p>Run the <code>virsh autostart</code> command followed by the name of
+the target virtual machine:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> autostart <span class="op">&lt;</span>vm-name<span class="op">&gt;</span></span></code></pre></div>
+<p><em>Replace <code>&lt;vm-name&gt;</code> with the actual name of your
+virtual machine.</em></p>
+<p>This command creates a symbolic link to the VM's XML configuration
+file inside <code>/etc/libvirt/qemu/autostart/</code>.</p>
+<h3 id="4-verify-autostart-configuration">4. Verify Autostart
+Configuration</h3>
+<p>To confirm that the virtual machine has been successfully configured
+to boot with the host, run:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> list <span class="at">--autostart</span></span></code></pre></div>
+<p>Alternatively, check the domain details for a specific VM:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> dominfo <span class="op">&lt;</span>vm-name<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> Autostart</span></code></pre></div>
+<p>The output should display:</p>
+<pre class="text"><code>Autostart:      enable</code></pre>
+<h3 id="5-disable-autostart-optional">5. Disable Autostart
+(Optional)</h3>
+<p>If you need to stop a virtual machine from starting automatically in
+the future, disable the setting with the <code>--disable</code>
+flag:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virsh</span> autostart <span class="at">--disable</span> <span class="op">&lt;</span>vm-name<span class="op">&gt;</span></span></code></pre></div>
+<p>This removes the symbolic link from
+<code>/etc/libvirt/qemu/autostart/</code> without modifying the virtual
+machine's underlying disk image or base configuration.</p>
+<h3 id="6-configure-graceful-shutdown-on-host-reboot">6. Configure
+Graceful Shutdown on Host Reboot</h3>
+<p>To prevent data corruption, configure the host to gracefully shut
+down or suspend running guests when the Ubuntu system restarts.</p>
+<ol type="1">
+<li><p>Open the <code>libvirt-guests</code> configuration file:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/libvirt-guests</span></code></pre></div></li>
+<li><p>Locate and adjust the following parameters:</p>
+<ul>
+<li><code>ON_BOOT=start</code> (starts all autostart-enabled
+guests)</li>
+<li><code>ON_SHUTDOWN=shutdown</code> (sends a graceful ACPI shutdown
+signal instead of suspending)</li>
+<li><code>SHUTDOWN_TIMEOUT=300</code> (time in seconds to wait for
+guests to shut down)</li>
+</ul></li>
+<li><p>Save the file and enable the service:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable libvirt-guests</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start libvirt-guests</span></code></pre></div></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

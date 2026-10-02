@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Simulate a Drive Failure in mdadm on Ubuntu - ubuntu</title>
+    <meta name="description" content="Testing redundancy notifications is a critical step in verifying that your Ubuntu server will properly alert you when a storage drive degrades. This article explains how to safely simulate a disk failure in an active mdadm software RAID array, observe th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-simulate-a-drive-failure-in-mdadm-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Simulate a Drive Failure in mdadm on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-simulate-a-drive-failure-in-mdadm-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Testing redundancy notifications is a critical step in verifying that your Ubuntu server will properly alert you when a storage drive degrades. This article explains how to safely simulate a disk failure in an active mdadm software RAID array, observe th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-simulate-a-drive-failure-in-mdadm-on-ubuntu">How to
+Simulate a Drive Failure in mdadm on Ubuntu</h1>
+<p>Testing redundancy notifications is a critical step in verifying that
+your Ubuntu server will properly alert you when a storage drive
+degrades. This article explains how to safely simulate a disk failure in
+an active <code>mdadm</code> software RAID array, observe the system's
+automated alerting mechanism, and subsequently restore the drive to
+rebuild the array back to a healthy state.</p>
+<h3 id="1-identify-the-array-and-member-disks">1. Identify the Array and
+Member Disks</h3>
+<p>Before modifying your RAID configuration, verify the name of your
+array and its constituent partitions. Run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/mdstat</span></code></pre></div>
+<p>Alternatively, query the array details:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mdadm <span class="at">--detail</span> /dev/md0</span></code></pre></div>
+<p>Locate your target array (typically <code>/dev/md0</code> or
+<code>/dev/md127</code>) and note the component devices (such as
+<code>/dev/sda1</code> or <code>/dev/sdb1</code>). Ensure that the array
+is currently healthy and not in the middle of a rebuild before
+proceeding.</p>
+<h3 id="2-mark-a-drive-as-failed">2. Mark a Drive as Failed</h3>
+<p>To simulate a disk fault without physically disconnecting hardware,
+use the <code>--fail</code> (or <code>-f</code>) flag with
+<code>mdadm</code>. Replace <code>/dev/md0</code> with your array device
+and <code>/dev/sdb1</code> with the partition you want to simulate
+failing:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mdadm <span class="at">--fail</span> /dev/md0 /dev/sdb1</span></code></pre></div>
+<p>The kernel will immediately mark the drive as faulty and drop it from
+the active set of working drives.</p>
+<h3 id="3-verify-the-degraded-state-and-alerts">3. Verify the Degraded
+State and Alerts</h3>
+<p>Confirm the array's degraded status:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/mdstat</span></code></pre></div>
+<p>The output should show the disk marked with <code>(F)</code> and the
+array status updated (e.g., <code>[U_]</code> instead of
+<code>[UU]</code>).</p>
+<p>At this stage, your alert system should trigger:</p>
+<ul>
+<li>Check your system mail or root inbox if configured via the
+<code>MAILADDR</code> directive in <code>/etc/mdadm/mdadm.conf</code>:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mail</span></code></pre></div></li>
+<li>Review the kernel log buffer to verify the failure event was logged:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dmesg</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> md</span></code></pre></div></li>
+<li>Verify third-party monitoring services (such as Prometheus
+node_exporter, Zabbix, or Datadog) to ensure they register the degraded
+array state.</li>
+</ul>
+<h3 id="4-remove-the-faulty-drive">4. Remove the Faulty Drive</h3>
+<p>Before a failed drive can be re-added or replaced, it must be
+logically removed from the array configuration:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mdadm <span class="at">--remove</span> /dev/md0 /dev/sdb1</span></code></pre></div>
+<h3 id="5-re-add-the-drive-and-rebuild-the-array">5. Re-add the Drive
+and Rebuild the Array</h3>
+<p>Once you have verified that your notification pipeline operates as
+expected, return the disk to the array to trigger the synchronization
+process:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mdadm <span class="at">--add</span> /dev/md0 /dev/sdb1</span></code></pre></div>
+<h3 id="6-monitor-the-rebuild-process">6. Monitor the Rebuild
+Process</h3>
+<p>Track the rebuild progress until the array returns to a fully
+redundant, clean state:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 cat /proc/mdstat</span></code></pre></div>
+<p>Once the synchronization reaches 100%, the array will display
+<code>[UU]</code> (or equivalent fully active status), indicating that
+normal operations and redundancy have been completely restored.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

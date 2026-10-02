@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Elasticsearch Heap Size on Ubuntu - ubuntu</title>
+    <meta name="description" content="Configuring the Java Virtual Machine (JVM) heap size is a critical step for optimizing Elasticsearch performance and stability on an Ubuntu system. This guide explains how to properly size your heap, where to locate the configuration files on Ubuntu, and">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-elasticsearch-heap-size-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Elasticsearch Heap Size on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-elasticsearch-heap-size-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring the Java Virtual Machine (JVM) heap size is a critical step for optimizing Elasticsearch performance and stability on an Ubuntu system. This guide explains how to properly size your heap, where to locate the configuration files on Ubuntu, and" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-elasticsearch-heap-size-on-ubuntu">Configure
+Elasticsearch Heap Size on Ubuntu</h1>
+<p>Configuring the Java Virtual Machine (JVM) heap size is a critical
+step for optimizing Elasticsearch performance and stability on an Ubuntu
+system. This guide explains how to properly size your heap, where to
+locate the configuration files on Ubuntu, and how to apply and verify
+the new memory settings using standard system administration tools.</p>
+<h3 id="heap-size-rules-of-thumb">Heap Size Rules of Thumb</h3>
+<p>Before altering any configuration files, determine the appropriate
+heap size based on two core principles:</p>
+<ol type="1">
+<li><strong>Set the minimum and maximum heap sizes to be
+identical:</strong> Setting <code>-Xms</code> (minimum heap) and
+<code>-Xmx</code> (maximum heap) to the same value prevents the JVM from
+resizing the heap during runtime, which can cause latency spikes.</li>
+<li><strong>Do not exceed 50% of physical RAM:</strong> Elasticsearch
+uses heap memory for internal operations, but the underlying Lucene
+engine relies heavily on the operating system’s filesystem cache.
+Leaving at least 50% of system memory free ensures efficient data
+retrieval.</li>
+<li><strong>Stay below the 32 GB threshold:</strong> Never allocate more
+than 31 GB (typically recommended under 30 GB or 31 GB depending on the
+system) to maintain Compressed Ordinary Object Pointers (Compressed
+OOPs). Exceeding this limit drops pointer compression and wastes
+memory.</li>
+</ol>
+<h3 id="step-1-create-a-custom-jvm-options-file">Step 1: Create a Custom
+JVM Options File</h3>
+<p>In modern versions of Elasticsearch (7.x and 8.x) installed via the
+<code>.deb</code> package on Ubuntu, custom settings should be placed in
+the <code>/etc/elasticsearch/jvm.options.d/</code> directory rather than
+modifying the default <code>/etc/elasticsearch/jvm.options</code> file
+directly.</p>
+<p>Create a new file called <code>heap.options</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/elasticsearch/jvm.options.d/heap.options</span></code></pre></div>
+<h3 id="step-2-define-heap-allocation">Step 2: Define Heap
+Allocation</h3>
+<p>Add your desired heap size values to this file. For example, to
+allocate 4 GB of RAM to an Elasticsearch node on an 8 GB Ubuntu server,
+enter:</p>
+<pre class="text"><code>-Xms4g
+-Xmx4g</code></pre>
+<p>If specifying values in megabytes, use the <code>m</code> suffix
+instead (e.g., <code>-Xms2048m</code>). Save and close the file.</p>
+<h3 id="step-3-ensure-correct-permissions">Step 3: Ensure Correct
+Permissions</h3>
+<p>Ensure that the newly created file has the proper ownership so the
+Elasticsearch process can read it:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown root:elasticsearch /etc/elasticsearch/jvm.options.d/heap.options</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 660 /etc/elasticsearch/jvm.options.d/heap.options</span></code></pre></div>
+<h3 id="step-4-restart-the-elasticsearch-service">Step 4: Restart the
+Elasticsearch Service</h3>
+<p>Apply the new memory configuration by restarting the Elasticsearch
+service via <code>systemctl</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart elasticsearch</span></code></pre></div>
+<p>Verify that the service is running without errors:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status elasticsearch</span></code></pre></div>
+<h3 id="step-5-verify-the-new-heap-size">Step 5: Verify the New Heap
+Size</h3>
+<p>Confirm that Elasticsearch is actively running with the updated JVM
+parameters using the nodes API:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-X</span> GET <span class="st">&quot;localhost:9200/_nodes/jvm?pretty&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> heap_max_in_bytes</span></code></pre></div>
+<p>Alternatively, inspect the running process directly from the command
+line:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> elasticsearch <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;\-Xm[sx]&#39;</span></span></code></pre></div>
+<p>The output will display the active <code>-Xms</code> and
+<code>-Xmx</code> values confirming the new configuration is
+operational.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

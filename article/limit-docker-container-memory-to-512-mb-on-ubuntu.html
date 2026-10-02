@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limit Docker Container Memory to 512MB on Ubuntu - ubuntu</title>
+    <meta name="description" content="Controlling memory allocation for Docker containers on Ubuntu ensures single processes do not exhaust host resources and destabilize the operating system. This guide outlines how to enforce a 512MB memory limit when launching a Docker container using CLI">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/limit-docker-container-memory-to-512-mb-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Limit Docker Container Memory to 512MB on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/limit-docker-container-memory-to-512-mb-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Controlling memory allocation for Docker containers on Ubuntu ensures single processes do not exhaust host resources and destabilize the operating system. This guide outlines how to enforce a 512MB memory limit when launching a Docker container using CLI" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="limit-docker-container-memory-to-512mb-on-ubuntu">Limit Docker
+Container Memory to 512MB on Ubuntu</h1>
+<p>Controlling memory allocation for Docker containers on Ubuntu ensures
+single processes do not exhaust host resources and destabilize the
+operating system. This guide outlines how to enforce a 512MB memory
+limit when launching a Docker container using CLI flags, configure swap
+limits, verify memory usage, and apply equivalent configurations using
+Docker Compose.</p>
+<h3 id="limiting-memory-with-the-docker-cli">Limiting Memory with the
+Docker CLI</h3>
+<p>To limit a container to 512MB of RAM upon launch, pass the
+<code>-m</code> or <code>--memory</code> flag to the
+<code>docker run</code> command.</p>
+<p>Run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="at">--name</span> my_container <span class="at">-m</span> 512m nginx</span></code></pre></div>
+<p>In this command:</p>
+<ul>
+<li><code>-d</code> runs the container in detached mode.</li>
+<li><code>--name my_container</code> assigns a name to the
+container.</li>
+<li><code>-m 512m</code> (or <code>--memory 512m</code>) sets the
+maximum limit of user memory to 512 megabytes.</li>
+<li><code>nginx</code> is the example image being launched.</li>
+</ul>
+<h3 id="managing-swap-memory-limits">Managing Swap Memory Limits</h3>
+<p>By default, Docker allocates an equal amount of swap memory in
+addition to the specified RAM limit. If you restrict memory to
+<code>512m</code>, the container can access up to 512MB of RAM and 512MB
+of swap, totaling 1GB of combined memory.</p>
+<p>To completely prevent the container from using swap memory beyond the
+512MB RAM allocation, set the <code>--memory-swap</code> flag to the
+same value as <code>--memory</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="at">--name</span> my_container <span class="at">-m</span> 512m <span class="at">--memory-swap</span> 512m nginx</span></code></pre></div>
+<p><em>Note: If Ubuntu displays a warning stating
+<code>WARNING: No swap limit support</code>, enable memory cgroups in
+your GRUB configuration by adding
+<code>cgroup_enable=memory swapaccount=1</code> to
+<code>/etc/default/grub</code> and running <code>sudo update-grub</code>
+followed by a reboot.</em></p>
+<h3 id="limiting-memory-using-docker-compose">Limiting Memory Using
+Docker Compose</h3>
+<p>If you use Docker Compose to manage containers, define the 512MB
+limit in your <code>docker-compose.yml</code> file under the resource
+deployment limits:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;3.8&#39;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">web</span><span class="kw">:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> nginx</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">deploy</span><span class="kw">:</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">resources</span><span class="kw">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">limits</span><span class="kw">:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">memory</span><span class="kw">:</span><span class="at"> 512M</span></span></code></pre></div>
+<p>For Compose specification versions that do not use the
+<code>deploy</code> key, use the direct attribute:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;2.4&#39;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">web</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> nginx</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mem_limit</span><span class="kw">:</span><span class="at"> 512m</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">memswap_limit</span><span class="kw">:</span><span class="at"> 512m</span></span></code></pre></div>
+<p>Apply the configuration with:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
+<h3 id="verifying-the-memory-limit">Verifying the Memory Limit</h3>
+<p>To confirm that the 512MB limit is actively enforced on the running
+container, inspect its real-time metrics with
+<code>docker stats</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> stats my_container</span></code></pre></div>
+<p>The output displays the <code>MEM USAGE / LIMIT</code> column, which
+will show the container's current usage alongside <code>512MiB</code>,
+confirming the restriction is active.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

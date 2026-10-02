@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Host Directory to Docker Container on Ubuntu - ubuntu</title>
+    <meta name="description" content="Mapping a host directory to a Docker container allows persistent storage and seamless data sharing between an Ubuntu host and a containerized environment. While Docker natively uses the -v (or --mount) flag during container creation to bind-mount directo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/map-host-directory-to-docker-container-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Map Host Directory to Docker Container on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/map-host-directory-to-docker-container-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Mapping a host directory to a Docker container allows persistent storage and seamless data sharing between an Ubuntu host and a containerized environment. While Docker natively uses the -v (or --mount) flag during container creation to bind-mount directo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="map-host-directory-to-docker-container-on-ubuntu">Map Host
+Directory to Docker Container on Ubuntu</h1>
+<p>Mapping a host directory to a Docker container allows persistent
+storage and seamless data sharing between an Ubuntu host and a
+containerized environment. While Docker natively uses the
+<code>-v</code> (or <code>--mount</code>) flag during container creation
+to bind-mount directories, native Docker commands cannot directly attach
+a live mount to an <em>already running</em> container. To achieve this
+on Ubuntu, administrators must either launch a new container with the
+mount flag, copy files using <code>docker cp</code>, or use advanced
+system tools like <code>nsenter</code> to inject the mount point into
+the container's active mount namespace.</p>
+<h2 id="1-the-standard-command-mapping-at-container-launch">1. The
+Standard Command: Mapping at Container Launch</h2>
+<p>The recommended way to map a host directory into a container is
+specifying the bind mount when launching it with
+<code>docker run</code>.</p>
+<h3 id="using-the--v-flag">Using the <code>-v</code> Flag</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> /path/to/host/dir:/path/to/container/dir <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> my_container <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  my_image</span></code></pre></div>
+<h3 id="using-the---mount-flag-recommended-for-clarity">Using the
+<code>--mount</code> Flag (Recommended for Clarity)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--mount</span> type=bind,source=/path/to/host/dir,target=/path/to/container/dir <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> my_container <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  my_image</span></code></pre></div>
+<ul>
+<li>Both paths must be absolute paths on Ubuntu.</li>
+<li>If <code>/path/to/container/dir</code> does not exist inside the
+container, Docker creates it automatically.</li>
+</ul>
+<hr />
+<h2 id="2-managing-an-already-running-container">2. Managing an Already
+Running Container</h2>
+<p>If your container is already running and cannot easily be stopped,
+there are three methods to manage directory access:</p>
+<h3 id="method-a-copy-data-without-stopping-docker-cp">Method A: Copy
+Data Without Stopping (<code>docker cp</code>)</h3>
+<p>If you only need to sync files rather than maintain a live,
+synchronized mount, use <code>docker cp</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> cp /path/to/host/dir/. my_container:/path/to/container/dir/</span></code></pre></div>
+<p>This immediately transfers the files from the Ubuntu host into the
+active container.</p>
+<h3 id="method-b-stop-recreate-and-mount-best-practice">Method B: Stop,
+Recreate, and Mount (Best Practice)</h3>
+<p>To establish a persistent, synchronized link, commit the current
+state of the running container and recreate it with the volume
+mapped:</p>
+<ol type="1">
+<li>Save the running state:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> commit my_container my_container_backup</span></code></pre></div></li>
+<li>Stop and remove the old container:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> stop my_container</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> rm my_container</span></code></pre></div></li>
+<li>Run the saved image with the bind mount attached:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> /path/to/host/dir:/path/to/container/dir <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> my_container <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  my_container_backup</span></code></pre></div></li>
+</ol>
+<h3 id="method-c-dynamic-mount-using-nsenter-advanced">Method C: Dynamic
+Mount Using <code>nsenter</code> (Advanced)</h3>
+<p>For advanced users who cannot stop a running container, Ubuntu allows
+live mounting directly into the container's filesystem namespace using
+Linux utilities:</p>
+<ol type="1">
+<li>Obtain the container's PID:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">PID</span><span class="op">=</span><span class="va">$(</span><span class="ex">docker</span> inspect <span class="at">--format</span> <span class="st">&#39;{{.State.Pid}}&#39;</span> my_container<span class="va">)</span></span></code></pre></div></li>
+<li>Create the target directory inside the container's namespace:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nsenter <span class="at">--target</span> <span class="va">$PID</span> <span class="at">--mount</span> mkdir <span class="at">-p</span> /path/to/container/dir</span></code></pre></div></li>
+<li>Bind-mount the host directory into the target namespace:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nsenter <span class="at">--target</span> <span class="va">$PID</span> <span class="at">--mount</span> mount <span class="at">--bind</span> /path/to/host/dir /path/to/container/dir</span></code></pre></div></li>
+</ol>
+<p>The host directory is now accessible inside the running container
+without interruption. Note that mounts applied via <code>nsenter</code>
+will not persist across container restarts.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

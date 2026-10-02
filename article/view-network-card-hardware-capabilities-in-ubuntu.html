@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Network Card Hardware Capabilities in Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to inspect the detailed hardware capabilities of a network interface card (NIC) in Ubuntu. You will learn how to identify your network device name and use dedicated terminal utilities—primarily ethtool and lshw—to inspect su">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/view-network-card-hardware-capabilities-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="View Network Card Hardware Capabilities in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/view-network-card-hardware-capabilities-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to inspect the detailed hardware capabilities of a network interface card (NIC) in Ubuntu. You will learn how to identify your network device name and use dedicated terminal utilities—primarily ethtool and lshw—to inspect su" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="view-network-card-hardware-capabilities-in-ubuntu">View Network
+Card Hardware Capabilities in Ubuntu</h1>
+<p>This article explains how to inspect the detailed hardware
+capabilities of a network interface card (NIC) in Ubuntu. You will learn
+how to identify your network device name and use dedicated terminal
+utilities—primarily <code>ethtool</code> and <code>lshw</code>—to
+inspect supported link modes, port types, offload features, driver
+details, and hardware specifications.</p>
+<h3 id="step-1-identify-your-network-interface-name">Step 1: Identify
+Your Network Interface Name</h3>
+<p>Before querying hardware capabilities, identify the logical name of
+your network card using the <code>ip</code> command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> link</span></code></pre></div>
+<p>Look for interfaces such as <code>eth0</code>, <code>enp3s0</code>,
+or <code>wlan0</code>. Note down the name of the adapter you want to
+inspect.</p>
+<h3 id="step-2-use-ethtool-to-view-detailed-capabilities">Step 2: Use
+<code>ethtool</code> to View Detailed Capabilities</h3>
+<p>The standard and most comprehensive command to view network card
+hardware capabilities in Ubuntu is <code>ethtool</code>. If it is not
+installed on your system, install it using:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ethtool</span></code></pre></div>
+<h4 id="basic-hardware-and-link-capabilities">Basic Hardware and Link
+Capabilities</h4>
+<p>Run <code>ethtool</code> followed by your interface name:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool enp3s0</span></code></pre></div>
+<p>This outputs detailed hardware capabilities, including:</p>
+<ul>
+<li><strong>Supported link modes:</strong> The speeds and duplex
+configurations your physical card supports (e.g., 1000baseT/Full,
+10000baseT/Full).</li>
+<li><strong>Supported ports:</strong> The physical connector types
+(e.g., Twisted Pair, Fiber).</li>
+<li><strong>Auto-negotiation:</strong> Whether the card supports
+auto-negotiating speeds.</li>
+<li><strong>Speed and Duplex:</strong> The currently active connection
+speed and state.</li>
+</ul>
+<h4 id="protocol-and-offload-capabilities">Protocol and Offload
+Capabilities</h4>
+<p>Modern network cards can offload tasks from the CPU. To inspect
+hardware offload capabilities (such as TCP segmentation offload,
+checksum offloading, and scatter-gather):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ethtool</span> <span class="at">-k</span> enp3s0</span></code></pre></div>
+<p>Features listed as <code>[fixed]</code> cannot be changed, while
+those marked <code>on</code> or <code>off</code> can be modified.</p>
+<h4 id="driver-and-firmware-information">Driver and Firmware
+Information</h4>
+<p>To view the hardware's driver name, firmware version, and bus
+location:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ethtool</span> <span class="at">-i</span> enp3s0</span></code></pre></div>
+<hr />
+<h3 id="alternative-command-lshw">Alternative Command:
+<code>lshw</code></h3>
+<p>If you need deeper motherboard-level hardware details, the
+<code>lshw</code> (List Hardware) utility provides an overview of
+network hardware properties:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lshw <span class="at">-C</span> network</span></code></pre></div>
+<p>This displays the hardware vendor, product model, PCI bus
+information, clock speed, and a condensed <code>capabilities</code> line
+highlighting features like bus mastering, power management, and
+bandwidth limits.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using deborphan to Find Unused Libraries on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains the purpose and operation of the deborphan tool on Ubuntu systems. Over time, installing and removing software can leave behind lingering shared libraries that waste disk space and clutter your package database. Below, you will lear">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-deborphan-to-find-unused-libraries-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using deborphan to Find Unused Libraries on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-deborphan-to-find-unused-libraries-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the purpose and operation of the deborphan tool on Ubuntu systems. Over time, installing and removing software can leave behind lingering shared libraries that waste disk space and clutter your package database. Below, you will lear" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-deborphan-to-find-unused-libraries-on-ubuntu">Using
+deborphan to Find Unused Libraries on Ubuntu</h1>
+<p>This article explains the purpose and operation of the
+<code>deborphan</code> tool on Ubuntu systems. Over time, installing and
+removing software can leave behind lingering shared libraries that waste
+disk space and clutter your package database. Below, you will learn what
+<code>deborphan</code> is, why orphaned libraries occur, how the tool
+detects them, and how to safely inspect and remove unnecessary packages
+from your system.</p>
+<h2 id="the-purpose-of-deborphan">The Purpose of deborphan</h2>
+<p>The primary purpose of <code>deborphan</code> is to identify
+packages—specifically shared libraries—that have no other packages
+depending on them. When you install an application via the package
+manager, it often brings along several library dependencies. If you
+later remove that application using a basic command like
+<code>dpkg -r</code> or without the proper flags in <code>apt</code>,
+those auxiliary libraries may remain on the disk.</p>
+<p>While modern versions of APT include the <code>apt autoremove</code>
+command to clean up unneeded dependencies tracked by APT's automatic
+installation flags, <code>deborphan</code> operates independently by
+directly examining the system's package status database. It acts as a
+safety check and a deeper cleaning tool, detecting orphaned libraries
+that <code>apt</code> may overlook, particularly those installed
+manually or left behind by older packaging tools.</p>
+<h2 id="how-deborphan-identifies-orphaned-libraries">How deborphan
+Identifies Orphaned Libraries</h2>
+<p>By default, <code>deborphan</code> inspects the <code>libs</code> and
+<code>oldlibs</code> sections within <code>/var/lib/dpkg/status</code>.
+It evaluates the dependency tree of every installed package and
+determines whether any other installed package lists a given library in
+its <code>Depends</code> or <code>Pre-Depends</code> fields.</p>
+<p>If a library package has zero reverse dependencies,
+<code>deborphan</code> flags it as an "orphan." Because libraries are
+typically meant to serve other programs rather than be executed directly
+by users, a library with no reverse dependencies is almost always safe
+to remove.</p>
+<h2 id="installing-and-running-deborphan">Installing and Running
+deborphan</h2>
+<p>The <code>deborphan</code> package is available in the standard
+Ubuntu repositories and can be installed via the terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install deborphan</span></code></pre></div>
+<p>To run a basic scan and output a list of orphaned libraries,
+execute:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">deborphan</span></span></code></pre></div>
+<p>If any orphaned libraries are present, the command outputs their
+package names one per line. If no packages are listed, your system is
+free of unused library packages in the monitored sections.</p>
+<h3 id="useful-command-options">Useful Command Options</h3>
+<ul>
+<li><strong>Show Package Sizes:</strong> Run <code>deborphan -s</code>
+to view the package names alongside their estimated installed
+sizes.</li>
+<li><strong>Scan All Sections:</strong> While libraries are the default
+focus, running <code>deborphan -a</code> scans all package sections, not
+just <code>libs</code> and <code>oldlibs</code>. Use caution with this
+flag, as it will report user-facing applications and metapackages that
+do not have dependencies relying on them.</li>
+<li><strong>Predict Further Orphans:</strong> Running
+<code>deborphan --guess-all</code> employs heuristic checks to find
+non-library packages that might also be unneeded.</li>
+</ul>
+<h2 id="removing-orphaned-packages-safely">Removing Orphaned Packages
+Safely</h2>
+<p>Before removing any package identified by <code>deborphan</code>,
+review the list to confirm that no manually required development files
+or custom configurations depend on them. Once verified, you can pass the
+output of <code>deborphan</code> to <code>apt</code> to purge the
+packages and their configuration files:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get purge <span class="va">$(</span><span class="ex">deborphan</span><span class="va">)</span></span></code></pre></div>
+<p>Because removing one set of libraries can cause higher-level
+dependent libraries to become orphaned in turn, you may need to run
+<code>deborphan</code> iteratively until it returns no more results.
+Alternatively, you can use <code>orphaner</code>, a menu-driven text
+interface bundled with <code>deborphan</code>, which lets you
+selectively review and delete unused packages interactively:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> orphaner</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

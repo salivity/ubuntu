@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up a Cowrie SSH Honeypot on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up an SSH honeypot is an effective way to detect malicious scanning, log brute-force attempts, and analyze attacker behavior without risking your production environment. This guide provides a direct, step-by-step walkthrough for deploying Cowrie">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-a-cowrie-ssh-honeypot-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up a Cowrie SSH Honeypot on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-a-cowrie-ssh-honeypot-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up an SSH honeypot is an effective way to detect malicious scanning, log brute-force attempts, and analyze attacker behavior without risking your production environment. This guide provides a direct, step-by-step walkthrough for deploying Cowrie" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-a-cowrie-ssh-honeypot-on-ubuntu">How to Set Up a
+Cowrie SSH Honeypot on Ubuntu</h1>
+<p>Setting up an SSH honeypot is an effective way to detect malicious
+scanning, log brute-force attempts, and analyze attacker behavior
+without risking your production environment. This guide provides a
+direct, step-by-step walkthrough for deploying Cowrie—a popular medium-
+to high-interaction SSH and Telnet honeypot—on an exposed Ubuntu server.
+You will learn how to relocate your real SSH service to a non-standard
+port, install Cowrie inside a secure non-root environment, configure
+traffic forwarding, and analyze captured activity.</p>
+<h3 id="step-1-change-the-default-openssh-port">Step 1: Change the
+Default OpenSSH Port</h3>
+<p>Before installing Cowrie, you must move your legitimate SSH service
+to a different port so that port 22 is available for the honeypot.</p>
+<ol type="1">
+<li>Open the SSH daemon configuration:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div></li>
+<li>Locate the line <code>#Port 22</code> or <code>Port 22</code>,
+uncomment it, and change it to an alternate port, such as
+<code>22022</code>:
+<pre class="text"><code>Port 22022</code></pre></li>
+<li>Save the file and restart the SSH service:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div></li>
+<li>Confirm you can connect via the new port before closing your current
+terminal:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> 22022 user@your_server_ip</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-install-system-dependencies">Step 2: Install System
+Dependencies</h3>
+<p>Update the server packages and install the prerequisites required to
+run Cowrie inside a Python virtual environment:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install <span class="at">-y</span> git python3-virtualenv libssl-dev libffi-dev build-essential python3-dev python3-pip authbind iptables-persistent</span></code></pre></div>
+<h3 id="step-3-create-a-dedicated-cowrie-user">Step 3: Create a
+Dedicated Cowrie User</h3>
+<p>For security reasons, Cowrie must never be run as root. Create a
+dedicated system user with no administrative privileges:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser <span class="at">--disabled-password</span> <span class="at">--gecos</span> <span class="st">&quot;&quot;</span> cowrie</span></code></pre></div>
+<h3 id="step-4-download-and-install-cowrie">Step 4: Download and Install
+Cowrie</h3>
+<p>Switch to the newly created user and set up Cowrie in its home
+directory:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> cowrie</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/micheloosterhof/cowrie.git</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> cowrie</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">virtualenv</span> <span class="at">--python</span><span class="op">=</span>python3 cowrie-env</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> cowrie-env/bin/activate</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--upgrade</span> pip</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code></pre></div>
+<h3 id="step-5-configure-cowrie">Step 5: Configure Cowrie</h3>
+<p>Create a custom configuration file by copying the default
+template:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> etc/cowrie.cfg.dist etc/cowrie.cfg</span></code></pre></div>
+<p>Open <code>etc/cowrie.cfg</code> with a text editor to customize
+parameters:</p>
+<ul>
+<li>Set your honeypot hostname under the <code>[honeypot]</code> section
+(e.g., <code>hostname = ubuntu-srv</code>).</li>
+<li>By default, Cowrie listens on port <code>2222</code> for SSH and
+port <code>2223</code> for Telnet. Keep these default internal ports
+unchanged.</li>
+</ul>
+<p>Exit back to your administrative user:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span></span></code></pre></div>
+<h3 id="step-6-route-port-22-traffic-to-cowrie">Step 6: Route Port 22
+Traffic to Cowrie</h3>
+<p>Because non-root users cannot bind directly to privileged ports below
+1024, route inbound traffic from port 22 to Cowrie's port 2222 using
+<code>iptables</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables <span class="at">-t</span> nat <span class="at">-A</span> PREROUTING <span class="at">-p</span> tcp <span class="at">--dport</span> 22 <span class="at">-j</span> REDIRECT <span class="at">--to-port</span> 2222</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netfilter-persistent save</span></code></pre></div>
+<h3 id="step-7-launch-and-monitor-the-honeypot">Step 7: Launch and
+Monitor the Honeypot</h3>
+<p>Switch back to the <code>cowrie</code> user and start the
+service:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> cowrie</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> cowrie</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> cowrie-env/bin/activate</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bin/cowrie</span> start</span></code></pre></div>
+<p>Verify that the process is running:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bin/cowrie</span> status</span></code></pre></div>
+<p>To monitor inbound attack attempts in real time, view the Cowrie log
+file:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> var/log/cowrie/cowrie.log</span></code></pre></div>
+<p>Any attacker attempting to access port 22 will be directed into
+Cowrie’s emulated environment, where all keystrokes, downloaded
+payloads, and credential combinations are recorded in the
+<code>var/log/cowrie/</code> and <code>var/lib/cowrie/downloads/</code>
+directories.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

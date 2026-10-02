@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Find High Context Switch Processes in Ubuntu - ubuntu</title>
+    <meta name="description" content="A high rate of context switching can severely degrade CPU efficiency and application performance in Linux environments. While the vmstat utility detects system-wide context switch spikes, identifying the exact offending process requires pairing vmstat wi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-find-high-context-switch-processes-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Find High Context Switch Processes in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-find-high-context-switch-processes-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A high rate of context switching can severely degrade CPU efficiency and application performance in Linux environments. While the vmstat utility detects system-wide context switch spikes, identifying the exact offending process requires pairing vmstat wi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-find-high-context-switch-processes-in-ubuntu">How to Find
+High Context Switch Processes in Ubuntu</h1>
+<p>A high rate of context switching can severely degrade CPU efficiency
+and application performance in Linux environments. While the
+<code>vmstat</code> utility detects system-wide context switch spikes,
+identifying the exact offending process requires pairing
+<code>vmstat</code> with process-level monitoring tools like
+<code>pidstat</code>. This guide details how to detect elevated context
+switching with <code>vmstat</code> and isolate the specific processes
+causing the issue in Ubuntu.</p>
+<h2 id="step-1-detect-system-wide-context-switches-using-vmstat">Step 1:
+Detect System-Wide Context Switches Using vmstat</h2>
+<p>The <code>vmstat</code> (Virtual Memory Statistics) tool monitors
+operating system memory, processes, interrupts, and CPU activity.</p>
+<p>Run <code>vmstat</code> with a one-second refresh interval:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vmstat</span> 1</span></code></pre></div>
+<p>Look at the <strong>system</strong> section:</p>
+<ul>
+<li><strong><code>cs</code></strong>: Context switches per second.</li>
+<li><strong><code>in</code></strong>: Interrupts per second.</li>
+</ul>
+<p>A baseline context switch rate varies depending on the workload and
+CPU core count, but values consistently exceeding tens of thousands per
+second often indicate an abnormal bottleneck. Because
+<code>vmstat</code> aggregates data across the entire operating system,
+it confirms that a problem exists but cannot display individual Process
+IDs (PIDs).</p>
+<h2 id="step-2-identify-the-culprit-process-with-pidstat">Step 2:
+Identify the Culprit Process with pidstat</h2>
+<p>To map the high <code>cs</code> value observed in <code>vmstat</code>
+to a specific process, use <code>pidstat</code>, which is part of the
+<code>sysstat</code> package.</p>
+<p>Install <code>sysstat</code> if it is not present on your system:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install sysstat <span class="at">-y</span></span></code></pre></div>
+<p>Run <code>pidstat</code> with the <code>-w</code> flag to monitor
+task context switches every second:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pidstat</span> <span class="at">-w</span> 1</span></code></pre></div>
+<p>To view thread-level context switching alongside processes, add the
+<code>-t</code> flag:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pidstat</span> <span class="at">-wt</span> 1</span></code></pre></div>
+<h2 id="step-3-analyze-the-output">Step 3: Analyze the Output</h2>
+<p>The <code>pidstat -w</code> output displays two primary metrics for
+each active PID:</p>
+<ol type="1">
+<li><strong><code>cswch/s</code> (Voluntary Context Switches per
+Second):</strong> Occurs when a task voluntarily yields the CPU while
+waiting for an unavailable resource, such as disk I/O, network sockets,
+system calls, or mutex locks.</li>
+<li><strong><code>nvcswch/s</code> (Non-voluntary/Involuntary Context
+Switches per Second):</strong> Occurs when the Linux scheduler preempts
+a task because its time slice expired or a higher-priority task became
+runnable. High numbers here typically indicate severe CPU contention or
+too many competing threads.</li>
+</ol>
+<p>Sort by total switches to immediately locate the top offenders:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pidstat</span> <span class="at">-w</span> 1 <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-k4</span> <span class="at">-nr</span></span></code></pre></div>
+<h2 id="step-4-inspect-the-process">Step 4: Inspect the Process</h2>
+<p>Once you identify the PID generating the excessive context switches,
+inspect the process to determine its behavior and configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the executable path and command-line arguments</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-fp</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Trace system calls to see what is causing voluntary yields</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> strace <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> -c</span></code></pre></div>
+<p>Using <code>vmstat</code> to alert on high context switching combined
+with <code>pidstat -w</code> provides a direct path from recognizing
+system-level overhead to resolving the specific application or thread
+causing it.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

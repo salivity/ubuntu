@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraform HA Ubuntu Web Cluster on DigitalOcean - ubuntu</title>
+    <meta name="description" content="This guide details how to automate the provisioning of a high-availability Ubuntu web server cluster on DigitalOcean using HashiCorp Terraform. You will configure the DigitalOcean Terraform provider, deploy multiple Ubuntu Droplets provisioned with an Ng">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/terraform-ha-ubuntu-web-cluster-on-digital-ocean">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Terraform HA Ubuntu Web Cluster on DigitalOcean - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/terraform-ha-ubuntu-web-cluster-on-digital-ocean" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide details how to automate the provisioning of a high-availability Ubuntu web server cluster on DigitalOcean using HashiCorp Terraform. You will configure the DigitalOcean Terraform provider, deploy multiple Ubuntu Droplets provisioned with an Ng" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="terraform-ha-ubuntu-web-cluster-on-digitalocean">Terraform HA
+Ubuntu Web Cluster on DigitalOcean</h1>
+<p>This guide details how to automate the provisioning of a
+high-availability Ubuntu web server cluster on DigitalOcean using
+HashiCorp Terraform. You will configure the DigitalOcean Terraform
+provider, deploy multiple Ubuntu Droplets provisioned with an Nginx web
+server, and distribute incoming traffic across them using a managed
+DigitalOcean Load Balancer with health checks to ensure continuous
+uptime.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before beginning, ensure you have the following:</p>
+<ul>
+<li>Terraform (v1.3+) installed on your local machine.</li>
+<li>A DigitalOcean account with an active Personal Access Token.</li>
+<li>An SSH key added to your DigitalOcean account.</li>
+</ul>
+<h3 id="step-1-configure-the-terraform-provider">Step 1: Configure the
+Terraform Provider</h3>
+<p>Create a working directory and a file named <code>provider.tf</code>
+to declare the DigitalOcean provider.</p>
+<pre class="hcl"><code>terraform {
+  required_version = &quot;&gt;= 1.3.0&quot;
+  required_providers {
+    digitalocean = {
+      source  = &quot;digitalocean/digitalocean&quot;
+      version = &quot;~&gt; 2.0&quot;
+    }
+  }
+}
+
+variable &quot;do_token&quot; {
+  description = &quot;DigitalOcean API Token&quot;
+  type        = string
+  sensitive   = true
+}
+
+variable &quot;ssh_fingerprint&quot; {
+  description = &quot;Fingerprint of the SSH key uploaded to DigitalOcean&quot;
+  type        = string
+}
+
+variable &quot;region&quot; {
+  description = &quot;DigitalOcean region&quot;
+  type        = string
+  default     = &quot;nyc3&quot;
+}
+
+provider &quot;digitalocean&quot; {
+  token = var.do_token
+}</code></pre>
+<h3 id="step-2-define-web-droplets-and-user-data">Step 2: Define Web
+Droplets and User Data</h3>
+<p>Create a file named <code>main.tf</code>. This configuration uses
+<code>cloud-init</code> via the <code>user_data</code> argument to
+install and start Nginx automatically on each Ubuntu instance.</p>
+<pre class="hcl"><code>data &quot;digitalocean_ssh_key&quot; &quot;default&quot; {
+  fingerprint = var.ssh_fingerprint
+}
+
+resource &quot;digitalocean_tag&quot; &quot;web_cluster&quot; {
+  name = &quot;web-cluster&quot;
+}
+
+resource &quot;digitalocean_droplet&quot; &quot;web&quot; {
+  count              = 2
+  name               = &quot;ubuntu-web-${count.index + 1}&quot;
+  region             = var.region
+  image              = &quot;ubuntu-22-04-x64&quot;
+  size               = &quot;s-1vcpu-1gb&quot;
+  ssh_keys           = [data.digitalocean_ssh_key.default.id]
+  tags               = [digitalocean_tag.web_cluster.id]
+
+  user_data = &lt;&lt;-EOF
+              #!/bin/bash
+              apt-get update -y
+              apt-get install -y nginx
+              echo &quot;&lt;h1&gt;Served from $(hostname)&lt;/h1&gt;&quot; &gt; /var/www/html/index.html
+              systemctl enable nginx
+              systemctl start nginx
+              EOF
+}</code></pre>
+<p>Using a tag (<code>web-cluster</code>) allows the load balancer to
+dynamically associate with all cluster members rather than managing
+individual Droplet IDs.</p>
+<h3 id="step-3-add-the-digitalocean-load-balancer">Step 3: Add the
+DigitalOcean Load Balancer</h3>
+<p>In <code>main.tf</code>, append the
+<code>digitalocean_loadbalancer</code> resource. The load balancer
+routes incoming port 80 traffic evenly across the Droplets and runs
+periodic health checks to remove failing nodes from rotation.</p>
+<pre class="hcl"><code>resource &quot;digitalocean_loadbalancer&quot; &quot;public&quot; {
+  name   = &quot;ha-web-lb&quot;
+  region = var.region
+
+  forwarding_rule {
+    entry_port     = 80
+    entry_protocol = &quot;http&quot;
+
+    target_port     = 80
+    target_protocol = &quot;http&quot;
+  }
+
+  healthcheck {
+    port     = 80
+    protocol = &quot;http&quot;
+    path     = &quot;/&quot;
+    check_interval_seconds   = 10
+    response_timeout_seconds = 5
+    unhealthy_threshold      = 3
+    healthy_threshold        = 2
+  }
+
+  droplet_tag = digitalocean_tag.web_cluster.name
+}</code></pre>
+<h3 id="step-4-define-output-variables">Step 4: Define Output
+Variables</h3>
+<p>Create an <code>outputs.tf</code> file to display the external IP
+address of the load balancer upon deployment.</p>
+<pre class="hcl"><code>output &quot;load_balancer_ip&quot; {
+  description = &quot;The public IP address of the Load Balancer&quot;
+  value       = digitalocean_loadbalancer.public.ip
+}</code></pre>
+<h3 id="step-5-initialize-and-deploy">Step 5: Initialize and Deploy</h3>
+<p>Set your environment variables or provide a
+<code>terraform.tfvars</code> file containing your <code>do_token</code>
+and <code>ssh_fingerprint</code>. Then run:</p>
+<ol type="1">
+<li><p><strong>Initialize the working directory:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> init</span></code></pre></div></li>
+<li><p><strong>Preview the execution plan:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> plan</span></code></pre></div></li>
+<li><p><strong>Apply the changes:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> apply <span class="at">-auto-approve</span></span></code></pre></div></li>
+</ol>
+<h3 id="verification-and-scaling">Verification and Scaling</h3>
+<p>Once the provisioning completes, Terraform outputs the public IP
+address of the load balancer. Open
+<code>http://&lt;load_balancer_ip&gt;</code> in your web browser and
+refresh repeatedly; you should see responses alternate between
+<code>ubuntu-web-1</code> and <code>ubuntu-web-2</code>.</p>
+<p>To scale the cluster, adjust the <code>count</code> attribute in
+<code>digitalocean_droplet.web</code> and re-run
+<code>terraform apply</code>. The new Droplets will automatically be
+tagged, pass health checks, and begin handling incoming traffic.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Node.js Apps in the Background with PM2 on Ubuntu - ubuntu</title>
+    <meta name="description" content="Running a Node.js application permanently in production requires a process manager to keep it alive during crashes and system reboots. This guide demonstrates how to install PM2, start your Node.js application in the background, configure it to automatic">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/run-node-js-apps-in-the-background-with-pm-2-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Run Node.js Apps in the Background with PM2 on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/run-node-js-apps-in-the-background-with-pm-2-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Running a Node.js application permanently in production requires a process manager to keep it alive during crashes and system reboots. This guide demonstrates how to install PM2, start your Node.js application in the background, configure it to automatic" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="run-nodejs-apps-in-the-background-with-pm2-on-ubuntu">Run
+Node.js Apps in the Background with PM2 on Ubuntu</h1>
+<p>Running a Node.js application permanently in production requires a
+process manager to keep it alive during crashes and system reboots. This
+guide demonstrates how to install PM2, start your Node.js application in
+the background, configure it to automatically launch on server restarts,
+and manage your processes efficiently on an Ubuntu server.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have Node.js and NPM installed on your Ubuntu system. You
+can verify your installation by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> <span class="at">-v</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> <span class="at">-v</span></span></code></pre></div>
+<p>If Node.js is not yet installed, update your package index and
+install it via the NodeSource repository or Ubuntu's package manager
+before proceeding.</p>
+<hr />
+<h3 id="step-1-install-pm2-globally">Step 1: Install PM2 Globally</h3>
+<p>PM2 is a production process manager for Node.js applications with a
+built-in load balancer. Install it globally using <code>npm</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> npm install pm2 <span class="at">-g</span></span></code></pre></div>
+<p>Verify that the installation was successful:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> <span class="at">-v</span></span></code></pre></div>
+<hr />
+<h3 id="step-2-start-your-application-with-pm2">Step 2: Start Your
+Application with PM2</h3>
+<p>Navigate to your application's directory:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/your/app</span></code></pre></div>
+<p>Start your application using the <code>pm2 start</code> command.
+Replace <code>app.js</code> with your entry file and set an identifiable
+name with the <code>--name</code> flag:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> start app.js <span class="at">--name</span> <span class="st">&quot;my-app&quot;</span></span></code></pre></div>
+<p>Once executed, PM2 automatically detaches the process and runs it in
+the background, displaying a status table indicating the app's ID,
+status, CPU, and memory usage.</p>
+<hr />
+<h3 id="step-3-configure-pm2-to-start-on-system-boot">Step 3: Configure
+PM2 to Start on System Boot</h3>
+<p>To ensure your application runs permanently, even after an unexpected
+crash or server reboot, configure PM2's startup script.</p>
+<p>Generate the startup configuration script:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> startup systemd</span></code></pre></div>
+<p>PM2 will output a specific command that looks similar to this:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> env PATH=<span class="va">$PATH</span>:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd <span class="at">-u</span> your_username <span class="at">--hp</span> /home/your_username</span></code></pre></div>
+<p>Copy and run the exact command generated in your terminal to enable
+the systemd service.</p>
+<hr />
+<h3 id="step-4-save-the-running-process-list">Step 4: Save the Running
+Process List</h3>
+<p>After enabling the startup hook, save the current PM2 process list so
+that PM2 remembers which applications to launch upon boot:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> save</span></code></pre></div>
+<p>Your application is now configured to run permanently in the
+background.</p>
+<hr />
+<h3 id="essential-pm2-commands-for-process-management">Essential PM2
+Commands for Process Management</h3>
+<p>Use the following commands to monitor and manage your
+application:</p>
+<ul>
+<li><strong>View running processes:</strong>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> list</span></code></pre></div></li>
+<li><strong>View real-time logs:</strong>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> logs my-app</span></code></pre></div></li>
+<li><strong>Restart an application:</strong>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> restart my-app</span></code></pre></div></li>
+<li><strong>Reload an application with zero downtime:</strong>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> reload my-app</span></code></pre></div></li>
+<li><strong>Stop a running application:</strong>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> stop my-app</span></code></pre></div></li>
+<li><strong>Access the terminal dashboard:</strong>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pm2</span> monit</span></code></pre></div></li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

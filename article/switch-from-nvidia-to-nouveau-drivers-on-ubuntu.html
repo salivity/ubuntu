@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch from NVIDIA to Nouveau Drivers on Ubuntu - ubuntu</title>
+    <meta name="description" content="Switching the Ubuntu graphics stack from proprietary NVIDIA drivers back to the open-source Nouveau driver requires completely removing the proprietary packages, removing kernel blacklists that suppress Nouveau, updating the initial RAM file system, and">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/switch-from-nvidia-to-nouveau-drivers-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Switch from NVIDIA to Nouveau Drivers on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/switch-from-nvidia-to-nouveau-drivers-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Switching the Ubuntu graphics stack from proprietary NVIDIA drivers back to the open-source Nouveau driver requires completely removing the proprietary packages, removing kernel blacklists that suppress Nouveau, updating the initial RAM file system, and" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="switch-from-nvidia-to-nouveau-drivers-on-ubuntu">Switch from
+NVIDIA to Nouveau Drivers on Ubuntu</h1>
+<p>Switching the Ubuntu graphics stack from proprietary NVIDIA drivers
+back to the open-source Nouveau driver requires completely removing the
+proprietary packages, removing kernel blacklists that suppress Nouveau,
+updating the initial RAM file system, and rebooting the system. This
+guide provides a direct, step-by-step walkthrough to safely reconfigure
+your system to use the built-in open-source Nouveau driver.</p>
+<h3 id="step-1-remove-proprietary-nvidia-drivers">Step 1: Remove
+Proprietary NVIDIA Drivers</h3>
+<p>To allow Nouveau to take over the graphics hardware, you must first
+uninstall all proprietary NVIDIA kernel modules and userspace packages.
+Open a terminal and run the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get purge <span class="st">&quot;*nvidia*&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get autoremove</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get autoclean</span></code></pre></div>
+<p>This completely removes all installed NVIDIA binary packages,
+configuration files, and unused dependencies.</p>
+<h3 id="step-2-remove-the-nouveau-blacklist">Step 2: Remove the Nouveau
+Blacklist</h3>
+<p>When proprietary NVIDIA drivers are installed, Ubuntu automatically
+creates configuration files in <code>/etc/modprobe.d/</code> to
+blacklist the Nouveau driver and prevent it from loading into the Linux
+kernel. You must remove or modify these entries.</p>
+<p>Check for files containing the word "blacklist" and referencing
+"nouveau":</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;blacklist nouveau&quot;</span> /etc/modprobe.d/</span></code></pre></div>
+<p>Common files that blacklist Nouveau include:</p>
+<ul>
+<li><code>/etc/modprobe.d/blacklist-nvidia.conf</code></li>
+<li><code>/etc/modprobe.d/nvidia-graphics-drivers.conf</code></li>
+<li><code>/etc/modprobe.d/blacklist.conf</code></li>
+</ul>
+<p>Delete any standalone NVIDIA blacklist configuration files:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-f</span> /etc/modprobe.d/blacklist-nvidia.conf</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-f</span> /etc/modprobe.d/nvidia-graphics-drivers.conf</span></code></pre></div>
+<p>If <code>blacklist nouveau</code> is located inside
+<code>/etc/modprobe.d/blacklist.conf</code>, open that file with a text
+editor:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/blacklist.conf</span></code></pre></div>
+<p>Find the line that reads <code>blacklist nouveau</code> (and any
+associated <code>options nouveau modeset=0</code>), delete or comment
+them out by adding a <code>#</code> at the start of the line, and save
+the file (<code>Ctrl+O</code>, then <code>Enter</code>, then
+<code>Ctrl+X</code>).</p>
+<h3 id="step-3-ensure-mesa-nouveau-packages-are-installed">Step 3:
+Ensure Mesa Nouveau Packages Are Installed</h3>
+<p>The open-source driver relies on the Mesa 3D graphics library for
+OpenGL and hardware acceleration. Verify that the necessary packages are
+installed:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">--reinstall</span> xserver-xorg-video-nouveau mesa-va-drivers libdrm-nouveau2</span></code></pre></div>
+<h3 id="step-4-update-the-initramfs">Step 4: Update the Initramfs</h3>
+<p>The kernel boot configuration must be regenerated to reflect the
+removal of the blacklist and to ensure that the Nouveau kernel module is
+included in the initial boot image. Run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span></span></code></pre></div>
+<h3 id="step-5-reboot-and-verify">Step 5: Reboot and Verify</h3>
+<p>Reboot your machine to apply the changes:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>After the system boots to the desktop, verify that the Nouveau driver
+is actively controlling your graphics hardware:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-k</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-EA3</span> <span class="st">&#39;VGA|3D&#39;</span></span></code></pre></div>
+<p>Look for the line <code>Kernel driver in use: nouveau</code>. You can
+also verify that the module is loaded by running:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lsmod</span> <span class="kw">|</span> <span class="fu">grep</span> nouveau</span></code></pre></div>
+<p>If <code>nouveau</code> appears in the output, your Ubuntu graphics
+stack has successfully returned to using the open-source driver.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

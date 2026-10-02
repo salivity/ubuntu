@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Scrub a ZFS Pool on Ubuntu - ubuntu</title>
+    <meta name="description" content="Scrubbing a ZFS pool is an essential maintenance task on Ubuntu that reads all data blocks across the pool to detect silent data corruption, commonly known as bit rot, and automatically repairs errors using parity or mirror copies. This guide outlines th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-scrub-a-zfs-pool-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Scrub a ZFS Pool on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-scrub-a-zfs-pool-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Scrubbing a ZFS pool is an essential maintenance task on Ubuntu that reads all data blocks across the pool to detect silent data corruption, commonly known as bit rot, and automatically repairs errors using parity or mirror copies. This guide outlines th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-scrub-a-zfs-pool-on-ubuntu">How to Scrub a ZFS Pool on
+Ubuntu</h1>
+<p>Scrubbing a ZFS pool is an essential maintenance task on Ubuntu that
+reads all data blocks across the pool to detect silent data corruption,
+commonly known as bit rot, and automatically repairs errors using parity
+or mirror copies. This guide outlines the step-by-step process for
+initiating a manual scrub, monitoring its progress, managing the
+operation, and automating the process via systemd or cron to maintain
+long-term data integrity.</p>
+<h3 id="what-is-a-zfs-scrub">What is a ZFS Scrub?</h3>
+<p>A ZFS scrub validates all checksums stored within a pool. Unlike a
+standard filesystem check (<code>fsck</code>), a scrub runs while the
+pool is online and actively mounted, ensuring zero downtime for your
+services. If a checksum mismatch is detected, ZFS automatically attempts
+to repair the corrupted block using redundant copies from mirrored or
+RAID-Z drives.</p>
+<h3 id="step-1-identify-your-zfs-pool">Step 1: Identify Your ZFS
+Pool</h3>
+<p>Before running a scrub, identify the name and current state of your
+pool by opening a terminal and running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zpool</span> status</span></code></pre></div>
+<p>Note the name of the pool you wish to verify (for example,
+<code>tank</code> or <code>rpool</code>).</p>
+<h3 id="step-2-start-the-scrub-operation">Step 2: Start the Scrub
+Operation</h3>
+<p>Initiate the scrub using the <code>zpool scrub</code> command
+followed by your pool's name. Superuser privileges are required:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool scrub <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;pool_name&gt;</code> with your actual pool name.
+The command returns immediately to the prompt because the scrub executes
+as a background process.</p>
+<h3 id="step-3-monitor-scrub-progress">Step 3: Monitor Scrub
+Progress</h3>
+<p>To view the progress, scan rate, estimated completion time, and any
+repaired errors, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zpool</span> status <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Under the <code>scan</code> line, the output will display details
+such as:</p>
+<ul>
+<li>The amount of data scanned and repaired.</li>
+<li>The scrubbing speed and percentage completed.</li>
+<li>The estimated time remaining.</li>
+</ul>
+<p>Once the scrub completes, the <code>scan</code> section updates to
+show the date and time of completion, along with a tally of any repaired
+errors.</p>
+<h3 id="step-4-pause-or-stop-a-scrub-optional">Step 4: Pause or Stop a
+Scrub (Optional)</h3>
+<p>Because scrubbing causes significant disk I/O, you may need to pause
+or cancel it during high-load periods.</p>
+<p>To pause a scrub:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool scrub <span class="at">-p</span> <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<p>To resume a paused scrub, run the original scrub command again:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool scrub <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<p>To cancel and stop the scrub entirely:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> zpool scrub <span class="at">-s</span> <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="step-5-automate-regular-scrubs">Step 5: Automate Regular
+Scrubs</h3>
+<p>Ubuntu installations with the <code>zfsutils-linux</code> package
+include automated scrub configurations by default.</p>
+<p>To verify that the automated systemd scrub timer is active, run:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> list-timers <span class="kw">|</span> <span class="fu">grep</span> zfs</span></code></pre></div>
+<p>If it is inactive, enable the built-in systemd timer:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> zfs-scrub.timer</span></code></pre></div>
+<p>Alternatively, you can configure a monthly cron job by creating a
+file in <code>/etc/cron.monthly/zfs-scrub</code>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zpool</span> scrub <span class="op">&lt;</span>pool_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Ensure the script is executable:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod +x /etc/cron.monthly/zfs-scrub</span></code></pre></div>
+<p>Scheduling regular scrubs once every two to four weeks ensures
+continuous protection against data degradation without manual
+intervention.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

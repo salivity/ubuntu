@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe System Performance Monitoring with eBPF on Ubuntu - ubuntu</title>
+    <meta name="description" content="Extended Berkeley Packet Filter (eBPF) provides a revolutionary approach to system observability on Ubuntu by executing custom, sandboxed bytecode directly within the Linux kernel. This article examines how eBPF achieves deep, real-time performance insig">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/safe-system-performance-monitoring-with-e-bpf-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Safe System Performance Monitoring with eBPF on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/safe-system-performance-monitoring-with-e-bpf-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Extended Berkeley Packet Filter (eBPF) provides a revolutionary approach to system observability on Ubuntu by executing custom, sandboxed bytecode directly within the Linux kernel. This article examines how eBPF achieves deep, real-time performance insig" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="safe-system-performance-monitoring-with-ebpf-on-ubuntu">Safe
+System Performance Monitoring with eBPF on Ubuntu</h1>
+<p>Extended Berkeley Packet Filter (eBPF) provides a revolutionary
+approach to system observability on Ubuntu by executing custom,
+sandboxed bytecode directly within the Linux kernel. This article
+examines how eBPF achieves deep, real-time performance insights without
+modifying kernel source code or loading risky third-party kernel
+modules, ensuring system stability while capturing high-resolution
+metrics across CPU, memory, storage, and networking subsystems.</p>
+<h3 id="the-architecture-of-ebpf-observability">The Architecture of eBPF
+Observability</h3>
+<p>Traditionally, gathering detailed performance data required either
+invasive kernel modules—which risked kernel panics—or heavy userspace
+tracing tools that incurred substantial CPU overhead. eBPF changes this
+paradigm by running an event-driven virtual machine inside the Linux
+kernel.</p>
+<p>When a performance event occurs—such as a system call, function
+entry/exit, tracepoint, or network socket event—an attached eBPF program
+executes instantly. Rather than transferring raw event streams to
+userspace for processing, eBPF aggregates and filters the data inside
+the kernel using structured data stores called eBPF maps. Only the
+summarized data is passed to userspace, reducing context switches and
+minimizing system overhead.</p>
+<h3 id="ensuring-system-safety-via-the-kernel-verifier">Ensuring System
+Safety via the Kernel Verifier</h3>
+<p>The defining strength of eBPF on Ubuntu is its rigorous safety model,
+orchestrated by the in-kernel verifier:</p>
+<ul>
+<li><strong>Termination Checks:</strong> The verifier inspects the
+program control flow graph to ensure it contains no unbounded loops,
+preventing programs from hanging the CPU.</li>
+<li><strong>Memory Safety:</strong> Every pointer dereference is
+validated. eBPF programs cannot access arbitrary kernel memory or cause
+buffer overflows; they can only read designated data structures.</li>
+<li><strong>Privilege Separation:</strong> Loading tracing programs
+requires administrative privileges (<code>CAP_BPF</code> or
+<code>CAP_SYS_ADMIN</code>), preventing unauthorized users from spying
+on system activities.</li>
+<li><strong>Resource Limits:</strong> Instructions and stack size are
+strictly bounded, ensuring the program does not consume excessive kernel
+resources.</li>
+</ul>
+<p>If a program fails any of these static checks, the Ubuntu kernel
+refuses to load it, eliminating the risk of kernel crashes or system
+instability.</p>
+<h3 id="key-use-cases-for-ubuntu-performance-monitoring">Key Use Cases
+for Ubuntu Performance Monitoring</h3>
+<ol type="1">
+<li><strong>I/O Latency Analysis:</strong> Instead of measuring average
+disk throughput, eBPF tools track the exact latency distribution of
+block device requests, pinpointing micro-stalls and outlier
+requests.</li>
+<li><strong>CPU Scheduling and Thread Latency:</strong> eBPF hooks into
+the Linux scheduler (CFS/EEVDF) to monitor run-queue delays, identifying
+CPU starvation before it manifests as application-level
+degradation.</li>
+<li><strong>Network Performance:</strong> Operating at the TC (Traffic
+Control) and XDP (eXpress Data Path) layers, eBPF enables high-speed
+packet inspection, connection tracking, and drop monitoring without
+loading socket buffers into userspace.</li>
+<li><strong>Memory Allocation Profiling:</strong> Developers can track
+page faults, heap allocations, and slab usage patterns to detect memory
+leaks and suboptimal allocation behaviors in both user applications and
+kernel space.</li>
+</ol>
+<h3 id="practical-implementation-on-ubuntu">Practical Implementation on
+Ubuntu</h3>
+<p>Modern Ubuntu releases (such as Ubuntu 22.04 LTS and 24.04 LTS) ship
+with modern kernels that fully support eBPF out of the box.
+Administrators and engineers primarily interface with eBPF through two
+main ecosystems available via Ubuntu's package manager:</p>
+<ul>
+<li><strong>BPF Compiler Collection (BCC):</strong> A toolset offering
+dozens of ready-to-use performance tools (like <code>biolatency</code>,
+<code>execsnoop</code>, and <code>tcplife</code>) alongside Python and C
+bindings for writing custom monitors.</li>
+<li><strong>bpftrace:</strong> A high-level tracing language inspired by
+awk and DTrace, ideal for ad-hoc debugging, one-liners, and exploratory
+performance analysis.</li>
+</ul>
+<p>By combining low overhead, kernel-level depth, and programmatic
+safety guarantees, eBPF acts as the modern foundation for non-invasive,
+production-grade observability on Ubuntu.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

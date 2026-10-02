@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up an HSM Using OpenSC on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up a Hardware Security Module (HSM) or smart card token on Ubuntu using OpenSC enables secure cryptographic key generation, storage, and authentication. This guide provides a straightforward process for preparing an Ubuntu system, installing the">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-an-hsm-using-open-sc-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up an HSM Using OpenSC on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-an-hsm-using-open-sc-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up a Hardware Security Module (HSM) or smart card token on Ubuntu using OpenSC enables secure cryptographic key generation, storage, and authentication. This guide provides a straightforward process for preparing an Ubuntu system, installing the" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-an-hsm-using-opensc-on-ubuntu">How to Set Up an
+HSM Using OpenSC on Ubuntu</h1>
+<p>Setting up a Hardware Security Module (HSM) or smart card token on
+Ubuntu using OpenSC enables secure cryptographic key generation,
+storage, and authentication. This guide provides a straightforward
+process for preparing an Ubuntu system, installing the necessary drivers
+and OpenSC utilities, detecting your hardware token, and verifying
+cryptographic functionality via PKCS#11 tools.</p>
+<h3 id="step-1-install-opensc-and-pcsc-middleware">Step 1: Install
+OpenSC and PC/SC Middleware</h3>
+<p>Ubuntu requires the PC/SC (Personal Computer/Smart Card) daemon and
+the OpenSC suite to interface with cryptographic hardware. Open a
+terminal and update your package lists, then install the required
+packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install opensc pcscd pcsc-tools libccid</span></code></pre></div>
+<ul>
+<li><code>pcscd</code>: The background daemon that handles communication
+with smart cards and USB HSMs.</li>
+<li><code>libccid</code>: The generic USB Chip/Smart Card Interface
+Devices driver.</li>
+<li><code>opensc</code>: The core library and utilities implementing
+PKCS#11 and PKCS#15 standards.</li>
+<li><code>pcsc-tools</code>: Helpful diagnostic utilities, including
+<code>pcsc_scan</code>.</li>
+</ul>
+<h3 id="step-2-enable-and-start-the-pcsc-daemon">Step 2: Enable and
+Start the PC/SC Daemon</h3>
+<p>Ensure the <code>pcscd</code> service is running and configured to
+launch automatically on boot:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable pcscd</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start pcscd</span></code></pre></div>
+<p>Verify that the service is active:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status pcscd</span></code></pre></div>
+<h3 id="step-3-connect-and-detect-the-hsm">Step 3: Connect and Detect
+the HSM</h3>
+<p>Connect your USB HSM or smart card reader to the Ubuntu machine.
+Verify that the operating system recognizes the hardware using
+<code>pcsc_scan</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pcsc_scan</span></span></code></pre></div>
+<p>The output should display your card reader and card status, showing
+an ATR (Answer to Reset) string. Press <code>Ctrl+C</code> to exit the
+scan.</p>
+<p>Next, confirm that OpenSC can interact with the device:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">opensc-tool</span> <span class="at">-l</span></span></code></pre></div>
+<p>To view the card's profile and ATR details directly through OpenSC,
+run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">opensc-tool</span> <span class="at">-a</span></span></code></pre></div>
+<h3 id="step-4-inspect-token-structure">Step 4: Inspect Token
+Structure</h3>
+<p>To check whether the token is already initialized and formatted with
+a PKCS#15 structure, run:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pkcs15-tool</span> <span class="at">--dump</span></span></code></pre></div>
+<p>If the device is initialized, this command outputs details about the
+cardholder, PINs, public keys, and certificates present on the
+device.</p>
+<h3 id="step-5-generate-keys-and-perform-cryptographic-operations">Step
+5: Generate Keys and Perform Cryptographic Operations</h3>
+<p>You can manage the HSM using <code>pkcs11-tool</code>, which
+communicates with the HSM via the OpenSC PKCS#11 module located at
+<code>/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so</code>.</p>
+<p>To view available slots and token labels:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pkcs11-tool</span> <span class="at">--module</span> /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so <span class="at">--list-slots</span></span></code></pre></div>
+<p>To generate a 2048-bit RSA key pair on the HSM (replace
+<code>123456</code> with your user PIN):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pkcs11-tool</span> <span class="at">--module</span> /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so <span class="dt">\</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--login</span> <span class="at">--pin</span> 123456 <span class="dt">\</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--keypairgen</span> <span class="at">--key-type</span> rsa:2048 <span class="dt">\</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--label</span> <span class="st">&quot;hsm-demo-key&quot;</span> <span class="at">--id</span> 01</span></code></pre></div>
+<p>List all cryptographic objects stored on the device to confirm the
+key creation:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pkcs11-tool</span> <span class="at">--module</span> /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so <span class="at">--list-objects</span></span></code></pre></div>
+<h3 id="step-6-test-device-performance-and-cryptography">Step 6: Test
+Device Performance and Cryptography</h3>
+<p>Validate that the token operates properly under cryptographic load
+using the built-in PKCS#11 test suite:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pkcs11-tool</span> <span class="at">--module</span> /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--login</span> <span class="at">--pin</span> 123456 <span class="at">--test</span></span></code></pre></div>
+<p>This command runs automated signature, decryption, and hash
+verification tests directly on the hardware module, confirming that your
+HSM is fully operational and ready for integration with applications
+such as OpenSSL, OpenVPN, or Apache.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

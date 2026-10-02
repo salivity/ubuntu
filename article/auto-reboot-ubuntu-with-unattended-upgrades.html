@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Reboot Ubuntu with Unattended-Upgrades - ubuntu</title>
+    <meta name="description" content="This guide explains how to configure the unattended-upgrades package on an Ubuntu server to automatically reboot the system whenever a security or kernel update requires it. By making a few adjustments to the package configuration files, administrators c">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/auto-reboot-ubuntu-with-unattended-upgrades">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Auto Reboot Ubuntu with Unattended-Upgrades - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/auto-reboot-ubuntu-with-unattended-upgrades" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to configure the unattended-upgrades package on an Ubuntu server to automatically reboot the system whenever a security or kernel update requires it. By making a few adjustments to the package configuration files, administrators c" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="auto-reboot-ubuntu-with-unattended-upgrades">Auto Reboot Ubuntu
+with Unattended-Upgrades</h1>
+<p>This guide explains how to configure the
+<code>unattended-upgrades</code> package on an Ubuntu server to
+automatically reboot the system whenever a security or kernel update
+requires it. By making a few adjustments to the package configuration
+files, administrators can ensure security patches are fully applied
+while choosing whether to reboot immediately or schedule the restart
+during off-peak hours.</p>
+<h3 id="step-1-install-required-packages">Step 1: Install Required
+Packages</h3>
+<p>First, ensure that <code>unattended-upgrades</code> and
+<code>update-notifier-common</code> are installed on your Ubuntu system.
+The <code>update-notifier-common</code> package is necessary because it
+detects whether a reboot is required after updates are applied.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install unattended-upgrades update-notifier-common</span></code></pre></div>
+<p>To enable unattended upgrades, run the reconfiguration wizard:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure <span class="at">--priority</span><span class="op">=</span>low unattended-upgrades</span></code></pre></div>
+<p>Select <strong>Yes</strong> when prompted to automatically download
+and install stable updates.</p>
+<h3 id="step-2-configure-automatic-reboots">Step 2: Configure Automatic
+Reboots</h3>
+<p>Open the primary configuration file for unattended upgrades in a text
+editor:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apt/apt.conf.d/50unattended-upgrades</span></code></pre></div>
+<p>Scroll through the file to find the reboot configuration lines. By
+default, these lines are commented out with double slashes
+(<code>//</code>).</p>
+<p>Locate the <code>Automatic-Reboot</code> directive, uncomment it by
+removing <code>//</code>, and set its value to <code>"true"</code>:</p>
+<pre class="text"><code>Unattended-Upgrade::Automatic-Reboot &quot;true&quot;;</code></pre>
+<h3 id="step-3-set-a-scheduled-reboot-time-recommended">Step 3: Set a
+Scheduled Reboot Time (Recommended)</h3>
+<p>To prevent the server from rebooting unexpectedly in the middle of a
+business day, specify a maintenance window by setting
+<code>Automatic-Reboot-Time</code>. Uncomment the line and specify your
+preferred time in 24-hour format:</p>
+<pre class="text"><code>Unattended-Upgrade::Automatic-Reboot-Time &quot;03:00&quot;;</code></pre>
+<p>With this setting, if a kernel update installs at 2:00 PM, the server
+will postpone the reboot until 3:00 AM.</p>
+<h3 id="step-4-handle-logged-in-users-optional">Step 4: Handle Logged-In
+Users (Optional)</h3>
+<p>If users or automated sessions remain logged into the server, the
+system can be forced to reboot anyway by enabling
+<code>Automatic-Reboot-WithUsers</code>:</p>
+<pre class="text"><code>Unattended-Upgrade::Automatic-Reboot-WithUsers &quot;true&quot;;</code></pre>
+<p>Save and exit the file (in Nano, press <code>Ctrl+O</code>,
+<code>Enter</code>, then <code>Ctrl+X</code>).</p>
+<h3 id="step-5-test-the-configuration">Step 5: Test the
+Configuration</h3>
+<p>To confirm that the syntax of your configuration is valid and that
+unattended upgrades can run without errors, execute a dry run in debug
+mode:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> unattended-upgrades <span class="at">--dry-run</span> <span class="at">--debug</span></span></code></pre></div>
+<p>Review the output to verify that your settings are detected properly.
+Once configured, Ubuntu will automatically apply security updates and
+safely reboot when required by kernel installations.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

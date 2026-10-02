@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Samba Active Directory DC on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a comprehensive, step-by-step walkthrough for configuring an Ubuntu server as a Samba Active Directory Domain Controller (AD DC). You will learn how to prepare the network environment, install the required packages, provision the doma">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-samba-active-directory-dc-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup Samba Active Directory DC on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-samba-active-directory-dc-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a comprehensive, step-by-step walkthrough for configuring an Ubuntu server as a Samba Active Directory Domain Controller (AD DC). You will learn how to prepare the network environment, install the required packages, provision the doma" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-samba-active-directory-dc-on-ubuntu">Setup Samba Active
+Directory DC on Ubuntu</h1>
+<p>This guide provides a comprehensive, step-by-step walkthrough for
+configuring an Ubuntu server as a Samba Active Directory Domain
+Controller (AD DC). You will learn how to prepare the network
+environment, install the required packages, provision the domain,
+configure Kerberos authentication, and verify that the domain controller
+and its integrated DNS service are functioning properly.</p>
+<h3 id="prerequisites-and-network-configuration">Prerequisites and
+Network Configuration</h3>
+<p>A Samba Active Directory Domain Controller requires a static IP
+address and a fully qualified domain name (FQDN).</p>
+<ol type="1">
+<li><p>Set your server's hostname (e.g.,
+<code>dc1.example.lan</code>):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> hostnamectl set-hostname dc1.example.lan</span></code></pre></div></li>
+<li><p>Edit <code>/etc/hosts</code> to map the static IP address to your
+FQDN and short hostname:</p>
+<pre class="text"><code>127.0.0.1       localhost
+192.168.1.10    dc1.example.lan    dc1</code></pre></li>
+<li><p>Configure a static IP address in <code>/etc/netplan/</code> using
+your network interface name. Ensure the nameserver points to
+<code>127.0.0.1</code> and your gateway's IP:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">network</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">renderer</span><span class="kw">:</span><span class="at"> networkd</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ethernets</span><span class="kw">:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">eth0</span><span class="kw">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dhcp4</span><span class="kw">:</span><span class="at"> </span><span class="ch">no</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">addresses</span><span class="kw">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> 192.168.1.10/24</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">routes</span><span class="kw">:</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">to</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">via</span><span class="kw">:</span><span class="at"> </span><span class="fl">192.168.1.1</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">nameservers</span><span class="kw">:</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">addresses</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="fl">127.0.0.1</span><span class="kw">,</span><span class="at"> </span><span class="fl">192.168.1.1</span><span class="kw">]</span></span></code></pre></div>
+<p>Apply the changes:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netplan apply</span></code></pre></div></li>
+</ol>
+<h3 id="disable-systemd-resolved-dns-stub-listener">Disable
+systemd-resolved DNS Stub Listener</h3>
+<p>Samba provides its own internal DNS server on port 53. Ubuntu’s
+default <code>systemd-resolved</code> service must be adjusted to
+prevent port conflicts.</p>
+<ol type="1">
+<li><p>Edit <code>/etc/systemd/resolved.conf</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Resolve]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">DNS</span><span class="ot">=</span><span class="st">127.0.0.1</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">DNSStubListener</span><span class="ot">=</span><span class="kw">no</span></span></code></pre></div></li>
+<li><p>Link the resolved file and restart the service:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /etc/resolv.conf</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> /run/systemd/resolve/resolv.conf /etc/resolv.conf</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-resolved</span></code></pre></div></li>
+</ol>
+<h3 id="install-samba-and-kerberos-packages">Install Samba and Kerberos
+Packages</h3>
+<p>Update repository lists and install the required software suites:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> samba smbclient winbind libpam-winbind libnss-winbind krb5-user krb5-config</span></code></pre></div>
+<p>During installation, prompt screens will ask for the Kerberos default
+realm. Enter your realm in all uppercase (e.g.,
+<code>EXAMPLE.LAN</code>). For the administrative server, enter your
+domain controller hostname (e.g., <code>dc1.example.lan</code>).</p>
+<h3 id="provision-the-domain">Provision the Domain</h3>
+<p>Before provisioning, you must stop any standard Samba services and
+remove the default configuration file.</p>
+<ol type="1">
+<li><p>Stop and disable standard services:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop smbd nmbd winbind</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable smbd nmbd winbind</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl mask smbd nmbd winbind</span></code></pre></div></li>
+<li><p>Remove or rename the default Samba configuration:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv /etc/samba/smb.conf /etc/samba/smb.conf.bak</span></code></pre></div></li>
+<li><p>Provision the domain interactively using
+<code>samba-tool</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> samba-tool domain provision <span class="at">--use-rfc2307</span> <span class="at">--interactive</span></span></code></pre></div>
+<ul>
+<li><strong>Realm:</strong> <code>EXAMPLE.LAN</code></li>
+<li><strong>Domain:</strong> <code>EXAMPLE</code></li>
+<li><strong>Server Role:</strong> <code>dc</code></li>
+<li><strong>DNS backend:</strong> <code>SAMBA_INTERNAL</code></li>
+<li><strong>DNS forwarder IP:</strong> Upstream DNS IP (e.g.,
+<code>192.168.1.1</code> or <code>8.8.8.8</code>)</li>
+<li><strong>Administrator password:</strong> Choose a strong password
+meeting complex criteria.</li>
+</ul></li>
+</ol>
+<h3 id="configure-kerberos">Configure Kerberos</h3>
+<p>Replace the default Kerberos configuration with the configuration
+generated by Samba:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /var/lib/samba/private/krb5.conf /etc/krb5.conf</span></code></pre></div>
+<h3 id="start-the-samba-active-directory-domain-controller">Start the
+Samba Active Directory Domain Controller</h3>
+<ol type="1">
+<li><p>Unmask and start the <code>samba-ad-dc</code> service:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl unmask samba-ad-dc</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start samba-ad-dc</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable samba-ad-dc</span></code></pre></div></li>
+<li><p>Verify that the service is running:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status samba-ad-dc</span></code></pre></div></li>
+</ol>
+<h3 id="verification-and-testing">Verification and Testing</h3>
+<ol type="1">
+<li><p><strong>Verify Kerberos Authentication:</strong> Request a
+ticket-granting ticket for the Administrator account:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kinit</span> administrator@EXAMPLE.LAN</span></code></pre></div>
+<p>Check that the ticket is active:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">klist</span></span></code></pre></div></li>
+<li><p><strong>Verify DNS Records:</strong> Ensure Samba internal DNS is
+resolving domain records:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">host</span> <span class="at">-t</span> A example.lan</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">host</span> <span class="at">-t</span> SRV _ldap._tcp.example.lan</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">host</span> <span class="at">-t</span> SRV _kerberos._udp.example.lan</span></code></pre></div></li>
+<li><p><strong>Verify SMB Shares:</strong> List the shares hosted on the
+domain controller:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">smbclient</span> <span class="at">-L</span> localhost <span class="at">-U%</span></span></code></pre></div>
+<p>You should see default Active Directory shares such as
+<code>sysvol</code> and <code>netlogon</code>.</p></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

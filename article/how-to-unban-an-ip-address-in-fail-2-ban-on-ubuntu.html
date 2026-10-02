@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Unban an IP Address in Fail2ban on Ubuntu - ubuntu</title>
+    <meta name="description" content="Fail2ban secures Ubuntu servers by monitoring log files and banning IP addresses that show malicious signs, such as too many failed login attempts. However, legitimate users are occasionally locked out due to accidental credential errors. This guide prov">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-unban-an-ip-address-in-fail-2-ban-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Unban an IP Address in Fail2ban on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-unban-an-ip-address-in-fail-2-ban-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Fail2ban secures Ubuntu servers by monitoring log files and banning IP addresses that show malicious signs, such as too many failed login attempts. However, legitimate users are occasionally locked out due to accidental credential errors. This guide prov" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-unban-an-ip-address-in-fail2ban-on-ubuntu">How to Unban
+an IP Address in Fail2ban on Ubuntu</h1>
+<p>Fail2ban secures Ubuntu servers by monitoring log files and banning
+IP addresses that show malicious signs, such as too many failed login
+attempts. However, legitimate users are occasionally locked out due to
+accidental credential errors. This guide provides the direct commands
+required to check banned IP lists, identify the relevant jail, and
+immediately unban an IP address using the Fail2ban client.</p>
+<h3 id="step-1-identify-the-jail-name">Step 1: Identify the Jail
+Name</h3>
+<p>Fail2ban organizes its firewall rules into "jails" based on the
+service being protected (such as SSH, Nginx, or Postfix). Before
+unbanning an IP, you must identify which jail triggered the ban.</p>
+<p>Run the following command to see all active jails:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client status</span></code></pre></div>
+<p>The output will list the active jails under <code>Jail list</code>.
+For example:</p>
+<pre class="text"><code>`- Jail list:   sshd, nginx-http-auth</code></pre>
+<h3 id="step-2-confirm-the-banned-ip-address">Step 2: Confirm the Banned
+IP Address</h3>
+<p>To see the list of banned IPs within a specific jail (for instance,
+<code>sshd</code>), execute:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client status sshd</span></code></pre></div>
+<p>Locate the <code>Banned IP list</code> in the output to confirm that
+the target IP address is present.</p>
+<h3 id="step-3-unban-the-ip-address">Step 3: Unban the IP Address</h3>
+<p>Once you know the jail name and the banned IP, you can remove the ban
+using the <code>set unbanip</code> command.</p>
+<p>Use the following syntax:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client set <span class="op">&lt;</span>jail_name<span class="op">&gt;</span> unbanip <span class="op">&lt;</span>ip_address<span class="op">&gt;</span></span></code></pre></div>
+<p>For example, to unban the IP <code>192.0.2.1</code> from the
+<code>sshd</code> jail:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client set sshd unbanip 192.0.2.1</span></code></pre></div>
+<p>If the unban is successful, the terminal will return the unbanned IP
+address:</p>
+<pre class="text"><code>192.0.2.1</code></pre>
+<h3 id="alternative-unban-an-ip-across-all-jails">Alternative: Unban an
+IP Across All Jails</h3>
+<p>If you do not know which jail banned the IP address, or if it was
+banned across multiple services, you can issue a universal unban
+command:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client unban 192.0.2.1</span></code></pre></div>
+<p>Fail2ban will automatically search through all active jails and lift
+the ban for that address.</p>
+<h3 id="step-4-verify-the-removal">Step 4: Verify the Removal</h3>
+<p>Confirm that the IP address has been successfully removed by querying
+the jail's status again:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> fail2ban-client status sshd</span></code></pre></div>
+<p>The IP address should no longer appear in the
+<code>Banned IP list</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

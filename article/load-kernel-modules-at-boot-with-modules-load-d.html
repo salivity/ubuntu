@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Kernel Modules at Boot with modules-load.d - ubuntu</title>
+    <meta name="description" content="Loading a custom kernel module automatically at boot in Ubuntu is handled by the systemd-modules-load.service daemon, which reads static configuration files from /etc/modules-load.d/. This guide explains how to install a compiled kernel module into the s">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/load-kernel-modules-at-boot-with-modules-load-d">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Load Kernel Modules at Boot with modules-load.d - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/load-kernel-modules-at-boot-with-modules-load-d" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Loading a custom kernel module automatically at boot in Ubuntu is handled by the systemd-modules-load.service daemon, which reads static configuration files from /etc/modules-load.d/. This guide explains how to install a compiled kernel module into the s" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="load-kernel-modules-at-boot-with-modules-loadd">Load Kernel
+Modules at Boot with modules-load.d</h1>
+<p>Loading a custom kernel module automatically at boot in Ubuntu is
+handled by the <code>systemd-modules-load.service</code> daemon, which
+reads static configuration files from <code>/etc/modules-load.d/</code>.
+This guide explains how to install a compiled kernel module into the
+system tree, register it within <code>/etc/modules-load.d/</code>, and
+verify that it loads correctly on system startup.</p>
+<h3 id="step-1-install-the-module-into-the-kernel-tree">Step 1: Install
+the Module into the Kernel Tree</h3>
+<p>Before systemd can load your module at boot, the module file
+(<code>.ko</code>) must exist inside the module directory for your
+currently running kernel version so that <code>modprobe</code> can
+locate it.</p>
+<ol type="1">
+<li><p>Copy your compiled <code>.ko</code> file to the kernel's extra
+modules directory:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /lib/modules/<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span>/extra</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp your_module_name.ko /lib/modules/<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span>/extra/</span></code></pre></div></li>
+<li><p>Update the module dependency database:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> depmod <span class="at">-a</span></span></code></pre></div></li>
+<li><p>Test that the module loads manually without errors:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe your_module_name</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-create-a-configuration-file-in-etcmodules-loadd">Step 2:
+Create a Configuration File in /etc/modules-load.d/</h3>
+<p>The <code>systemd-modules-load.service</code> searches
+<code>/etc/modules-load.d/</code> for files ending in
+<code>.conf</code>. Each file contains a newline-separated list of
+kernel module names to load.</p>
+<ol type="1">
+<li><p>Create a new configuration file (for example,
+<code>custom-modules.conf</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modules-load.d/custom-modules.conf</span></code></pre></div></li>
+<li><p>Add the exact name of your module (without the <code>.ko</code>
+extension):</p>
+<pre class="text"><code>your_module_name</code></pre></li>
+<li><p>Save and close the file.</p></li>
+</ol>
+<h3 id="step-3-handle-module-parameters-optional">Step 3: Handle Module
+Parameters (Optional)</h3>
+<p>The files in <code>/etc/modules-load.d/</code> only accept module
+names; they do not accept module parameters. If your custom module
+requires options passed to it during initialization:</p>
+<ol type="1">
+<li><p>Create a file in <code>/etc/modprobe.d/</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/modprobe.d/your_module_name.conf</span></code></pre></div></li>
+<li><p>Specify the parameters using the <code>options</code>
+directive:</p>
+<pre class="text"><code>options your_module_name parameter_name=value</code></pre></li>
+</ol>
+<h3 id="step-4-verify-the-configuration">Step 4: Verify the
+Configuration</h3>
+<p>You can verify the configuration without rebooting by restarting the
+<code>systemd-modules-load</code> service:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-modules-load</span></code></pre></div>
+<p>Check the status of the service to ensure it processed the
+configuration without failure:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status systemd-modules-load</span></code></pre></div>
+<p>Finally, confirm that your module is loaded in memory:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lsmod</span> <span class="kw">|</span> <span class="fu">grep</span> your_module_name</span></code></pre></div>
+<p>Upon subsequent reboots, Ubuntu will now automatically load the
+designated kernel module during early user-space initialization.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

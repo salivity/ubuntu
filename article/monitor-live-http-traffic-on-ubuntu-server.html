@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Live HTTP Traffic on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="Monitoring real-time HTTP requests on an Ubuntu web server is essential for troubleshooting traffic spikes, debugging application errors, and identifying malicious requests. While standard access logs record this data, several command-line utilities allo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/monitor-live-http-traffic-on-ubuntu-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Monitor Live HTTP Traffic on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/monitor-live-http-traffic-on-ubuntu-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Monitoring real-time HTTP requests on an Ubuntu web server is essential for troubleshooting traffic spikes, debugging application errors, and identifying malicious requests. While standard access logs record this data, several command-line utilities allo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="monitor-live-http-traffic-on-ubuntu-server">Monitor Live HTTP
+Traffic on Ubuntu Server</h1>
+<p>Monitoring real-time HTTP requests on an Ubuntu web server is
+essential for troubleshooting traffic spikes, debugging application
+errors, and identifying malicious requests. While standard access logs
+record this data, several command-line utilities allow administrators to
+inspect incoming and outgoing HTTP traffic as it happens. This guide
+covers the most effective commands for live HTTP traffic monitoring on
+Ubuntu, ranging from dedicated HTTP packet sniffers like
+<code>httpry</code> and raw packet analyzers like <code>tcpdump</code>
+to real-time log viewers.</p>
+<h2 id="1-using-httpry-dedicated-http-sniffer">1. Using
+<code>httpry</code> (Dedicated HTTP Sniffer)</h2>
+<p>The <code>httpry</code> utility is a specialized packet sniffer
+designed explicitly for displaying and logging HTTP traffic. It captures
+network packets, parses the HTTP protocol, and prints requests to the
+terminal in a clean, human-readable format.</p>
+<p>To install <code>httpry</code> on Ubuntu:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install httpry</span></code></pre></div>
+<p>To start monitoring HTTP traffic on all interfaces:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> httpry <span class="at">-i</span> any</span></code></pre></div>
+<p>To filter for specific HTTP methods (such as <code>GET</code> and
+<code>POST</code>):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> httpry <span class="at">-m</span> get,post</span></code></pre></div>
+<h2 id="2-using-tcpdump-network-packet-inspection">2. Using
+<code>tcpdump</code> (Network Packet Inspection)</h2>
+<p>The <code>tcpdump</code> command is a powerful, native network
+analysis tool pre-installed or readily available on almost all Linux
+systems. You can configure it to capture ASCII-encoded HTTP payloads on
+standard web ports (port 80).</p>
+<p>Run the following command to monitor live HTTP requests:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tcpdump <span class="at">-i</span> any <span class="at">-n</span> <span class="at">-s</span> 0 <span class="at">-A</span> <span class="st">&#39;tcp port 80 and (((ip[2:2] - ((ip[0]&amp;0xf)&lt;&lt;2)) - ((tcp[12:2]&amp;0xf0)&gt;&gt;2)) != 0)&#39;</span></span></code></pre></div>
+<ul>
+<li><code>-i any</code>: Listens on all available network
+interfaces.</li>
+<li><code>-n</code>: Disables DNS lookups to keep output fast.</li>
+<li><code>-s 0</code>: Captures the full packet size (snapshot
+length).</li>
+<li><code>-A</code>: Outputs packet contents in ASCII text, allowing you
+to read HTTP headers directly.</li>
+</ul>
+<h2 id="3-streaming-web-server-logs-with-tail--f">3. Streaming Web
+Server Logs with <code>tail -f</code></h2>
+<p>If your traffic is encrypted via HTTPS (port 443), packet sniffers
+like <code>tcpdump</code> and <code>httpry</code> will only display
+encrypted payloads unless configured with decryption keys. In production
+environments, the most common way to monitor live decrypted HTTP and
+HTTPS traffic is to tail your web server's access logs.</p>
+<h3 id="for-nginx">For Nginx:</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tail <span class="at">-f</span> /var/log/nginx/access.log</span></code></pre></div>
+<h3 id="for-apache">For Apache:</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tail <span class="at">-f</span> /var/log/apache2/access.log</span></code></pre></div>
+<p>You can combine this with <code>grep</code> to monitor requests to a
+specific endpoint or from a specific IP address:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tail <span class="at">-f</span> /var/log/nginx/access.log <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;POST /api/v1&quot;</span></span></code></pre></div>
+<h2 id="4-using-goaccess-for-interactive-real-time-monitoring">4. Using
+<code>goaccess</code> for Interactive Real-Time Monitoring</h2>
+<p><code>GoAccess</code> is an interactive real-time web log analyzer
+that parses your server logs and outputs a visual dashboard directly
+within the terminal.</p>
+<p>To install <code>goaccess</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install goaccess</span></code></pre></div>
+<p>To run <code>goaccess</code> interactively on your Nginx access
+log:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> goaccess /var/log/nginx/access.log <span class="at">--log-format</span><span class="op">=</span>COMBINED</span></code></pre></div>
+<p>This interface tracks hits, visitor numbers, requested URLs,
+referrers, and HTTP response codes in real time.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

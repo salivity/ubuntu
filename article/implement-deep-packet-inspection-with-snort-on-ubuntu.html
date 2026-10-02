@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement Deep Packet Inspection with Snort on Ubuntu - ubuntu</title>
+    <meta name="description" content="Deep packet inspection (DPI) allows network administrators to look beyond packet headers and analyze the actual data payloads crossing a network perimeter. This article provides a direct, technical walkthrough for deploying Snort as a DPI engine on an Ub">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/implement-deep-packet-inspection-with-snort-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Implement Deep Packet Inspection with Snort on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/implement-deep-packet-inspection-with-snort-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Deep packet inspection (DPI) allows network administrators to look beyond packet headers and analyze the actual data payloads crossing a network perimeter. This article provides a direct, technical walkthrough for deploying Snort as a DPI engine on an Ub" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="implement-deep-packet-inspection-with-snort-on-ubuntu">Implement
+Deep Packet Inspection with Snort on Ubuntu</h1>
+<p>Deep packet inspection (DPI) allows network administrators to look
+beyond packet headers and analyze the actual data payloads crossing a
+network perimeter. This article provides a direct, technical walkthrough
+for deploying Snort as a DPI engine on an Ubuntu-based gateway router or
+firewall. You will learn how to configure network interfaces for
+boundary monitoring, install and configure Snort, write custom rules to
+inspect payload contents, and run the engine to actively identify and
+log malicious application-layer data.</p>
+<h3 id="1-network-boundary-architecture">1. Network Boundary
+Architecture</h3>
+<p>To inspect boundary traffic, the Ubuntu host must sit directly in the
+traffic path (as a router/bridge using Inline mode) or receive mirrored
+traffic from a switch's SPAN port (Passive mode). For full deep packet
+inspection and prevention (IPS), an inline deployment with two network
+interfaces is standard:</p>
+<ul>
+<li><strong>Interface 1 (<code>eth0</code>):</strong> External / WAN
+facing.</li>
+<li><strong>Interface 2 (<code>eth1</code>):</strong> Internal / LAN
+facing.</li>
+</ul>
+<p>Disable interface offloading features to ensure Snort sees raw,
+intact packets without kernel-level fragmentation changes:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool <span class="at">-K</span> eth0 gro off lro off tso off</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool <span class="at">-K</span> eth1 gro off lro off tso off</span></code></pre></div>
+<p>To persist these settings, add them to your
+<code>/etc/netplan/*.yaml</code> file or a systemd startup script.</p>
+<h3 id="2-installing-snort">2. Installing Snort</h3>
+<p>Update package lists and install Snort. Ubuntu provides Snort
+packages via the standard repository:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install snort <span class="at">-y</span></span></code></pre></div>
+<p>During installation, the package installer will prompt you for the
+local network address range. Specify your internal subnet (for example,
+<code>192.168.1.0/24</code>).</p>
+<h3 id="3-configuring-the-boundary-parameters">3. Configuring the
+Boundary Parameters</h3>
+<p>The main configuration file is located at
+<code>/etc/snort/snort.conf</code>. Edit this file to establish your
+network topology:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/snort/snort.conf</span></code></pre></div>
+<p>Define the internal and external network variables:</p>
+<pre class="plaintext"><code>ipvar HOME_NET [192.168.1.0/24]
+ipvar EXTERNAL_NET !$HOME_NET</code></pre>
+<p>Set the rule path variables to ensure custom DPI signatures are
+loaded:</p>
+<pre class="plaintext"><code>var RULE_PATH /etc/snort/rules
+var SO_RULE_PATH /etc/snort/so_rules
+var PREPROC_RULE_PATH /etc/snort/preproc_rules</code></pre>
+<p>Verify that preprocessors responsible for packet reassembly (such as
+<code>frag3</code> for IP defragmentation and <code>stream5</code> for
+TCP stream reassembly) are enabled. DPI requires clean stream reassembly
+to inspect payloads spanning multiple packets:</p>
+<pre class="plaintext"><code>preprocessor frag3_global: max_frags 65536
+preprocessor frag3_engine: policy first detect_anomalies
+
+preprocessor stream5_global: track_tcp yes, track_udp yes
+preprocessor stream5_tcp: policy first, require_3whs yes</code></pre>
+<h3 id="4-writing-custom-deep-packet-inspection-rules">4. Writing Custom
+Deep Packet Inspection Rules</h3>
+<p>DPI relies on matching patterns deep inside the application payload
+rather than just filtering source/destination ports and IPs.</p>
+<p>Open the local rules file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/snort/rules/local.rules</span></code></pre></div>
+<p>Add rules that inspect payload contents using keywords such as
+<code>content</code>, <code>depth</code>, <code>offset</code>, and
+<code>nocase</code>:</p>
+<ul>
+<li><strong>Detecting cleartext credentials or command sequences (e.g.,
+unauthorized HTTP admin login):</strong></li>
+</ul>
+<pre class="plaintext"><code>alert tcp $EXTERNAL_NET any -&gt; $HOME_NET 80 (msg:&quot;DPI: Unauthorized Admin POST Attempt&quot;; flow:to_server,established; content:&quot;POST&quot;; http_method; content:&quot;/admin/login&quot;; http_uri; content:&quot;admin=true&quot;; nocase; sid:1000001; rev:1;)</code></pre>
+<ul>
+<li><strong>Detecting custom protocol malware signatures (hex payload
+matching):</strong></li>
+</ul>
+<pre class="plaintext"><code>alert tcp $HOME_NET any -&gt; $EXTERNAL_NET any (msg:&quot;DPI: Known Trojan Signature Match&quot;; flow:to_server,established; content:&quot;|4d 5a 90 00 03|&quot;; depth:5; sid:1000002; rev:1;)</code></pre>
+<ul>
+<li><strong>Detecting sensitive data leakage (credit card or PII
+strings):</strong></li>
+</ul>
+<pre class="plaintext"><code>alert tcp $HOME_NET any -&gt; $EXTERNAL_NET any (msg:&quot;DPI: Suspicious Outbound Key Transmission&quot;; flow:established; content:&quot;BEGIN PRIVATE KEY&quot;; sid:1000003; rev:1;)</code></pre>
+<h3 id="5-validating-and-testing-the-configuration">5. Validating and
+Testing the Configuration</h3>
+<p>Validate the configuration file to detect syntax errors before
+running the service:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snort <span class="at">-T</span> <span class="at">-c</span> /etc/snort/snort.conf</span></code></pre></div>
+<p>If the validation returns
+<code>Snort successfully validated the configuration!</code>, start
+Snort in test mode on your monitored boundary interface:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snort <span class="at">-A</span> console <span class="at">-q</span> <span class="at">-c</span> /etc/snort/snort.conf <span class="at">-i</span> eth1</span></code></pre></div>
+<p>Trigger a rule from a client machine inside the network using
+<code>curl</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://<span class="op">&lt;</span>target-ip<span class="op">&gt;</span>/admin/login <span class="at">-d</span> <span class="st">&quot;admin=true&quot;</span></span></code></pre></div>
+<p>Snort will output an alert to the terminal confirming that the
+application payload was inspected and flagged:</p>
+<pre class="plaintext"><code>[**] [1:1000001:1] DPI: Unauthorized Admin POST Attempt [**]
+[Priority: 0] 
+05/14-10:20:15.123456 192.168.1.50:48292 -&gt; 192.168.1.10:80</code></pre>
+<h3 id="6-running-snort-as-a-system-service">6. Running Snort as a
+System Service</h3>
+<p>To keep Snort running continuously at the boundary, enable the
+systemd service:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable snort</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start snort</span></code></pre></div>
+<p>Alert logs will be written to <code>/var/log/snort/alert</code>,
+where they can be forwarded to a SIEM or analyzed using tools like
+Barnyard2 or fluentd for continuous boundary monitoring.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

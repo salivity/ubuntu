@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using Mosh for Roaming Network Connections in Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explores how the Mobile Shell (Mosh) application provides seamless terminal roaming and intermittent connectivity for Ubuntu systems. While standard SSH connections terminate when network interfaces change or drop, Mosh relies on a modern pr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-mosh-for-roaming-network-connections-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using Mosh for Roaming Network Connections in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-mosh-for-roaming-network-connections-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how the Mobile Shell (Mosh) application provides seamless terminal roaming and intermittent connectivity for Ubuntu systems. While standard SSH connections terminate when network interfaces change or drop, Mosh relies on a modern pr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-mosh-for-roaming-network-connections-in-ubuntu">Using Mosh
+for Roaming Network Connections in Ubuntu</h1>
+<p>This article explores how the Mobile Shell (Mosh) application
+provides seamless terminal roaming and intermittent connectivity for
+Ubuntu systems. While standard SSH connections terminate when network
+interfaces change or drop, Mosh relies on a modern protocol that
+maintains persistent, responsive sessions. Below, we cover how Mosh
+functions, why it resolves common SSH roaming limitations, and how to
+utilize it effectively in Ubuntu environments.</p>
+<h3 id="the-limitation-of-traditional-ssh-on-mobile-connections">The
+Limitation of Traditional SSH on Mobile Connections</h3>
+<p>Standard SSH relies on persistent TCP streams. When an Ubuntu client
+connects to a remote server over TCP, the session is tied to a specific
+IP address and port pair. If a user moves from an office Wi-Fi network
+to a cellular hotspot, the local IP address changes, causing the TCP
+connection to stall and eventually drop. Similarly, putting a laptop to
+sleep or passing through network dead zones causes standard SSH sessions
+to hang and require manual termination.</p>
+<h3 id="how-mosh-facilitates-seamless-network-roaming">How Mosh
+Facilitates Seamless Network Roaming</h3>
+<p>Mosh solves connection instability by replacing the underlying
+transport mechanism with its own State Synchronization Protocol (SSP),
+which runs over UDP.</p>
+<ol type="1">
+<li><strong>IP-Agnostic Session Maintenance</strong>: Mosh uses SSH
+solely for authentication and session initiation. Once authenticated,
+the server launches the <code>mosh-server</code> process and sends an
+encrypted session key back to the client over a specified UDP port
+(typically in the 60000–61000 range). Because UDP is connectionless, the
+session is bound to the cryptographic key rather than the client's IP
+address.</li>
+<li><strong>Automatic Handover</strong>: When your Ubuntu machine
+changes IP addresses—such as switching between Wi-Fi access points or
+moving to a mobile tether—the client simply resumes sending UDP packets
+with the new source IP. The server authenticates the packets using the
+existing session key and immediately updates the destination address for
+return traffic without interrupting running processes.</li>
+<li><strong>Handling Sleep and Disconnection</strong>: If an Ubuntu
+client goes to sleep or experiences a complete network outage, Mosh
+pauses synchronization. Once network connectivity is restored, the
+connection automatically recovers, even hours later, without requiring
+the user to reconnect or restart running shell tasks.</li>
+</ol>
+<h3 id="local-echo-and-latency-reduction">Local Echo and Latency
+Reduction</h3>
+<p>In addition to network roaming, Mosh implements speculative local
+echo. On high-latency mobile networks, typing via standard SSH feels
+sluggish because each keystroke must travel to the server and back
+before appearing on the screen. Mosh predicts the server's response
+locally, rendering typed characters and line edits immediately while
+synchronizing the actual state in the background. If a prediction is
+incorrect, Mosh seamlessly corrects the display once the server state
+arrives.</p>
+<h3 id="deploying-mosh-on-ubuntu">Deploying Mosh on Ubuntu</h3>
+<p>To utilize Mosh, both the client and remote host must run the
+software.</p>
+<ol type="1">
+<li><p><strong>Installation</strong>: Mosh is available in the official
+Ubuntu repositories:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install mosh</span></code></pre></div></li>
+<li><p><strong>Firewall Configuration</strong>: Because Mosh uses UDP
+instead of TCP for data transit, the target server's firewall must allow
+traffic across the Mosh UDP port range. On an Ubuntu server running UFW
+(Uncomplicated Firewall):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 60000:61000/udp</span></code></pre></div></li>
+<li><p><strong>Connecting</strong>: Connect using the standard syntax,
+replacing <code>ssh</code> with <code>mosh</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mosh</span> username@remote_host</span></code></pre></div></li>
+</ol>
+<p>By abstracting remote terminal access away from fixed IP connections
+and continuous TCP streams, Mosh enables Ubuntu users to work reliably
+across variable, mobile, and roaming network environments.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

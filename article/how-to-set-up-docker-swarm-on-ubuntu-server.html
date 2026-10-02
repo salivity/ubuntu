@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up Docker Swarm on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for setting up Docker Swarm mode and initializing a primary manager node on an Ubuntu server. You will learn how to configure the necessary firewall rules, install the Docker Engine, initialize the Swarm">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-docker-swarm-on-ubuntu-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up Docker Swarm on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-docker-swarm-on-ubuntu-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for setting up Docker Swarm mode and initializing a primary manager node on an Ubuntu server. You will learn how to configure the necessary firewall rules, install the Docker Engine, initialize the Swarm" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-docker-swarm-on-ubuntu-server">How to Set Up
+Docker Swarm on Ubuntu Server</h1>
+<p>This guide provides a straightforward walkthrough for setting up
+Docker Swarm mode and initializing a primary manager node on an Ubuntu
+server. You will learn how to configure the necessary firewall rules,
+install the Docker Engine, initialize the Swarm cluster using the
+correct network interface, and retrieve join tokens for adding future
+nodes to your infrastructure.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before starting, ensure you have:</p>
+<ul>
+<li>An Ubuntu server (20.04, 22.04, or 24.04 LTS).</li>
+<li>A user account with <code>sudo</code> privileges.</li>
+<li>A static internal or public IP address assigned to the server.</li>
+</ul>
+<hr />
+<h3 id="step-1-install-docker-engine">Step 1: Install Docker Engine</h3>
+<p>If Docker is not already installed on your Ubuntu server, update your
+package index and install Docker CE.</p>
+<p>Update the local package index:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<p>Install the required packages to allow <code>apt</code> to use a
+repository over HTTPS:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> ca-certificates curl gnupg lsb-release</span></code></pre></div>
+<p>Add Docker’s official GPG key:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/apt/keyrings</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg <span class="kw">|</span> <span class="fu">sudo</span> gpg <span class="at">--dearmor</span> <span class="at">-o</span> /etc/apt/keyrings/docker.gpg</span></code></pre></div>
+<p>Set up the Docker repository:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;deb [arch=</span><span class="va">$(</span><span class="ex">dpkg</span> <span class="at">--print-architecture</span><span class="va">)</span><span class="st"> signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu </span><span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">  </span><span class="va">$(</span><span class="ex">lsb_release</span> <span class="at">-cs</span><span class="va">)</span><span class="st"> stable&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/docker.list <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>Install Docker Engine:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span></code></pre></div>
+<p>Ensure Docker starts on boot and is running:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable docker</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status docker</span></code></pre></div>
+<hr />
+<h3 id="step-2-configure-the-firewall">Step 2: Configure the
+Firewall</h3>
+<p>Docker Swarm requires specific network ports to communicate across
+nodes in the cluster. If you are using UFW (Uncomplicated Firewall),
+open the following ports:</p>
+<ul>
+<li><strong>TCP port 2377:</strong> For cluster management
+communications.</li>
+<li><strong>TCP and UDP port 7946:</strong> For communication among
+nodes (node discovery).</li>
+<li><strong>UDP port 4789:</strong> For overlay network traffic
+(container ingress networking).</li>
+</ul>
+<p>Run the following commands to open these ports:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 2377/tcp</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 7946/tcp</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 7946/udp</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 4789/udp</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div>
+<hr />
+<h3 id="step-3-initialize-the-swarm-manager-node">Step 3: Initialize the
+Swarm Manager Node</h3>
+<p>To turn the standalone Docker server into a Swarm manager, run the
+<code>docker swarm init</code> command.</p>
+<p>If your host has multiple network interfaces (such as an internal
+private IP and an external public IP), explicitly declare the advertise
+address using the <code>--advertise-addr</code> flag.</p>
+<p>Identify your preferred IP address:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> addr show</span></code></pre></div>
+<p>Initialize the Swarm manager:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker swarm init <span class="at">--advertise-addr</span> <span class="op">&lt;</span>YOUR_SERVER_IP<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;YOUR_SERVER_IP&gt;</code> with the actual IP
+address of your Ubuntu server (for example,
+<code>192.168.1.100</code>).</p>
+<p>Upon initialization, the terminal will display output confirming the
+swarm is active, along with a generated command containing a join token
+for adding worker nodes.</p>
+<hr />
+<h3 id="step-4-verify-the-swarm-status">Step 4: Verify the Swarm
+Status</h3>
+<p>Verify that Docker Swarm mode is active and that your current server
+is designated as the manager:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker node ls</span></code></pre></div>
+<p>The output will display the hostname, status, availability, and
+manager status (marked as <code>Leader</code>).</p>
+<p>You can also check the broader cluster details by executing:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker info</span></code></pre></div>
+<p>Look for the <code>Swarm: active</code> line in the output.</p>
+<hr />
+<h3 id="step-5-retrieve-join-tokens">Step 5: Retrieve Join Tokens</h3>
+<p>If you need to view the command and token required to connect
+additional machines to the cluster at a later stage, use the following
+commands:</p>
+<p>To retrieve the token for adding <strong>worker</strong> nodes:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker swarm join-token worker</span></code></pre></div>
+<p>To retrieve the token for adding additional <strong>manager</strong>
+nodes (for high-availability setups):</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker swarm join-token manager</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

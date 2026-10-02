@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding PM2 ecosystem.config.js on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains the purpose, functionality, and advantages of using a PM2 ecosystem.config.js file when managing Node.js applications on an Ubuntu server. You will learn how this configuration file simplifies deployment workflows, handles multiple">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/understanding-pm-2-ecosystem-config-js-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Understanding PM2 ecosystem.config.js on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/understanding-pm-2-ecosystem-config-js-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the purpose, functionality, and advantages of using a PM2 ecosystem.config.js file when managing Node.js applications on an Ubuntu server. You will learn how this configuration file simplifies deployment workflows, handles multiple" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="understanding-pm2-ecosystemconfigjs-on-ubuntu">Understanding PM2
+ecosystem.config.js on Ubuntu</h1>
+<p>This article explains the purpose, functionality, and advantages of
+using a PM2 <code>ecosystem.config.js</code> file when managing Node.js
+applications on an Ubuntu server. You will learn how this configuration
+file simplifies deployment workflows, handles multiple environments,
+automates multi-process clustering, and centralizes runtime settings
+into a single, version-controlled file instead of relying on complex
+command-line arguments.</p>
+<p>In a production Ubuntu environment, running Node.js applications
+directly via command-line arguments (such as
+<code>pm2 start app.js -i max --name "api"</code>) quickly becomes
+inefficient and error-prone. The <code>ecosystem.config.js</code> file
+solves this by acting as a centralized, JavaScript-based configuration
+file that defines how PM2 should launch, monitor, and scale your Node.js
+processes.</p>
+<h3 id="centralized-process-management">Centralized Process
+Management</h3>
+<p>The primary role of the ecosystem file is defining one or more
+applications within an <code>apps</code> array. Instead of remembering
+specific startup parameters for every individual service, developers can
+define an application's name, entry script, working directory, and
+execution flags in a single place. Managing complex microservice
+architectures on an Ubuntu server is simplified to executing
+<code>pm2 start ecosystem.config.js</code>, which launches all
+configured services simultaneously.</p>
+<h3 id="multi-core-scaling-and-cluster-mode">Multi-Core Scaling and
+Cluster Mode</h3>
+<p>Node.js operates on a single thread by default. To take full
+advantage of multi-core Ubuntu servers, PM2 provides cluster mode.
+Inside <code>ecosystem.config.js</code>, you can configure the
+<code>instances</code> and <code>exec_mode</code> properties:</p>
+<ul>
+<li><strong><code>exec_mode: 'cluster'</code></strong>: Enables load
+balancing across processes.</li>
+<li><strong><code>instances: 'max'</code></strong> (or a specific
+integer): Automatically spawns a process for each available CPU
+core.</li>
+</ul>
+<p>This eliminates downtime during heavy traffic and ensures maximum
+hardware utilization.</p>
+<h3 id="environment-variable-isolation">Environment Variable
+Isolation</h3>
+<p>Managing development, staging, and production credentials directly in
+shell environments can lead to conflicts. The ecosystem file allows you
+to structure environment variables declaratively:</p>
+<ul>
+<li><strong><code>env</code></strong>: Default environment variables
+loaded on standard runs.</li>
+<li><strong><code>env_production</code></strong>: Production-specific
+variables activated by passing the <code>--env production</code>
+flag.</li>
+</ul>
+<p>This ensures sensitive values, database connection strings, and ports
+are consistently applied across deployments without manual re-entry.</p>
+<h3 id="automated-health-and-resource-controls">Automated Health and
+Resource Controls</h3>
+<p>Ubuntu servers require robust stability measures. The ecosystem
+configuration lets you declare strict recovery rules to prevent runaway
+processes from consuming server resources:</p>
+<ul>
+<li><strong><code>max_memory_restart</code></strong>: Automatically
+restarts an application if its RAM consumption exceeds a specified limit
+(e.g., <code>'500M'</code>).</li>
+<li><strong><code>restart_delay</code> and
+<code>max_restarts</code></strong>: Protects the server from crash loops
+by staggering reboot attempts.</li>
+<li><strong><code>watch</code> and <code>ignore_watch</code></strong>:
+Automates process restarts on file changes while excluding directories
+like <code>node_modules</code> or logs.</li>
+</ul>
+<h3 id="custom-log-routing">Custom Log Routing</h3>
+<p>By default, PM2 stores logs in the user's home directory
+(<code>~/.pm2/logs</code>). With <code>ecosystem.config.js</code>, you
+can route standard output (<code>out_file</code>) and standard error
+(<code>error_file</code>) to dedicated application paths (such as
+<code>/var/log/app/</code>) and specify log formatting settings like
+<code>time: true</code> to append timestamps to every log line.</p>
+<h3 id="deployment-automation">Deployment Automation</h3>
+<p>The ecosystem file includes a dedicated <code>deploy</code> block.
+This feature enables automated deployments directly to your Ubuntu
+server over SSH. It defines the repository, target host, SSH
+credentials, destination directory, and post-deployment commands (such
+as running <code>npm install</code>, compiling assets, and restarting
+the PM2 instances), turning the file into a lightweight continuous
+deployment pipeline.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

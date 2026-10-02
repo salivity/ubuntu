@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identify Disk Wake Processes with iosnoop on Ubuntu - ubuntu</title>
+    <meta name="description" content="Hard drives entering and exiting standby mode are essential for energy saving and noise reduction, but background processes often wake them unexpectedly. This guide explains how to use iosnoop, a dynamic tracing utility from the BPF Compiler Collection (">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/identify-disk-wake-processes-with-iosnoop-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Identify Disk Wake Processes with iosnoop on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/identify-disk-wake-processes-with-iosnoop-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Hard drives entering and exiting standby mode are essential for energy saving and noise reduction, but background processes often wake them unexpectedly. This guide explains how to use iosnoop, a dynamic tracing utility from the BPF Compiler Collection (" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="identify-disk-wake-processes-with-iosnoop-on-ubuntu">Identify
+Disk Wake Processes with iosnoop on Ubuntu</h1>
+<p>Hard drives entering and exiting standby mode are essential for
+energy saving and noise reduction, but background processes often wake
+them unexpectedly. This guide explains how to use <code>iosnoop</code>,
+a dynamic tracing utility from the BPF Compiler Collection (BCC), on
+Ubuntu to capture real-time disk input/output (I/O) events. By
+monitoring these events alongside I/O latency, you can easily identify
+the exact process name and Process ID (PID) responsible for spinning up
+a sleeping drive.</p>
+<h3 id="1-install-bcc-tools">1. Install BCC Tools</h3>
+<p><code>iosnoop</code> relies on eBPF (Extended Berkeley Packet Filter)
+to trace block device I/O at the kernel level. On Ubuntu, it is packaged
+within the BCC utilities.</p>
+<p>Open a terminal and install the required packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install bpfcc-tools linux-headers-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span></span></code></pre></div>
+<p>On Ubuntu, tools from this package are installed with the
+<code>-bpfcc</code> suffix to prevent name conflicts. The binary will be
+available as <code>iosnoop-bpfcc</code> located in
+<code>/usr/sbin/</code>.</p>
+<h3 id="2-identify-the-target-device">2. Identify the Target Device</h3>
+<p>Before running the trace, identify the disk you want to monitor.
+Run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>Locate the drive's name (for example, <code>sdb</code> or
+<code>sdc</code>). If the drive is already in standby, you can verify
+its power state using <code>hdparm</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> hdparm <span class="at">-C</span> /dev/sdX</span></code></pre></div>
+<p>If it reports <code>standby</code>, the drive is spun down.</p>
+<h3 id="3-run-iosnoop-to-capture-disk-activity">3. Run iosnoop to
+Capture Disk Activity</h3>
+<p>Because terminal logging or writing output to the monitored drive
+could prevent it from remaining asleep, ensure your terminal or log file
+runs on an SSD or RAM disk (<code>/tmp</code> or
+<code>/dev/shm</code>).</p>
+<p>Execute <code>iosnoop-bpfcc</code> with timestamps and disk queue
+latency:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iosnoop-bpfcc <span class="at">-ts</span> <span class="at">-d</span> sdX</span></code></pre></div>
+<p>Replace <code>sdX</code> with your target drive (e.g.,
+<code>sdb</code>). The flags provide critical information:</p>
+<ul>
+<li><code>-t</code>: Adds a timestamp to each I/O event.</li>
+<li><code>-s</code>: Adds the issue-to-complete duration (latency) in
+milliseconds.</li>
+<li><code>-d sdX</code>: Restricts tracing to the specified device.</li>
+</ul>
+<p>If you are monitoring disk activity over an extended period (such as
+overnight), direct the output to a temporary RAM-backed location:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iosnoop-bpfcc <span class="at">-ts</span> <span class="at">-d</span> sdX <span class="op">&gt;</span> /dev/shm/disk_wake.log</span></code></pre></div>
+<h3 id="4-locate-the-culprit-process">4. Locate the Culprit Process</h3>
+<p>When the drive wakes from standby, check the <code>iosnoop</code>
+output. It displays several columns:</p>
+<ul>
+<li><strong>TIME(s)</strong>: Time elapsed since tracing started.</li>
+<li><strong>COMM</strong>: The executable/command name responsible for
+the request.</li>
+<li><strong>PID</strong>: The process ID.</li>
+<li><strong>TYPE</strong>: The type of operation (Read <code>R</code> or
+Write <code>W</code>).</li>
+<li><strong>BYTES</strong>: Transfer size.</li>
+<li><strong>LAT(ms)</strong>: The duration between the request
+submission and completion.</li>
+</ul>
+<h4 id="the-spin-up-indicator-high-latency">The Spin-Up Indicator (High
+Latency)</h4>
+<p>A mechanical hard drive requires 3 to 15 seconds to spin up from a
+standby state to full speed. Therefore, the specific I/O request that
+triggers the wake event will display an exceptionally high latency
+(<code>LAT(ms)</code>), typically between <code>3000.00</code> and
+<code>15000.00</code> ms.</p>
+<p>Subsequent reads and writes will have low latency (under
+<code>10.00</code> ms). The process listed under the <code>COMM</code>
+column on that initial high-latency line is the process that woke the
+drive.</p>
+<h3 id="5-resolve-common-causes">5. Resolve Common Causes</h3>
+<p>Once you have identified the <code>COMM</code> and <code>PID</code>,
+address the offending service:</p>
+<ul>
+<li><strong><code>updatedb.mlocate</code></strong>: Disable the timer if
+index updates should not scan external drives
+(<code>sudo systemctl stop mlocate.timer</code>).</li>
+<li><strong><code>smartd</code></strong>: Configure
+<code>/etc/smartd.conf</code> with the <code>-n standby</code> directive
+so SMART queries do not spin up idle drives.</li>
+<li><strong><code>systemd-udevd</code></strong>: Adjust rules querying
+volume information.</li>
+<li><strong>File Managers / Indexers</strong>: Exclude mount points of
+secondary drives from desktop search utilities such as Tracker or
+Baloo.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual LUKS Encryption Setup on Ubuntu Server - ubuntu</title>
+    <meta name="description" content="This article provides a step-by-step walkthrough for manually configuring Linux Unified Key Setup (LUKS) full disk encryption during an Ubuntu Server installation. By bypassing automatic guided partitioning and using the native Subiquity installer's cust">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/manual-luks-encryption-setup-on-ubuntu-server">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Manual LUKS Encryption Setup on Ubuntu Server - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/manual-luks-encryption-setup-on-ubuntu-server" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a step-by-step walkthrough for manually configuring Linux Unified Key Setup (LUKS) full disk encryption during an Ubuntu Server installation. By bypassing automatic guided partitioning and using the native Subiquity installer's cust" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="manual-luks-encryption-setup-on-ubuntu-server">Manual LUKS
+Encryption Setup on Ubuntu Server</h1>
+<p>This article provides a step-by-step walkthrough for manually
+configuring Linux Unified Key Setup (LUKS) full disk encryption during
+an Ubuntu Server installation. By bypassing automatic guided
+partitioning and using the native Subiquity installer's custom storage
+layout, you will learn how to partition the physical drive, initialize
+an encrypted LUKS container, and assign the proper system mount points
+to ensure your data remains secure at rest.</p>
+<h3 id="step-1-boot-and-access-custom-storage">Step 1: Boot and Access
+Custom Storage</h3>
+<ol type="1">
+<li>Boot the target machine using official Ubuntu Server installation
+media.</li>
+<li>Complete the initial setup screens (Language, Keyboard Layout, and
+Network Connections).</li>
+<li>Continue past the proxy and mirror configurations until you reach
+the <strong>Guided Storage Configuration</strong> screen.</li>
+<li>Select <strong>Custom storage layout</strong> instead of the guided
+options, then select <strong>Done</strong>.</li>
+</ol>
+<h3 id="step-2-create-the-unencrypted-boot-partitions">Step 2: Create
+the Unencrypted Boot Partitions</h3>
+<p>A system using full disk encryption still requires unencrypted
+partitions so the motherboard firmware and bootloader can initialize the
+kernel.</p>
+<ol type="1">
+<li>Locate your target storage drive under the <strong>Available
+Devices</strong> list.</li>
+<li>Select the free space on the drive and choose <strong>Add GPT
+Partition</strong>.</li>
+<li>Create the EFI System Partition:
+<ul>
+<li><strong>Size:</strong> <code>1G</code> (or <code>1024M</code>)</li>
+<li><strong>Format:</strong> <code>fat32</code></li>
+<li><strong>Mount:</strong> <code>/boot/efi</code></li>
+</ul></li>
+<li>Select the remaining free space and create the Boot partition:
+<ul>
+<li><strong>Size:</strong> <code>2G</code> (or <code>2048M</code>)</li>
+<li><strong>Format:</strong> <code>ext4</code></li>
+<li><strong>Mount:</strong> <code>/boot</code></li>
+</ul></li>
+</ol>
+<h3 id="step-3-create-the-encrypted-luks-container">Step 3: Create the
+Encrypted LUKS Container</h3>
+<ol type="1">
+<li>Select the remaining unallocated free space on the target drive and
+choose <strong>Add GPT Partition</strong>.</li>
+<li>Leave the <strong>Size</strong> blank to use all remaining
+space.</li>
+<li>In the <strong>Format</strong> dropdown, select <strong>Create
+Encrypted Volume (LUKS)</strong>.</li>
+<li>Fill in the encryption parameters:
+<ul>
+<li><strong>Name:</strong> Enter an identifier for the decrypted device
+mapper (e.g., <code>dm_crypt-0</code>).</li>
+<li><strong>Passphrase:</strong> Enter a strong passphrase.</li>
+<li><strong>Confirm Passphrase:</strong> Re-enter the passphrase.</li>
+</ul></li>
+<li>Save the configuration. The installer will create the raw partition
+and immediately present the mapped, decrypted container in the storage
+list.</li>
+</ol>
+<h3 id="step-4-configure-the-root-filesystem">Step 4: Configure the Root
+Filesystem</h3>
+<p>Once the LUKS volume is created, define where the operating system
+files will reside inside the encrypted boundary.</p>
+<ol type="1">
+<li>Navigate to the newly mapped encrypted device listed under storage
+(typically displayed with the label you provided, such as
+<code>dm_crypt-0</code>).</li>
+<li>Select the encrypted device and choose <strong>Create
+Partition</strong> (or format it directly, depending on whether you are
+using raw partitions or Logical Volume Management [LVM]).</li>
+<li>Configure the root partition:
+<ul>
+<li><strong>Size:</strong> Leave blank to fill the entire encrypted
+volume, or designate a specific size if you plan to create separate
+volumes for swap or home directories.</li>
+<li><strong>Format:</strong> <code>ext4</code></li>
+<li><strong>Mount:</strong> <code>/</code></li>
+</ul></li>
+<li>Confirm the partition settings.</li>
+</ol>
+<h3 id="step-5-review-and-complete-installation">Step 5: Review and
+Complete Installation</h3>
+<ol type="1">
+<li>Review the configured file tree in the storage summary. Ensure the
+following hierarchy is correct:
+<ul>
+<li><code>/boot/efi</code> is assigned to the unencrypted FAT32
+partition.</li>
+<li><code>/boot</code> is assigned to the unencrypted ext4
+partition.</li>
+<li><code>/</code> is assigned to the filesystem located <em>inside</em>
+the encrypted container.</li>
+</ul></li>
+<li>Select <strong>Done</strong> and confirm the prompt warning that
+existing data will be overwritten.</li>
+<li>Complete the remaining profile setup (username, server name, SSH
+keys).</li>
+<li>Allow the installation process to finish, then reboot the
+machine.</li>
+</ol>
+<p>Upon reboot, GRUB will load from the unencrypted boot partition and
+prompt you for your LUKS passphrase before unlocking the root filesystem
+and loading the operating system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

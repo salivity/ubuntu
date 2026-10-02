@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Broadcom WiFi Drivers Offline in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to manually install proprietary Broadcom wireless drivers on an Ubuntu system without an active internet connection. The offline installation process involves identifying your exact Broadcom chipset, retrieving the necessary .deb">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-broadcom-wi-fi-drivers-offline-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install Broadcom WiFi Drivers Offline in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-broadcom-wi-fi-drivers-offline-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to manually install proprietary Broadcom wireless drivers on an Ubuntu system without an active internet connection. The offline installation process involves identifying your exact Broadcom chipset, retrieving the necessary .deb" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-broadcom-wifi-drivers-offline-in-ubuntu">Install
+Broadcom WiFi Drivers Offline in Ubuntu</h1>
+<p>This guide explains how to manually install proprietary Broadcom
+wireless drivers on an Ubuntu system without an active internet
+connection. The offline installation process involves identifying your
+exact Broadcom chipset, retrieving the necessary <code>.deb</code>
+driver and dependency packages using an installation media or a
+secondary connected machine, transferring the files via USB drive, and
+installing them using Ubuntu's native package management tools.</p>
+<h3 id="step-1-identify-the-broadcom-chipset">Step 1: Identify the
+Broadcom Chipset</h3>
+<p>Open the terminal on your offline Ubuntu machine and run the
+following command to detect your network controller model:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lspci</span> <span class="at">-nn</span> <span class="at">-d</span> 14e4:</span></code></pre></div>
+<p>This command filters for Broadcom PCI vendor ID (<code>14e4</code>).
+Note the PCI ID inside the brackets (such as <code>[14e4:43a0]</code> or
+<code>[14e4:4312]</code>). Most modern Broadcom chips (including
+BCM43142, BCM43224, BCM4352, and BCM4360) require the
+<code>bcmwl-kernel-source</code> package, which provides the Broadcom
+802.11 Linux STA driver (<code>wl</code>).</p>
+<h3 id="step-2-retrieve-the-driver-packages">Step 2: Retrieve the Driver
+Packages</h3>
+<p>You need the <code>bcmwl-kernel-source</code> package and its core
+dependency, <code>dkms</code>, along with any required development
+tools. You can acquire these using one of two methods.</p>
+<h4 id="method-a-from-the-ubuntu-installation-usb-recommended">Method A:
+From the Ubuntu Installation USB (Recommended)</h4>
+<p>If you still have the Ubuntu USB drive used to install the OS, insert
+it into the offline machine. The installation media contains the
+required offline packages inside the <code>pool</code> directory:</p>
+<ol type="1">
+<li>Open a terminal and navigate to the mounted USB drive:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /media/<span class="va">$USER</span>/<span class="pp">*</span>/pool/main/</span></code></pre></div></li>
+<li>Locate the required packages inside the <code>d/dkms</code> and
+<code>b/bcmwl</code> subdirectories.</li>
+</ol>
+<h4 id="method-b-download-from-another-computer">Method B: Download from
+Another Computer</h4>
+<p>If you do not have the installation drive, download the
+<code>.deb</code> files from an internet-connected computer using the
+official Ubuntu Package repository:</p>
+<ol type="1">
+<li>Find your exact Ubuntu release name by running
+<code>lsb_release -c</code> on your offline machine (e.g.,
+<code>jammy</code>, <code>focal</code>, <code>noble</code>).</li>
+<li>Search and download the corresponding <code>.deb</code> packages for
+your Ubuntu version:
+<ul>
+<li><code>dkms</code></li>
+<li><code>bcmwl-kernel-source</code></li>
+</ul></li>
+<li>If not already present on the system, you may also need:
+<ul>
+<li><code>libc6-dev</code></li>
+<li><code>linux-libc-dev</code></li>
+</ul></li>
+<li>Copy these <code>.deb</code> files onto a USB drive and plug it into
+your offline Ubuntu computer.</li>
+</ol>
+<h3 id="step-3-install-the-packages">Step 3: Install the Packages</h3>
+<ol type="1">
+<li><p>On the offline Ubuntu system, copy all the <code>.deb</code>
+files to a dedicated local directory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/broadcom-offline</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/usb/<span class="pp">*</span>.deb ~/broadcom-offline/</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/broadcom-offline/</span></code></pre></div></li>
+<li><p>Install all the packages simultaneously using
+<code>dpkg</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">-i</span> <span class="pp">*</span>.deb</span></code></pre></div></li>
+</ol>
+<p>The system will automatically configure DKMS, compile the kernel
+module for your active kernel, and install the wireless driver.</p>
+<h3 id="step-4-load-the-driver-module">Step 4: Load the Driver
+Module</h3>
+<p>Once the installation finishes without errors, remove any conflicting
+open-source drivers and load the proprietary <code>wl</code> module into
+the kernel:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe <span class="at">-r</span> b43 b44 b43legacy ssb bcma brcm80211 brcmsmac brcmfmac</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe wl</span></code></pre></div>
+<h3 id="step-5-verify-wireless-connectivity">Step 5: Verify Wireless
+Connectivity</h3>
+<p>Check that the driver has registered the wireless network
+interface:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> link</span></code></pre></div>
+<p>Look for a wireless interface name starting with <code>wlan</code> or
+<code>wlp</code>. Once visible, the network manager will automatically
+detect nearby Wi-Fi networks in your system settings. A system restart
+is recommended to ensure the module loads automatically at boot.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

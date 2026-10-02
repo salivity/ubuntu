@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Setup Corosync and Pacemaker on Ubuntu - ubuntu</title>
+    <meta name="description" content="High availability clusters prevent downtime by automatically migrating services to a standby node if the active node fails. This guide provides a step-by-step walkthrough for configuring a two-node Corosync and Pacemaker cluster on Ubuntu to achieve auto">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-setup-corosync-and-pacemaker-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Setup Corosync and Pacemaker on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-setup-corosync-and-pacemaker-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="High availability clusters prevent downtime by automatically migrating services to a standby node if the active node fails. This guide provides a step-by-step walkthrough for configuring a two-node Corosync and Pacemaker cluster on Ubuntu to achieve auto" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-setup-corosync-and-pacemaker-on-ubuntu">How to Setup
+Corosync and Pacemaker on Ubuntu</h1>
+<p>High availability clusters prevent downtime by automatically
+migrating services to a standby node if the active node fails. This
+guide provides a step-by-step walkthrough for configuring a two-node
+Corosync and Pacemaker cluster on Ubuntu to achieve automatic service
+failover. You will learn how to configure network communication,
+initialize cluster membership using Corosync, manage resources with
+Pacemaker via the <code>pcs</code> utility, and set up a virtual IP with
+a sample web service.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have two Ubuntu servers (referred to as <code>node1</code>
+and <code>node2</code>) on the same local network with static IP
+addresses.</p>
+<p>Edit <code>/etc/hosts</code> on both nodes to map hostnames to IP
+addresses:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/hosts</span></code></pre></div>
+<p>Add entries matching your environment:</p>
+<pre class="text"><code>192.168.1.10 node1
+192.168.1.11 node2</code></pre>
+<h3 id="step-1-install-pacemaker-corosync-and-pcs">Step 1: Install
+Pacemaker, Corosync, and PCS</h3>
+<p>Run the following command on <strong>both nodes</strong> to install
+the necessary clustering packages:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> pacemaker corosync pcs</span></code></pre></div>
+<p>Ensure the cluster configuration daemon is enabled and running on
+both nodes:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable pcsd</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start pcsd</span></code></pre></div>
+<h3 id="step-2-authenticate-cluster-nodes">Step 2: Authenticate Cluster
+Nodes</h3>
+<p>The package installation creates a system user named
+<code>hacluster</code>. Set the same password for this user on
+<strong>both nodes</strong>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> passwd hacluster</span></code></pre></div>
+<p>Authenticate the nodes from <strong>node1</strong> using the
+<code>pcs</code> tool:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs host auth node1 node2 <span class="at">-u</span> hacluster</span></code></pre></div>
+<p>Enter the <code>hacluster</code> password when prompted.</p>
+<h3 id="step-3-create-and-start-the-cluster">Step 3: Create and Start
+the Cluster</h3>
+<p>From <strong>node1</strong>, create and name the cluster:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster setup my_cluster node1 node2</span></code></pre></div>
+<p>Start the cluster services and enable them to run at boot on all
+nodes:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster start <span class="at">--all</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs cluster enable <span class="at">--all</span></span></code></pre></div>
+<p>Verify that both nodes are online:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs status</span></code></pre></div>
+<h3 id="step-4-configure-cluster-properties">Step 4: Configure Cluster
+Properties</h3>
+<p>For a two-node cluster, you must adjust specific quorum and fencing
+settings to ensure proper operation:</p>
+<ol type="1">
+<li><strong>Disable STONITH (Fencing):</strong> Fencing ensures nodes
+with split-brain issues are powered off. If hardware fencing devices are
+not present, disable it temporarily:
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs property set stonith-enabled=false</span></code></pre></div></li>
+<li><strong>Ignore Quorum Policy:</strong> Since standard quorum
+requires more than half of the nodes, disable it for a two-node setup:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs property set no-quorum-policy=ignore</span></code></pre></div></li>
+</ol>
+<h3 id="step-5-configure-resources-for-failover">Step 5: Configure
+Resources for Failover</h3>
+<p>Clusters typically control a Floating Virtual IP (VIP) and an active
+service (such as NGINX or Apache).</p>
+<ol type="1">
+<li><p><strong>Install the service</strong> on both nodes:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nginx</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop nginx</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable nginx</span></code></pre></div>
+<p><em>Note: Pacemaker must manage the service lifecycle, so disable
+native systemd startup.</em></p></li>
+<li><p><strong>Create the Floating IP Resource</strong> on
+<strong>node1</strong>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create VirtualIP ocf:heartbeat:IPaddr2 ip=192.168.1.100 cidr_netmask=24 op monitor interval=10s</span></code></pre></div></li>
+<li><p><strong>Create the Service Resource</strong> on
+<strong>node1</strong>:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource create WebServer systemd:nginx op monitor interval=10s</span></code></pre></div></li>
+<li><p><strong>Group the Resources:</strong> Ensure the IP address and
+the service run on the same node and start in order:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs resource group add WebGroup VirtualIP WebServer</span></code></pre></div></li>
+</ol>
+<h3 id="step-6-test-failover">Step 6: Test Failover</h3>
+<p>Check where the resources are currently running:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs status resources</span></code></pre></div>
+<p>To test failover, place the active node into standby mode:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs node standby node1</span></code></pre></div>
+<p>Run <code>sudo pcs status</code> to confirm that the
+<code>WebGroup</code> resources (VirtualIP and WebServer) have
+automatically migrated to <code>node2</code>.</p>
+<p>To return the node to the active cluster pool, run:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pcs node unstandby node1</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

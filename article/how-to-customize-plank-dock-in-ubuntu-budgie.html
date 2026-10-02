@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Customize Plank Dock in Ubuntu Budgie - ubuntu</title>
+    <meta name="description" content="Customizing the Plank dock in Ubuntu Budgie allows you to tailor your desktop's appearance, optimize screen space, and streamline application launching. This guide covers how to access the hidden preferences menu, adjust visual themes and icon sizes, con">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-customize-plank-dock-in-ubuntu-budgie">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Customize Plank Dock in Ubuntu Budgie - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-customize-plank-dock-in-ubuntu-budgie" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Customizing the Plank dock in Ubuntu Budgie allows you to tailor your desktop's appearance, optimize screen space, and streamline application launching. This guide covers how to access the hidden preferences menu, adjust visual themes and icon sizes, con" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-customize-plank-dock-in-ubuntu-budgie">How to Customize
+Plank Dock in Ubuntu Budgie</h1>
+<p>Customizing the Plank dock in Ubuntu Budgie allows you to tailor your
+desktop's appearance, optimize screen space, and streamline application
+launching. This guide covers how to access the hidden preferences menu,
+adjust visual themes and icon sizes, configure dock behavior and hiding
+rules, manage built-in docklets, and add or remove pinned
+applications.</p>
+<h2 id="accessing-plank-preferences">Accessing Plank Preferences</h2>
+<p>Plank does not display an obvious settings button by default. To open
+its configuration window:</p>
+<ol type="1">
+<li>Hold down the <strong>Ctrl</strong> key and
+<strong>right-click</strong> anywhere on empty space or an icon
+separator on the Plank dock.</li>
+<li>Select <strong>Preferences</strong> from the context menu.</li>
+</ol>
+<p>Alternatively, you can open a terminal and run the following command
+to launch the settings interface directly:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">plank</span> <span class="at">--preferences</span></span></code></pre></div>
+<h2 id="customizing-appearance">Customizing Appearance</h2>
+<p>Under the <strong>Appearance</strong> tab, you can modify the visual
+layout of the dock:</p>
+<ul>
+<li><strong>Theme:</strong> Choose from preinstalled themes such as
+<em>Default</em>, <em>Matte</em>, or <em>Transparent</em>. Your
+selection instantly alters the dock's background styling and border
+color.</li>
+<li><strong>Position:</strong> Choose which edge of your screen hosts
+the dock: <em>Bottom</em>, <em>Top</em>, <em>Left</em>, or
+<em>Right</em>.</li>
+<li><strong>Alignment:</strong> Control where the dock aligns on the
+chosen edge: <em>Fill</em> (stretches across), <em>Start</em>,
+<em>Center</em>, or <em>End</em>.</li>
+<li><strong>Icon Size:</strong> Adjust the slider to scale icons smaller
+or larger depending on your screen resolution.</li>
+<li><strong>Icon Zoom:</strong> Enable this toggle to zoom in on icons
+when your mouse hovers over them, and adjust the scale slider to set the
+magnification level.</li>
+</ul>
+<h2 id="configuring-dock-behavior">Configuring Dock Behavior</h2>
+<p>The <strong>Behavior</strong> tab dictates how Plank interacts with
+open windows and running applications:</p>
+<ul>
+<li><strong>Hide Mode:</strong>
+<ul>
+<li><em>None:</em> The dock remains visible at all times.</li>
+<li><em>Intelligent:</em> The dock hides automatically when a maximized
+or overlapping window covers it.</li>
+<li><em>Auto-hide:</em> The dock hides whenever the cursor moves away
+from it.</li>
+<li><em>Dodge Active Window:</em> The dock hides only when the currently
+focused window overlaps its space.</li>
+<li><em>Window Dodge:</em> The dock hides if any window covers it,
+regardless of focus.</li>
+</ul></li>
+<li><strong>Hide/Unhide Delays:</strong> Fine-tune the timer in
+milliseconds to prevent accidental triggers when moving the mouse past
+the dock edge.</li>
+<li><strong>Lock Icons:</strong> Toggle this on to prevent items from
+being accidentally moved, dragged off, or deleted from the dock.</li>
+<li><strong>Restrict to Display:</strong> If using multiple monitors,
+select which screen displays the dock.</li>
+</ul>
+<h2 id="managing-docklets">Managing Docklets</h2>
+<p>Plank includes several lightweight widgets called "Docklets." To
+manage them, go to the <strong>Docklets</strong> tab in the Preferences
+window:</p>
+<ol type="1">
+<li>Browse the available docklets, which typically include
+<strong>Clippy</strong> (clipboard manager), <strong>Clock</strong>,
+<strong>Desktop</strong> (minimize-all shortcut),
+<strong>Trash</strong>, and <strong>Battery</strong>.</li>
+<li><strong>Double-click</strong> any docklet to immediately add it to
+your dock, or drag and drop it into your preferred position.</li>
+<li>To remove a docklet, drag it off the dock until an "X" or puff of
+smoke appears, then release the mouse button.</li>
+</ol>
+<h2 id="pinning-rearranging-and-removing-applications">Pinning,
+Rearranging, and Removing Applications</h2>
+<p>Managing everyday applications does not require opening the
+Preferences menu:</p>
+<ul>
+<li><strong>Pin an App:</strong> Launch an application from the Budgie
+menu. When its icon appears in the dock, right-click it and select
+<strong>Keep in Dock</strong>. You can also drag application shortcuts
+directly from the Budgie application menu onto Plank.</li>
+<li><strong>Rearrange Icons:</strong> Click and drag any icon
+horizontally (or vertically) to reposition it.</li>
+<li><strong>Unpin an App:</strong> Right-click the application icon on
+the dock and uncheck <strong>Keep in Dock</strong>, or click and drag
+the icon away from the dock into empty desktop space until it
+dissolves.</li>
+</ul>
+<h2 id="adding-third-party-themes">Adding Third-Party Themes</h2>
+<p>To install custom themes:</p>
+<ol type="1">
+<li>Download a Plank theme archive from your chosen desktop
+customization site.</li>
+<li>Extract the theme folder.</li>
+<li>Open your file manager, press <strong>Ctrl + H</strong> to reveal
+hidden files, and navigate to <code>~/.local/share/plank/themes</code>
+(create the directory if it does not exist).</li>
+<li>Paste the extracted theme folder into this directory.</li>
+<li>Reopen <strong>Plank Preferences</strong> and select your new theme
+from the <strong>Theme</strong> dropdown.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

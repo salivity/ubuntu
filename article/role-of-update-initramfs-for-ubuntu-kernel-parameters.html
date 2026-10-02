@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of update-initramfs for Ubuntu Kernel Parameters - ubuntu</title>
+    <meta name="description" content="Modifying kernel configuration and startup parameters in Ubuntu is a common administrative task for tuning performance, enabling hardware support, or configuring storage encryption. This article explains the essential role of the update-initramfs command">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-update-initramfs-for-ubuntu-kernel-parameters">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of update-initramfs for Ubuntu Kernel Parameters - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-update-initramfs-for-ubuntu-kernel-parameters" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Modifying kernel configuration and startup parameters in Ubuntu is a common administrative task for tuning performance, enabling hardware support, or configuring storage encryption. This article explains the essential role of the update-initramfs command" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="role-of-update-initramfs-for-ubuntu-kernel-parameters">Role of
+update-initramfs for Ubuntu Kernel Parameters</h1>
+<p>Modifying kernel configuration and startup parameters in Ubuntu is a
+common administrative task for tuning performance, enabling hardware
+support, or configuring storage encryption. This article explains the
+essential role of the <code>update-initramfs</code> command following
+these modifications, detailing why the initial RAM filesystem must be
+refreshed to ensure that changes take effect properly during the early
+stages of system boot.</p>
+<h3 id="what-is-the-initramfs">What Is the initramfs?</h3>
+<p>The <code>initramfs</code> (initial RAM file system) is a temporary
+root file system loaded into memory by the bootloader (such as GRUB)
+during system startup. Its primary purpose is to prepare the system
+before the real root file system can be mounted. It contains essential
+kernel modules, drivers, storage utilities, decryption tools (like
+LUKS), and initialization scripts necessary to locate, mount, and hand
+control over to the actual operating system drive.</p>
+<h3 id="the-role-of-update-initramfs">The Role of
+<code>update-initramfs</code></h3>
+<p>When you modify kernel-related settings—such as updating module
+parameters in <code>/etc/modprobe.d/</code>, altering sysctl
+configurations, or adding boot-time storage drivers—these changes do not
+automatically propagate into the existing pre-built initramfs image
+stored in <code>/boot</code>.</p>
+<p>The <code>update-initramfs</code> command regenerates this RAM disk
+image. Its primary responsibilities include:</p>
+<ul>
+<li><strong>Packaging Updated Configurations:</strong> It reads the
+current configurations in <code>/etc</code> (including
+<code>/etc/modprobe.d/</code> and <code>/etc/initramfs-tools/</code>)
+and copies them directly into the newly generated initramfs
+archive.</li>
+<li><strong>Including Necessary Modules:</strong> If a new kernel
+parameter dictates the preloading or blacklisting of a specific driver,
+<code>update-initramfs</code> ensures that the driver is either bundled
+into or excluded from the boot image.</li>
+<li><strong>Ensuring Early Boot Consistency:</strong> Parameters that
+dictate root disk discovery, LVM handling, or cryptographic unlocking
+must execute long before the permanent root file system is mounted.
+<code>update-initramfs</code> ensures the startup scripts execute with
+your updated parameters rather than outdated defaults.</li>
+</ul>
+<h3 id="difference-between-update-grub-and-update-initramfs">Difference
+Between <code>update-grub</code> and <code>update-initramfs</code></h3>
+<p>It is common to confuse <code>update-grub</code> with
+<code>update-initramfs</code>:</p>
+<ul>
+<li><strong><code>update-grub</code></strong> updates the bootloader
+configuration file (<code>/boot/grub/grub.cfg</code>). It is used when
+modifying <code>GRUB_CMDLINE_LINUX</code> or
+<code>GRUB_CMDLINE_LINUX_DEFAULT</code> in
+<code>/etc/default/grub</code>. These arguments are passed directly to
+the kernel by the bootloader at startup.</li>
+<li><strong><code>update-initramfs</code></strong> rebuilds the
+<code>/boot/initrd.img</code> archive. It is required whenever changes
+are made inside <code>/etc/modprobe.d/</code>,
+<code>/etc/initramfs-tools/</code>, or system hooks that dictate
+early-boot behavior.</li>
+</ul>
+<p>In many maintenance scenarios involving low-level kernel driver
+options or encrypted volumes, running both commands is necessary to
+ensure both the bootloader command line and the initramfs internal state
+are fully synchronized.</p>
+<h3 id="how-to-run-the-command">How to Run the Command</h3>
+<p>To apply changes to the currently running kernel, run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span></span></code></pre></div>
+<p>The <code>-u</code> flag specifies the "update" mode, replacing the
+existing initramfs for the active kernel version with a freshly
+generated version incorporating your updated parameters. If changes need
+to be applied across all installed kernels, the command can be run
+with:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span> <span class="at">-k</span> all</span></code></pre></div>
+<p>Failing to run <code>update-initramfs</code> after making driver or
+module-level adjustments can lead to boot failures, ignored hardware
+parameters, or system crashes during early boot, as the kernel will
+continue relying on obsolete instructions packed into the older RAM
+disk.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

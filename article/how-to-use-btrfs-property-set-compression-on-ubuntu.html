@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use Btrfs Property Set Compression on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explores the specific role of the btrfs property set command in managing transparent data compression on an Ubuntu system running the Btrfs filesystem. It details how this command provides granular, object-level compression control over indi">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-use-btrfs-property-set-compression-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use Btrfs Property Set Compression on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-use-btrfs-property-set-compression-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores the specific role of the btrfs property set command in managing transparent data compression on an Ubuntu system running the Btrfs filesystem. It details how this command provides granular, object-level compression control over indi" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-use-btrfs-property-set-compression-on-ubuntu">How to Use
+Btrfs Property Set Compression on Ubuntu</h1>
+<p>This article explores the specific role of the
+<code>btrfs property set</code> command in managing transparent data
+compression on an Ubuntu system running the Btrfs filesystem. It details
+how this command provides granular, object-level compression control
+over individual files, directories, and subvolumes as an alternative or
+complement to global mount options, and covers practical command syntax
+for implementing and verifying these settings.</p>
+<h2 id="granular-compression-without-remounting">Granular Compression
+Without Remounting</h2>
+<p>On Ubuntu, Btrfs compression is traditionally enabled at mount time
+using options such as <code>compress=zstd</code> in
+<code>/etc/fstab</code>. While effective, mount options apply globally
+to all data written to that specific filesystem mount.</p>
+<p>The <code>btrfs property set</code> command allows administrators to
+control compression settings on a per-subvolume, per-directory, or
+per-file basis. This command modifies the underlying metadata property
+of the targeted filesystem object without requiring the filesystem to be
+unmounted, remounted, or adjusted in the system's mount configuration
+files.</p>
+<h2 id="inheritance-and-directory-level-rules">Inheritance and
+Directory-Level Rules</h2>
+<p>When <code>btrfs property set</code> is applied to a directory or a
+subvolume root, it sets an inheritable property. Any new files or child
+directories created within that directory automatically inherit the
+designated compression algorithm.</p>
+<p>This enables hybrid storage strategies on Ubuntu servers and
+desktops. For instance, high-write or latency-sensitive directories can
+remain uncompressed, while log directories, document stores, or virtual
+machine images can have compression explicitly defined via
+properties.</p>
+<h2 id="command-syntax-and-usage">Command Syntax and Usage</h2>
+<p>To enable compression on a specific file, directory, or subvolume
+path on Ubuntu, use the following syntax with root privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs property set /path/to/target compression zstd</span></code></pre></div>
+<p>Btrfs supports several compression algorithms through this
+property:</p>
+<ul>
+<li><strong>zstd</strong>: Modern standard balancing high compression
+ratios with fast decompression speeds.</li>
+<li><strong>lzo</strong>: Optimized for low CPU overhead and high
+throughput.</li>
+<li><strong>zlib</strong>: Legacy algorithm offering higher compression
+ratios at the cost of higher CPU usage.</li>
+</ul>
+<p>To verify the current compression property applied to an object:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs property get /path/to/target compression</span></code></pre></div>
+<p>To remove the explicit compression property and revert to the
+filesystem default or global mount settings:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs property set /path/to/target compression <span class="st">&quot;&quot;</span></span></code></pre></div>
+<h2 id="behavior-with-existing-data">Behavior with Existing Data</h2>
+<p>Setting the compression property does not retroactively compress data
+that already exists inside the file or directory. The compression
+algorithm is only applied to data written after the property has been
+set.</p>
+<p>To apply compression to existing files after updating the property,
+the data must be rewritten or defragmented using the Btrfs
+defragmentation utility:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs filesystem defragment <span class="at">-r</span> <span class="at">-czstd</span> /path/to/target</span></code></pre></div>
+<p>Using <code>btrfs property set</code> alongside targeted
+defragmentation provides complete administrative control over disk space
+optimization on Ubuntu without impacting unaffected partitions or
+workloads.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

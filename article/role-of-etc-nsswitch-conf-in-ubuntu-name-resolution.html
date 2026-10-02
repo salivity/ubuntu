@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of /etc/nsswitch.conf in Ubuntu Name Resolution - ubuntu</title>
+    <meta name="description" content="The /etc/nsswitch.conf (Name Service Switch configuration) file in Ubuntu acts as a central dispatcher that determines the order and priority of sources the operating system queries when looking up various system databases. For network name resolution, t">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-etc-nsswitch-conf-in-ubuntu-name-resolution">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of /etc/nsswitch.conf in Ubuntu Name Resolution - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-etc-nsswitch-conf-in-ubuntu-name-resolution" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The /etc/nsswitch.conf (Name Service Switch configuration) file in Ubuntu acts as a central dispatcher that determines the order and priority of sources the operating system queries when looking up various system databases. For network name resolution, t" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="role-of-etcnsswitchconf-in-ubuntu-name-resolution">Role of
+/etc/nsswitch.conf in Ubuntu Name Resolution</h1>
+<p>The <code>/etc/nsswitch.conf</code> (Name Service Switch
+configuration) file in Ubuntu acts as a central dispatcher that
+determines the order and priority of sources the operating system
+queries when looking up various system databases. For network name
+resolution, this file dictates how Ubuntu resolves human-readable
+hostnames and domain names into IP addresses, controlling the fallback
+behavior and interaction between local static files, DNS servers, and
+system daemons.</p>
+<h3 id="how-it-works">How It Works</h3>
+<p>When an application on Ubuntu requests network address resolution
+(typically using standard C library functions like
+<code>getaddrinfo</code> or <code>gethostbyname</code>), the system
+reads <code>/etc/nsswitch.conf</code> to discover where to look.</p>
+<p>The primary directive responsible for network name resolution is the
+<code>hosts:</code> line. A standard Ubuntu installation typically
+features an entry similar to:</p>
+<pre class="text"><code>hosts: files mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns</code></pre>
+<p>The system evaluates these services sequentially from left to
+right.</p>
+<h3 id="key-resolution-sources">Key Resolution Sources</h3>
+<p>Each keyword on the <code>hosts:</code> line corresponds to a
+specific service or NSS module:</p>
+<ul>
+<li><strong><code>files</code></strong>: Directs the system to consult
+the local <code>/etc/hosts</code> file first. If an IP and hostname
+mapping exists locally, it is used immediately without issuing a network
+request.</li>
+<li><strong><code>mdns4_minimal</code> / <code>mdns4</code></strong>:
+Provided by the Avahi daemon for Multicast DNS (mDNS). It handles
+zero-configuration networking, primarily resolving names ending in
+<code>.local</code>.</li>
+<li><strong><code>resolve</code></strong>: Integrates with
+<code>systemd-resolved</code>, the default local DNS caching and network
+management service in modern Ubuntu releases. It forwards queries to
+local or network-configured DNS servers via D-Bus.</li>
+<li><strong><code>dns</code></strong>: Acts as a fallback to traditional
+DNS resolution, directly querying the nameservers specified in
+<code>/etc/resolv.conf</code>.</li>
+</ul>
+<h3 id="control-criteria-and-execution-flow">Control Criteria and
+Execution Flow</h3>
+<p>Between the sources, bracketed parameters define control criteria
+that alter lookup flow based on query outcomes:</p>
+<ul>
+<li><strong><code>[NOTFOUND=return]</code></strong>: If the preceding
+service (such as <code>mdns4_minimal</code>) determines that a name does
+not exist, the search terminates immediately rather than continuing down
+the chain.</li>
+<li><strong><code>[!UNAVAIL=return]</code></strong>: If the service
+(such as <code>resolve</code>) is available—even if it returns that the
+host was not found—the query will not fall back to the subsequent direct
+<code>dns</code> lookup, preventing redundant network requests.</li>
+</ul>
+<h3 id="purpose-and-importance">Purpose and Importance</h3>
+<p>The <code>/etc/nsswitch.conf</code> file provides modularity,
+security, and performance optimization. By ordering local sources like
+<code>/etc/hosts</code> ahead of remote network queries, Ubuntu
+minimizes unnecessary network traffic and speeds up local resolutions.
+Furthermore, it allows system administrators to customize name
+resolution behavior—such as prioritizing specific internal directory
+services, disabling mDNS, or adjusting how DNS fallbacks occur—without
+modifying application code.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

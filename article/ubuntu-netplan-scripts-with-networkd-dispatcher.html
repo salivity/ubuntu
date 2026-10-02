@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Netplan Scripts with networkd-dispatcher - ubuntu</title>
+    <meta name="description" content="In modern Ubuntu systems, Netplan functions as the default network configuration abstraction layer, relying on backends like systemd-networkd to manage active interfaces. Because Netplan does not natively support runtime hooks or pre-up/post-down scripts">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ubuntu-netplan-scripts-with-networkd-dispatcher">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu Netplan Scripts with networkd-dispatcher - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ubuntu-netplan-scripts-with-networkd-dispatcher" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In modern Ubuntu systems, Netplan functions as the default network configuration abstraction layer, relying on backends like systemd-networkd to manage active interfaces. Because Netplan does not natively support runtime hooks or pre-up/post-down scripts" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ubuntu-netplan-scripts-with-networkd-dispatcher">Ubuntu Netplan
+Scripts with networkd-dispatcher</h1>
+<p>In modern Ubuntu systems, Netplan functions as the default network
+configuration abstraction layer, relying on backends like
+<code>systemd-networkd</code> to manage active interfaces. Because
+Netplan does not natively support runtime hooks or pre-up/post-down
+scripts like the legacy <code>ifupdown</code> framework, administrators
+require an event-driven mechanism to execute custom code when interface
+states change. The <code>networkd-dispatcher</code> daemon fulfills this
+role by monitoring <code>systemd-networkd</code> over the system D-Bus
+and executing user-defined scripts in response to network interface
+transitions.</p>
+<h3 id="why-networkd-dispatcher-is-necessary">Why networkd-dispatcher Is
+Necessary</h3>
+<p>Netplan generates configuration files at boot or during network
+reloads, rendering definitions for <code>systemd-networkd</code> (the
+standard on Ubuntu Server) or NetworkManager (standard on Ubuntu
+Desktop). Once generated, Netplan ceases execution and relinquishes
+interface lifecycle management to the backend.</p>
+<p>While the legacy <code>/etc/network/interfaces</code> setup provided
+directories like <code>/etc/network/if-up.d/</code> to trigger hooks,
+<code>systemd-networkd</code> by itself does not have a direct
+file-system-based hook directory. The <code>networkd-dispatcher</code>
+service bridges this gap. It runs continuously as a systemd service,
+watching D-Bus signals emitted by <code>systemd-networkd</code> and
+triggering executable scripts placed in specific operational state
+directories.</p>
+<h3 id="network-states-and-directory-structure">Network States and
+Directory Structure</h3>
+<p>When <code>networkd-dispatcher</code> detects an interface state
+update, it inspects the corresponding subdirectories inside
+<code>/etc/networkd-dispatcher/</code>. Each directory maps directly to
+a lifecycle state reported by <code>systemd-networkd</code>:</p>
+<ul>
+<li><strong><code>configuring.d/</code></strong>: The interface is
+actively negotiating link or address configuration.</li>
+<li><strong><code>configured.d/</code></strong>: The interface has
+successfully received its addressing parameters (IP, netmask) but may
+not yet have an active default gateway.</li>
+<li><strong><code>routable.d/</code></strong>: The interface is fully
+configured, has a route to external networks, and is ready to transmit
+traffic. This is the modern replacement for legacy <code>post-up</code>
+scripts.</li>
+<li><strong><code>degraded.d/</code></strong>: The interface is
+operational but lacks a complete configuration (for example, missing an
+IPv6 address in a dual-stack configuration).</li>
+<li><strong><code>carrier.d/</code></strong>: A physical or data-link
+layer carrier has been detected.</li>
+<li><strong><code>dormant.d/</code></strong>: The interface is up at the
+network layer but not actively passing traffic (common in 802.1X
+authentication).</li>
+<li><strong><code>off.d/</code></strong>: The interface has been brought
+down or lost link.</li>
+</ul>
+<h3 id="script-execution-and-environment-variables">Script Execution and
+Environment Variables</h3>
+<p>To run a custom script, place the executable into the folder
+corresponding to the targeted event (e.g.,
+<code>/etc/networkd-dispatcher/routable.d/my-script.sh</code>).</p>
+<p>For scripts to execute, they must meet standard permission
+requirements:</p>
+<ol type="1">
+<li>They must be owned by <code>root</code>.</li>
+<li>They must have executable permissions set
+(<code>chmod +x</code>).</li>
+<li>They must begin with a valid shebang line (e.g.,
+<code>#!/bin/sh</code> or <code>#!/bin/bash</code>).</li>
+</ol>
+<p>When <code>networkd-dispatcher</code> runs a hook, it populates
+several environment variables that can be evaluated within the
+script:</p>
+<ul>
+<li><strong><code>$IFACE</code></strong>: The name of the network
+interface that triggered the event (e.g., <code>eth0</code>,
+<code>enp3s0</code>).</li>
+<li><strong><code>$STATE</code></strong>: The target state category
+matching the directory (e.g., <code>routable</code>,
+<code>off</code>).</li>
+<li><strong><code>$AdministrativeState</code></strong>: The
+administrative status of the interface (e.g., <code>configured</code>,
+<code>unmanaged</code>).</li>
+<li><strong><code>$OperationalState</code></strong>: The systemd
+operational status (e.g., <code>routable</code>,
+<code>degraded</code>).</li>
+</ul>
+<p>Using these variables, a single script can filter execution so it
+only affects specific adapters, preventing unnecessary triggers when
+loopback or virtual bridge interfaces change states.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL Point-in-Time Recovery on Ubuntu - ubuntu</title>
+    <meta name="description" content="Point-in-Time Recovery (PITR) allows you to restore a PostgreSQL database to a specific moment in time using a physical base backup combined with archived Write-Ahead Logging (WAL) files. On Ubuntu, PITR is not executed through a single stand-alone comma">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/postgre-sql-point-in-time-recovery-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PostgreSQL Point-in-Time Recovery on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/postgre-sql-point-in-time-recovery-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Point-in-Time Recovery (PITR) allows you to restore a PostgreSQL database to a specific moment in time using a physical base backup combined with archived Write-Ahead Logging (WAL) files. On Ubuntu, PITR is not executed through a single stand-alone comma" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="postgresql-point-in-time-recovery-on-ubuntu">PostgreSQL
+Point-in-Time Recovery on Ubuntu</h1>
+<p>Point-in-Time Recovery (PITR) allows you to restore a PostgreSQL
+database to a specific moment in time using a physical base backup
+combined with archived Write-Ahead Logging (WAL) files. On Ubuntu, PITR
+is not executed through a single stand-alone command, but rather through
+a sequence of administrative commands centered around restoring the base
+data, signaling recovery with <code>touch recovery.signal</code>,
+configuring target parameters in <code>postgresql.conf</code>, and
+restarting the PostgreSQL service.</p>
+<h3 id="step-1-stop-the-postgresql-service">Step 1: Stop the PostgreSQL
+Service</h3>
+<p>Before modifying database files, stop the running PostgreSQL
+cluster:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop postgresql</span></code></pre></div>
+<h3 id="step-2-clear-data-directory-and-restore-the-base-backup">Step 2:
+Clear Data Directory and Restore the Base Backup</h3>
+<p>Move your current data directory to a safe location or clear it, then
+restore your file system base backup. Replace <code>16</code> with your
+PostgreSQL version and <code>main</code> with your cluster name if
+different:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv /var/lib/postgresql/16/main /var/lib/postgresql/16/main_old</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /var/lib/postgresql/16/main</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tar <span class="at">-xvzf</span> /path/to/basebackup.tar.gz <span class="at">-C</span> /var/lib/postgresql/16/main</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> postgres:postgres /var/lib/postgresql/16/main</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 700 /var/lib/postgresql/16/main</span></code></pre></div>
+<h3 id="step-3-create-the-recovery-signal-file">Step 3: Create the
+Recovery Signal File</h3>
+<p>The crucial command that instructs PostgreSQL to enter recovery mode
+on startup is creating a <code>recovery.signal</code> file in the data
+directory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres touch /var/lib/postgresql/16/main/recovery.signal</span></code></pre></div>
+<h3 id="step-4-configure-the-recovery-parameters">Step 4: Configure the
+Recovery Parameters</h3>
+<p>Edit your PostgreSQL configuration file to define how WAL archives
+are retrieved and specify the exact target time:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/postgresql/16/main/postgresql.conf</span></code></pre></div>
+<p>Add or update the following recovery settings:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Command to fetch WAL archives from your storage location</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">restore_command </span><span class="ot">=</span><span class="st"> &#39;cp /path/to/wal_archive/%f %p&#39;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Target timestamp for the recovery (UTC or specified timezone)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dt">recovery_target_time </span><span class="ot">=</span><span class="st"> &#39;2024-05-01 14:30:00 UTC&#39;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Action to take once the target is reached (promote opens the DB for writes)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dt">recovery_target_action </span><span class="ot">=</span><span class="st"> &#39;promote&#39;</span></span></code></pre></div>
+<h3 id="step-5-start-the-postgresql-service">Step 5: Start the
+PostgreSQL Service</h3>
+<p>Initiate the recovery process by starting the database service:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start postgresql</span></code></pre></div>
+<h3 id="step-6-verify-recovery">Step 6: Verify Recovery</h3>
+<p>PostgreSQL will replay the WAL records up to the timestamp defined in
+<code>recovery_target_time</code>, remove the
+<code>recovery.signal</code> file automatically, and promote the
+instance to accept connections. You can monitor the process through the
+logs:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tail <span class="at">-f</span> /var/log/postgresql/postgresql-16-main.log</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

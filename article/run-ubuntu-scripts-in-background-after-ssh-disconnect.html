@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Ubuntu Scripts in Background After SSH Disconnect - ubuntu</title>
+    <meta name="description" content="Running long scripts over an SSH connection can be risky because closing the terminal or losing the network connection sends a SIGHUP (hangup) signal that terminates your running process. Ubuntu provides several powerful built-in utilities—primarily no">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/run-ubuntu-scripts-in-background-after-ssh-disconnect">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Run Ubuntu Scripts in Background After SSH Disconnect - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/run-ubuntu-scripts-in-background-after-ssh-disconnect" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Running long scripts over an SSH connection can be risky because closing the terminal or losing the network connection sends a SIGHUP (hangup) signal that terminates your running process. Ubuntu provides several powerful built-in utilities—primarily no" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="run-ubuntu-scripts-in-background-after-ssh-disconnect">Run
+Ubuntu Scripts in Background After SSH Disconnect</h1>
+<p>Running long scripts over an SSH connection can be risky because
+closing the terminal or losing the network connection sends a SIGHUP
+(hangup) signal that terminates your running process. Ubuntu provides
+several powerful built-in utilities—primarily <code>nohup</code>,
+<code>tmux</code>, and <code>cron</code>—that allow you to execute or
+schedule scripts to run persistently in the background, ensuring they
+continue execution entirely unaffected by SSH disconnections.</p>
+<h3 id="1-the-nohup-command-best-for-immediate-execution">1. The
+<code>nohup</code> Command (Best for Immediate Execution)</h3>
+<p>The most direct command to run a script continuously in the
+background is <code>nohup</code> (no hang up), combined with the
+background operator <code>&amp;</code>.</p>
+<p>To run your script, use the following syntax:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nohup</span> /path/to/script.sh <span class="op">&gt;</span> output.log <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">&amp;</span></span></code></pre></div>
+<ul>
+<li><strong><code>nohup</code></strong>: Prevents the process from
+receiving the SIGHUP signal when the SSH session ends.</li>
+<li><strong><code>&gt; output.log 2&gt;&amp;1</code></strong>: Redirects
+both standard output (<code>stdout</code>) and standard error
+(<code>stderr</code>) to a file named <code>output.log</code>. If
+omitted, output defaults to <code>nohup.out</code>.</li>
+<li><strong><code>&amp;</code></strong>: Sends the command to the
+background immediately, returning control of the terminal prompt to
+you.</li>
+</ul>
+<p>Once executed, you can safely log out of your SSH session using the
+<code>exit</code> command without interrupting the script.</p>
+<h3 id="2-the-cron-utility-best-for-scheduled-tasks">2. The
+<code>cron</code> Utility (Best for Scheduled Tasks)</h3>
+<p>If you need to schedule a script to run automatically at a specific
+time or on a recurring basis, use <code>cron</code>. Because
+<code>cron</code> runs as a system daemon, it executes independently of
+any active user login session.</p>
+<ol type="1">
+<li><p>Open your user's crontab editor:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crontab</span> <span class="at">-e</span></span></code></pre></div></li>
+<li><p>Add a line defining the schedule and the script:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run every day at 02:00 AM</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span> 2 <span class="pp">*</span> <span class="pp">*</span> <span class="pp">*</span> /bin/bash /path/to/script.sh <span class="op">&gt;</span> /path/to/cron.log <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span></code></pre></div></li>
+</ol>
+<h3 id="3-the-at-command-best-for-one-time-scheduled-execution">3. The
+<code>at</code> Command (Best for One-Time Scheduled Execution)</h3>
+<p>For scheduling a script to execute once at a future time in the
+background, use <code>at</code>.</p>
+<ol type="1">
+<li><p>Install <code>at</code> if not already present:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install at</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> atd</span></code></pre></div></li>
+<li><p>Schedule the execution time (for example, at 3:30 PM):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;/bin/bash /path/to/script.sh&quot;</span> <span class="kw">|</span> <span class="ex">at</span> 15:30</span></code></pre></div></li>
+</ol>
+<h3 id="4-tmux-or-screen-best-for-interactive-background-sessions">4.
+<code>tmux</code> or <code>screen</code> (Best for Interactive
+Background Sessions)</h3>
+<p>Terminal multiplexers like <code>tmux</code> allow you to detach from
+an active session and let processes run inside an isolated shell
+environment.</p>
+<ol type="1">
+<li>Start a new session:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> new <span class="at">-s</span> mysession</span></code></pre></div></li>
+<li>Execute your script inside the session:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./script.sh</span></span></code></pre></div></li>
+<li>Detach from the session by pressing <strong>Ctrl + B</strong>, then
+<strong>D</strong>.</li>
+</ol>
+<p>You can now disconnect from SSH. To reattach to the running session
+later, log back in and run:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> attach <span class="at">-t</span> mysession</span></code></pre></div>
+<h3 id="managing-running-background-jobs">Managing Running Background
+Jobs</h3>
+<p>To monitor or manage your background scripts:</p>
+<ul>
+<li>Check active background processes:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> script.sh</span></code></pre></div></li>
+<li>Terminate a background process using its Process ID (PID):
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span></code></pre></div></li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

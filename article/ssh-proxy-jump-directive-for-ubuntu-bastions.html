@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH ProxyJump Directive for Ubuntu Bastions - ubuntu</title>
+    <meta name="description" content="The ProxyJump directive in the ~/.ssh/config file simplifies and secures the process of connecting to private network servers through an intermediary gateway, commonly known as a bastion host or jump box. Instead of manually establishing multiple SSH ses">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ssh-proxy-jump-directive-for-ubuntu-bastions">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SSH ProxyJump Directive for Ubuntu Bastions - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ssh-proxy-jump-directive-for-ubuntu-bastions" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The ProxyJump directive in the ~/.ssh/config file simplifies and secures the process of connecting to private network servers through an intermediary gateway, commonly known as a bastion host or jump box. Instead of manually establishing multiple SSH ses" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ssh-proxyjump-directive-for-ubuntu-bastions">SSH ProxyJump
+Directive for Ubuntu Bastions</h1>
+<p>The <code>ProxyJump</code> directive in the
+<code>~/.ssh/config</code> file simplifies and secures the process of
+connecting to private network servers through an intermediary gateway,
+commonly known as a bastion host or jump box. Instead of manually
+establishing multiple SSH sessions or configuring complex
+port-forwarding scripts, <code>ProxyJump</code> automates the traversal
+of an Ubuntu bastion host in the background. This article explains the
+role of <code>ProxyJump</code>, its operational and security advantages,
+and how to configure it for seamless routing to internal
+infrastructure.</p>
+<h2 id="understanding-the-role-of-an-ubuntu-bastion">Understanding the
+Role of an Ubuntu Bastion</h2>
+<p>In secure cloud and enterprise environments, internal servers hosting
+databases, application backends, and internal services rarely have
+public IP addresses. To manage these machines, administrators place a
+hardened, publicly accessible server—the bastion host—at the network
+perimeter.</p>
+<p>Traditionally, accessing an internal server required logging into the
+Ubuntu bastion first, storing private keys on that bastion, and then
+running a second SSH command to reach the target machine. Alternatively,
+users had to write verbose <code>ProxyCommand</code> strings using
+utilities like <code>netcat</code> (<code>nc</code>). The
+<code>ProxyJump</code> directive replaces both workflows with a clean,
+native SSH mechanism.</p>
+<h2 id="how-proxyjump-functions">How ProxyJump Functions</h2>
+<p>Introduced natively in OpenSSH 7.3, <code>ProxyJump</code> instructs
+your local SSH client to establish an encrypted transport-layer tunnel
+through the bastion to the target destination using OpenSSH’s standard
+<code>-W</code> (stdio forwarding) flag.</p>
+<p>When you initiate an SSH connection using <code>ProxyJump</code>:</p>
+<ol type="1">
+<li>Your local client connects and authenticates with the Ubuntu bastion
+host.</li>
+<li>The bastion opens an unauthenticated TCP channel directly to the
+private target server's SSH port (typically port 22).</li>
+<li>Your local client establishes an end-to-end encrypted SSH session
+with the internal server through this channel.</li>
+</ol>
+<p>The Ubuntu bastion merely acts as a dumb packet forwarder at the
+transport layer; it never decrypts or inspects the traffic between your
+local machine and the destination host.</p>
+<h2 id="advantages-of-using-proxyjump">Advantages of Using
+ProxyJump</h2>
+<ul>
+<li><strong>End-to-End Encryption:</strong> The SSH session to the
+target host is fully encrypted locally. The intermediate Ubuntu bastion
+cannot view commands, transmitted data, or credentials.</li>
+<li><strong>No Keys on the Bastion:</strong> Because the connection to
+the internal host originates cryptographically from your local machine,
+your private keys remain exclusively on your local workstation.</li>
+<li><strong>Avoids SSH Agent Forwarding Risks:</strong> Unlike agent
+forwarding (<code>ForwardAgent yes</code>), which can expose your
+authentication agent to compromise if the bastion host is hijacked,
+<code>ProxyJump</code> eliminates the need to expose your agent
+socket.</li>
+<li><strong>Simplified Commands:</strong> Once configured in
+<code>~/.ssh/config</code>, connecting to an internal node behind a
+firewall requires nothing more than running
+<code>ssh target-server</code>.</li>
+</ul>
+<h2 id="example-sshconfig-configuration">Example ~/.ssh/config
+Configuration</h2>
+<p>To configure transparent routing through an Ubuntu bastion, open or
+create your <code>~/.ssh/config</code> file and define both the bastion
+and the target instances:</p>
+<pre class="text"><code># The Ubuntu Bastion Host (Gateway)
+Host bastion
+    HostName 203.0.113.10
+    User ubuntu
+    IdentityFile ~/.ssh/bastion_key.pem
+
+# Internal Target Server
+Host internal-db
+    HostName 10.0.1.50
+    User ubuntu
+    IdentityFile ~/.ssh/internal_key.pem
+    ProxyJump bastion</code></pre>
+<p>With this configuration in place, running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> internal-db</span></code></pre></div>
+<p>automatically connects through the Ubuntu bastion at
+<code>203.0.113.10</code> and establishes the session with
+<code>10.0.1.50</code> without requiring any manual hopping or dual
+authentication commands.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

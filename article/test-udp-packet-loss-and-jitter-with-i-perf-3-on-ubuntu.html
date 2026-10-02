@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test UDP Packet Loss and Jitter with iPerf3 on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide demonstrates how to measure network performance metrics, specifically UDP packet loss and jitter, between two Ubuntu servers using the iperf3 utility. By default, iperf3 measures TCP throughput, but with specific flags, it can generate UDP tra">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/test-udp-packet-loss-and-jitter-with-i-perf-3-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Test UDP Packet Loss and Jitter with iPerf3 on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/test-udp-packet-loss-and-jitter-with-i-perf-3-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide demonstrates how to measure network performance metrics, specifically UDP packet loss and jitter, between two Ubuntu servers using the iperf3 utility. By default, iperf3 measures TCP throughput, but with specific flags, it can generate UDP tra" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="test-udp-packet-loss-and-jitter-with-iperf3-on-ubuntu">Test UDP
+Packet Loss and Jitter with iPerf3 on Ubuntu</h1>
+<p>This guide demonstrates how to measure network performance metrics,
+specifically UDP packet loss and jitter, between two Ubuntu servers
+using the <code>iperf3</code> utility. By default, <code>iperf3</code>
+measures TCP throughput, but with specific flags, it can generate UDP
+traffic to evaluate real-time transport reliability. You will learn how
+to install <code>iperf3</code>, configure one server as a listener,
+execute the client-side UDP test, and accurately read the resulting
+jitter and loss statistics.</p>
+<h3 id="step-1-install-iperf3-on-both-servers">Step 1: Install iperf3 on
+Both Servers</h3>
+<p>Update the package lists and install <code>iperf3</code> on both your
+target servers (Server A and Server B) by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install iperf3 <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-open-the-required-ports">Step 2: Open the Required
+Ports</h3>
+<p><code>iperf3</code> uses port 5201 by default. Because UDP tests
+still require a TCP control connection to exchange test setup
+parameters, you must allow both TCP and UDP traffic on port 5201 on the
+receiving server (Server A).</p>
+<p>If you are using UFW (Uncomplicated Firewall), run the following on
+Server A:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 5201/tcp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 5201/udp</span></code></pre></div>
+<h3 id="step-3-start-the-iperf3-server">Step 3: Start the iperf3
+Server</h3>
+<p>Designate one server (Server A) as the receiver. Start
+<code>iperf3</code> in server mode:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-s</span></span></code></pre></div>
+<p>The terminal will display:</p>
+<pre class="text"><code>-----------------------------------------------------------
+Server listening on 5201 (test #1)
+-----------------------------------------------------------</code></pre>
+<h3 id="step-4-run-the-udp-test-from-the-client">Step 4: Run the UDP
+Test from the Client</h3>
+<p>Log in to the second server (Server B) to initiate the test. To
+measure UDP metrics, you must specify the target bandwidth; otherwise,
+<code>iperf3</code> defaults to a restrictive 1 Mbit/sec limit for
+UDP.</p>
+<p>Run the test using this command (replace <code>SERVER_A_IP</code>
+with the actual IP address of Server A):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-c</span> SERVER_A_IP <span class="at">-u</span> <span class="at">-b</span> 100M <span class="at">-t</span> 30</span></code></pre></div>
+<p>Key flags explained:</p>
+<ul>
+<li><code>-c SERVER_A_IP</code>: Specifies client mode and connects to
+the target IP.</li>
+<li><code>-u</code>: Switches the test protocol to UDP instead of
+TCP.</li>
+<li><code>-b 100M</code>: Sets the target bandwidth (e.g., 100
+Mbits/sec). Adjust this to match your testing capacity (e.g.,
+<code>50M</code>, <code>1G</code>).</li>
+<li><code>-t 30</code>: Sets the duration of the test to 30
+seconds.</li>
+</ul>
+<h3 id="step-5-read-packet-loss-and-jitter-results">Step 5: Read Packet
+Loss and Jitter Results</h3>
+<p>Once the test completes, <code>iperf3</code> prints a summary report
+on both the client and server. Focus on the final lines of the output
+under the receiver summary on Server B:</p>
+<pre class="text"><code>[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-30.00  sec   357 MBytes  99.9 Mbits/sec  0.035 ms  0/45696 (0%)  receiver</code></pre>
+<ul>
+<li><strong>Jitter</strong>: The variation in packet arrival time,
+displayed in milliseconds (ms). Lower values indicate a more stable
+connection, which is critical for real-time applications like VoIP and
+video streaming.</li>
+<li><strong>Lost/Total Datagrams</strong>: Shows the total number of
+dropped UDP packets alongside the total packets sent, followed by the
+percentage of packet loss. A non-zero percentage indicates network
+congestion, hardware buffer overruns, or intermediate link
+degradation.</li>
+</ul>
+<h3 id="optional-test-the-reverse-direction">Optional: Test the Reverse
+Direction</h3>
+<p>To test packet loss and jitter from Server A to Server B without
+restarting the server daemon, append the <code>-R</code> flag to the
+client command to run the test in reverse mode:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-c</span> SERVER_A_IP <span class="at">-u</span> <span class="at">-b</span> 100M <span class="at">-t</span> 30 <span class="at">-R</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

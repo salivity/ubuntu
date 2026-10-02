@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Up C/C++ Compilation on Ubuntu with ccache - ubuntu</title>
+    <meta name="description" content="This article explores the role of ccache (compiler cache) in accelerating C and C++ build times on Ubuntu systems. By capturing and storing the results of previous compilations, ccache detects identical source files and compiler flags, retrieving cached">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/speed-up-c-c-compilation-on-ubuntu-with-ccache">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Speed Up C/C++ Compilation on Ubuntu with ccache - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/speed-up-c-c-compilation-on-ubuntu-with-ccache" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores the role of ccache (compiler cache) in accelerating C and C++ build times on Ubuntu systems. By capturing and storing the results of previous compilations, ccache detects identical source files and compiler flags, retrieving cached" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="speed-up-cc-compilation-on-ubuntu-with-ccache">Speed Up C/C++
+Compilation on Ubuntu with ccache</h1>
+<p>This article explores the role of <code>ccache</code> (compiler
+cache) in accelerating C and C++ build times on Ubuntu systems. By
+capturing and storing the results of previous compilations,
+<code>ccache</code> detects identical source files and compiler flags,
+retrieving cached object files instead of recompiling code from scratch.
+Below, you will learn how <code>ccache</code> works behind the scenes,
+how to install and enable it on Ubuntu, and how to integrate it
+seamlessly into modern build systems to significantly reduce development
+cycle times.</p>
+<h3 id="how-ccache-works">How ccache Works</h3>
+<p>When building C or C++ projects, the compiler converts source files
+into object files—a computationally expensive process involving
+preprocessing, parsing, optimization, and code generation. Often,
+developers only modify a small subset of files between builds, or switch
+between Git branches where previous states are restored. Standard build
+systems like <code>make</code> rely primarily on file modification
+timestamps to decide what needs rebuilding, often triggering unnecessary
+recompilations if timestamps change.</p>
+<p><code>ccache</code> acts as a wrapper around your compiler (such as
+GCC or Clang). When a compilation command is invoked,
+<code>ccache</code> performs the following steps:</p>
+<ol type="1">
+<li><strong>Hashing the Input:</strong> It hashes the preprocessed
+source code, compiler options, compiler binary hash, and environment
+settings.</li>
+<li><strong>Cache Lookup:</strong> It checks its local storage (usually
+located in <code>~/.cache/ccache</code> or <code>~/.ccache</code>) for a
+matching hash.</li>
+<li><strong>Cache Hit:</strong> If an identical compilation exists,
+<code>ccache</code> immediately produces the cached object code and
+replays any stored compiler warnings, bypassing the actual compilation
+entirely.</li>
+<li><strong>Cache Miss:</strong> If the hash is new, <code>ccache</code>
+executes the real compiler, writes the output to the destination, and
+stores a copy of the object file in the cache for future use.</li>
+</ol>
+<p>Because cache hits avoid parsing and optimization steps entirely,
+recompilation times can drop by 5x to 10x or more for unchanged
+compilation units.</p>
+<h3 id="installing-and-activating-ccache-on-ubuntu">Installing and
+Activating ccache on Ubuntu</h3>
+<p>Ubuntu includes <code>ccache</code> in its standard package
+repositories. You can install it using <code>apt</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ccache</span></code></pre></div>
+<p>Once installed, Ubuntu provides compiler symlinks in
+<code>/usr/lib/ccache</code>. To enable <code>ccache</code> system-wide
+for your user session, prepend this directory to your <code>PATH</code>
+environment variable by adding the following line to your
+<code>~/.bashrc</code> or <code>~/.profile</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">&quot;/usr/lib/ccache:</span><span class="va">$PATH</span><span class="st">&quot;</span></span></code></pre></div>
+<p>After reloading your shell (<code>source ~/.bashrc</code>), running
+<code>which gcc</code> or <code>which g++</code> should point to
+<code>/usr/lib/ccache/gcc</code> and
+<code>/usr/lib/ccache/g++</code>.</p>
+<h3 id="integration-with-build-systems">Integration with Build
+Systems</h3>
+<h4 id="cmake">CMake</h4>
+<p>For projects using CMake, you can enable <code>ccache</code> without
+altering system-wide symlinks by setting the compiler launcher
+variables:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-B</span> build <span class="at">-DCMAKE_C_COMPILER_LAUNCHER</span><span class="op">=</span>ccache <span class="at">-DCMAKE_CXX_COMPILER_LAUNCHER</span><span class="op">=</span>ccache</span></code></pre></div>
+<p>Alternatively, add the configuration directly inside your
+<code>CMakeLists.txt</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode cmake"><code class="sourceCode cmake"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">find_program</span>(CCACHE_PROGRAM ccache)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(CCACHE_PROGRAM)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">set</span>(<span class="dv">CMAKE_C_COMPILER_LAUNCHER</span> <span class="st">&quot;</span><span class="dv">${CCACHE_PROGRAM}</span><span class="st">&quot;</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">set</span>(<span class="dv">CMAKE_CXX_COMPILER_LAUNCHER</span> <span class="st">&quot;</span><span class="dv">${CCACHE_PROGRAM}</span><span class="st">&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">endif</span>()</span></code></pre></div>
+<h4 id="make">Make</h4>
+<p>For standard Makefiles, define the <code>CC</code> and
+<code>CXX</code> variables explicitly:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> CC=<span class="st">&quot;ccache gcc&quot;</span> CXX=<span class="st">&quot;ccache g++&quot;</span></span></code></pre></div>
+<h3 id="monitoring-and-managing-the-cache">Monitoring and Managing the
+Cache</h3>
+<p><code>ccache</code> includes a command-line interface to monitor
+cache usage and verify performance gains.</p>
+<ul>
+<li><strong>View Statistics:</strong> Run <code>ccache -s</code> to view
+your hit rate, miss rate, and cache size.</li>
+<li><strong>Set Cache Size:</strong> By default, <code>ccache</code>
+limits storage to 5 GB. For large codebases, increase this limit (for
+example, to 20 GB) using:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ccache</span> <span class="at">-M</span> 20G</span></code></pre></div></li>
+<li><strong>Clear Statistics:</strong> Reset the counters with
+<code>ccache -z</code> to measure stats for a single build.</li>
+<li><strong>Clear Cache:</strong> Remove all cached objects with
+<code>ccache -C</code>.</li>
+</ul>
+<p>By skipping redundant compilation passes, <code>ccache</code>
+dramatically shortens incremental build times and context-switching
+overhead on Ubuntu development environments.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

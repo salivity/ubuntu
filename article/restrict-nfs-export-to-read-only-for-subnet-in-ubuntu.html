@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restrict NFS Export to Read-Only for Subnet in Ubuntu - ubuntu</title>
+    <meta name="description" content="Configuring Network File System (NFS) exports with granular permissions ensures data integrity across your local network. This guide explains how to restrict an NFS share to read-only access for a specific subnet on an Ubuntu server by editing the /etc/e">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/restrict-nfs-export-to-read-only-for-subnet-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Restrict NFS Export to Read-Only for Subnet in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/restrict-nfs-export-to-read-only-for-subnet-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring Network File System (NFS) exports with granular permissions ensures data integrity across your local network. This guide explains how to restrict an NFS share to read-only access for a specific subnet on an Ubuntu server by editing the /etc/e" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="restrict-nfs-export-to-read-only-for-subnet-in-ubuntu">Restrict
+NFS Export to Read-Only for Subnet in Ubuntu</h1>
+<p>Configuring Network File System (NFS) exports with granular
+permissions ensures data integrity across your local network. This guide
+explains how to restrict an NFS share to read-only access for a specific
+subnet on an Ubuntu server by editing the <code>/etc/exports</code>
+file, applying the updated configuration, and verifying the export
+status.</p>
+<h3 id="step-1-edit-the-nfs-exports-file">Step 1: Edit the NFS Exports
+File</h3>
+<p>NFS shares and their associated host permissions are defined in
+<code>/etc/exports</code>. Open this file in your preferred text editor
+using root privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/exports</span></code></pre></div>
+<h3 id="step-2-define-the-subnet-and-read-only-permissions">Step 2:
+Define the Subnet and Read-Only Permissions</h3>
+<p>Locate or add the line defining the directory you want to share.
+Specify the target subnet using CIDR notation, followed immediately by
+the access options in parentheses. Ensure there is <strong>no
+space</strong> between the subnet and the opening parenthesis.</p>
+<p>Use the <code>ro</code> option to enforce read-only access:</p>
+<pre class="text"><code>/mnt/shared_data 192.168.1.0/24(ro,sync,no_subtree_check)</code></pre>
+<p><strong>Option Breakdown:</strong></p>
+<ul>
+<li><code>/mnt/shared_data</code>: The absolute path to the directory
+being exported.</li>
+<li><code>192.168.1.0/24</code>: The allowed subnet. Only clients with
+IP addresses in this range can access the share.</li>
+<li><code>ro</code>: Restricts clients to read-only operations,
+preventing file creation, modification, or deletion.</li>
+<li><code>sync</code>: Forces the server to write changes to disk before
+responding to requests, ensuring data consistency.</li>
+<li><code>no_subtree_check</code>: Improves reliability by preventing
+the server from checking if a file is in a specific subdirectory of the
+exported tree.</li>
+</ul>
+<p>Save the file and exit the editor (in <code>nano</code>, press
+<code>CTRL+O</code>, <code>Enter</code>, then <code>CTRL+X</code>).</p>
+<h3 id="step-3-apply-the-changes">Step 3: Apply the Changes</h3>
+<p>To update the NFS server with the new export rules without restarting
+the entire service, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> exportfs <span class="at">-ra</span></span></code></pre></div>
+<ul>
+<li><code>-r</code>: Re-exports all directories listed in
+<code>/etc/exports</code>.</li>
+<li><code>-a</code>: Applies the action across all exports.</li>
+</ul>
+<h3 id="step-4-verify-the-configuration">Step 4: Verify the
+Configuration</h3>
+<p>Confirm that the directory is correctly exported with read-only
+permissions for the specified subnet:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> exportfs <span class="at">-v</span></span></code></pre></div>
+<p>The output will display the active export path, the permitted subnet,
+and the applied flags, including <code>ro</code>.</p>
+<h3 id="step-5-configure-the-firewall-optional">Step 5: Configure the
+Firewall (Optional)</h3>
+<p>If Ubuntu's Uncomplicated Firewall (UFW) is active, ensure traffic
+from the specified subnet is permitted on the NFS port:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow from 192.168.1.0/24 to any port nfs</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw reload</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

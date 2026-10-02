@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Migrate LXD Containers Between Ubuntu Hosts - ubuntu</title>
+    <meta name="description" content="Migrating an LXD container from one Ubuntu host to another over a network can be accomplished seamlessly using LXD's built-in remote management capabilities. This guide outlines how to expose the LXD API on the target server, establish a trusted remote c">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-migrate-lxd-containers-between-ubuntu-hosts">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Migrate LXD Containers Between Ubuntu Hosts - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-migrate-lxd-containers-between-ubuntu-hosts" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Migrating an LXD container from one Ubuntu host to another over a network can be accomplished seamlessly using LXD's built-in remote management capabilities. This guide outlines how to expose the LXD API on the target server, establish a trusted remote c" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-migrate-lxd-containers-between-ubuntu-hosts">How to
+Migrate LXD Containers Between Ubuntu Hosts</h1>
+<p>Migrating an LXD container from one Ubuntu host to another over a
+network can be accomplished seamlessly using LXD's built-in remote
+management capabilities. This guide outlines how to expose the LXD API
+on the target server, establish a trusted remote connection between both
+hosts, and transfer a container directly using the <code>lxc copy</code>
+or <code>lxc move</code> command without needing to manually export and
+import image tarballs.</p>
+<h3 id="step-1-configure-the-target-host">Step 1: Configure the Target
+Host</h3>
+<p>To allow the source server to transfer data, the target Ubuntu host
+must expose its LXD daemon to the network and define a trust password
+for authentication.</p>
+<p>Run the following commands on the <strong>destination (target)
+host</strong>:</p>
+<ol type="1">
+<li><p>Bind the LXD daemon to an HTTPS port (default is 8443):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config set core.https_address <span class="st">&quot;[::]:8443&quot;</span></span></code></pre></div></li>
+<li><p>Set a temporary trust password to allow new clients to
+authenticate:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config set core.trust_password YourSecurePasswordHere</span></code></pre></div></li>
+<li><p>Ensure port 8443 is open on the target firewall:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 8443/tcp</span></code></pre></div></li>
+</ol>
+<h3 id="step-2-add-the-remote-on-the-source-host">Step 2: Add the Remote
+on the Source Host</h3>
+<p>Once the target host is listening, configure the source host to
+recognize the target as a valid remote destination.</p>
+<p>Run the following commands on the <strong>source host</strong>:</p>
+<ol type="1">
+<li><p>Add the target host to your LXD remotes list:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> remote add target-server <span class="op">&lt;</span>TARGET_IP<span class="op">&gt;</span>:8443</span></code></pre></div>
+<p>Replace <code>&lt;TARGET_IP&gt;</code> with the actual IP address or
+hostname of your destination server.</p></li>
+<li><p>When prompted, verify the target server's certificate fingerprint
+by typing <code>yes</code>.</p></li>
+<li><p>Enter the trust password configured in Step 1.</p></li>
+<li><p>Verify that the connection is active:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> remote list</span></code></pre></div>
+<p>The <code>target-server</code> should now appear in the list of
+available remotes.</p></li>
+</ol>
+<h3 id="step-3-migrate-the-container">Step 3: Migrate the Container</h3>
+<p>LXD supports copying (preserving the source container) or moving
+(deleting the source container after transfer).</p>
+<h4 id="option-a-copy-the-container">Option A: Copy the Container</h4>
+<p>To duplicate the container to the remote host while leaving the
+original intact:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> copy my-container target-server:my-container</span></code></pre></div>
+<p>If the container is actively running and you want to minimize
+downtime, use the <code>--mode=relay</code> flag (if network routing
+requires it) or specify live migration using CRIU (if configured):</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> copy my-container target-server:my-container <span class="at">--mode</span><span class="op">=</span>pull</span></code></pre></div>
+<h4 id="option-b-move-the-container">Option B: Move the Container</h4>
+<p>To completely transfer and delete the container from the source
+host:</p>
+<ol type="1">
+<li><p>Stop the container first for the cleanest migration:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> stop my-container</span></code></pre></div></li>
+<li><p>Execute the move command:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> move my-container target-server:my-container</span></code></pre></div></li>
+</ol>
+<h3 id="step-4-verify-and-start-the-container">Step 4: Verify and Start
+the Container</h3>
+<p>On the <strong>target host</strong>, verify that the container is
+present:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> list</span></code></pre></div>
+<p>Start the migrated container:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> start my-container</span></code></pre></div>
+<p>Verify that the network configurations, storage pools, and profiles
+assigned to the container on the source match those available on the
+target to ensure the container initializes properly.</p>
+<h3 id="step-5-post-migration-security-cleanup">Step 5: Post-Migration
+Security Cleanup</h3>
+<p>After completing the transfer, remove the trust password from the
+<strong>target host</strong> to prevent unauthorized authentication
+attempts:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config unset core.trust_password</span></code></pre></div>
+<p>If you do not intend to perform further remote operations, you can
+also stop listening on the public port:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config unset core.https_address</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

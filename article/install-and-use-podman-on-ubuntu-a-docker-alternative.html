@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install and Use Podman on Ubuntu: A Docker Alternative - ubuntu</title>
+    <meta name="description" content="This guide explains how to install and use Podman on Ubuntu as a rootless, daemonless alternative to Docker. You will learn the commands required to install Podman from official repositories, configure basic container settings, and manage containers usin">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-and-use-podman-on-ubuntu-a-docker-alternative">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install and Use Podman on Ubuntu: A Docker Alternative - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-and-use-podman-on-ubuntu-a-docker-alternative" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to install and use Podman on Ubuntu as a rootless, daemonless alternative to Docker. You will learn the commands required to install Podman from official repositories, configure basic container settings, and manage containers usin" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-and-use-podman-on-ubuntu-a-docker-alternative">Install
+and Use Podman on Ubuntu: A Docker Alternative</h1>
+<p>This guide explains how to install and use Podman on Ubuntu as a
+rootless, daemonless alternative to Docker. You will learn the commands
+required to install Podman from official repositories, configure basic
+container settings, and manage containers using familiar
+Docker-compatible syntax.</p>
+<h3 id="what-is-podman">What is Podman?</h3>
+<p>Podman (Pod Manager) is an open-source, OCI-compliant container
+engine developed by Red Hat. Unlike Docker, Podman does not rely on a
+persistent background daemon (<code>dockerd</code>) to run. Instead, it
+launches containers directly as child processes of the user. It also
+enables rootless execution by default, significantly improving host
+security by preventing root access escalation inside containers.</p>
+<h3 id="step-1-update-the-system">Step 1: Update the System</h3>
+<p>Ensure your local package index is up to date before installing new
+packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-install-podman">Step 2: Install Podman</h3>
+<p>Podman is available in the official package repositories of Ubuntu
+20.10 and newer releases (including 22.04 LTS and 24.04 LTS). Install it
+directly with <code>apt</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> podman</span></code></pre></div>
+<p>Once the installation finishes, verify that Podman is properly
+installed by checking its version:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> <span class="at">--version</span></span></code></pre></div>
+<h3 id="step-3-configure-registries-optional">Step 3: Configure
+Registries (Optional)</h3>
+<p>By default, Podman searches through defined registries (such as
+Docker Hub or Quay.io) when you pull an image. You can configure or
+verify registry search paths in
+<code>/etc/containers/registries.conf</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /etc/containers/registries.conf</span></code></pre></div>
+<p>If it is not configured, you can specify fully qualified domain names
+when pulling images (e.g., <code>docker.io/library/ubuntu</code>).</p>
+<h3 id="step-4-run-rootless-containers">Step 4: Run Rootless
+Containers</h3>
+<p>Podman works without <code>sudo</code> by default. You can search,
+pull, and run containers directly under your standard user account.</p>
+<h4 id="search-for-an-image">Search for an Image</h4>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> search nginx</span></code></pre></div>
+<h4 id="pull-an-image">Pull an Image</h4>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> pull docker.io/library/nginx</span></code></pre></div>
+<h4 id="run-a-container">Run a Container</h4>
+<p>Run an Nginx web server in detached mode mapping host port
+<code>8080</code> to container port <code>80</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> run <span class="at">-d</span> <span class="at">--name</span> web-server <span class="at">-p</span> 8080:80 docker.io/library/nginx</span></code></pre></div>
+<p>Test that the web server is running:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080</span></code></pre></div>
+<h3 id="step-5-managing-containers">Step 5: Managing Containers</h3>
+<p>Podman mirrors Docker CLI syntax closely. Common commands
+include:</p>
+<ul>
+<li><strong>List active containers:</strong>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> ps</span></code></pre></div></li>
+<li><strong>List all containers (running and stopped):</strong>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> ps <span class="at">-a</span></span></code></pre></div></li>
+<li><strong>View container logs:</strong>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> logs web-server</span></code></pre></div></li>
+<li><strong>Stop a container:</strong>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> stop web-server</span></code></pre></div></li>
+<li><strong>Remove a container:</strong>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> rm web-server</span></code></pre></div></li>
+<li><strong>List local images:</strong>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> images</span></code></pre></div></li>
+<li><strong>Remove an image:</strong>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">podman</span> rmi docker.io/library/nginx</span></code></pre></div></li>
+</ul>
+<h3 id="step-6-using-podman-as-a-drop-in-docker-replacement">Step 6:
+Using Podman as a Drop-In Docker Replacement</h3>
+<p>Because the CLI commands are intentionally identical, you can set an
+alias to substitute <code>docker</code> with <code>podman</code>:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> docker=podman</span></code></pre></div>
+<p>To make this permanent, append the alias to your shell configuration
+file:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;alias docker=podman&quot;</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div>
+<p>You can now execute <code>docker run</code>, <code>docker ps</code>,
+and other standard workflows powered directly by Podman.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

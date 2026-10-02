@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of Zeek Network Analysis Framework on Ubuntu - ubuntu</title>
+    <meta name="description" content="Zeek, formerly known as Bro, is a powerful open-source network security monitoring (NSM) framework that translates raw network traffic into structured, high-level behavioral data. Deploying Zeek on an Ubuntu server establishes a dedicated, scalable netwo">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-zeek-network-analysis-framework-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of Zeek Network Analysis Framework on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-zeek-network-analysis-framework-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Zeek, formerly known as Bro, is a powerful open-source network security monitoring (NSM) framework that translates raw network traffic into structured, high-level behavioral data. Deploying Zeek on an Ubuntu server establishes a dedicated, scalable netwo" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="role-of-zeek-network-analysis-framework-on-ubuntu">Role of Zeek
+Network Analysis Framework on Ubuntu</h1>
+<p>Zeek, formerly known as Bro, is a powerful open-source network
+security monitoring (NSM) framework that translates raw network traffic
+into structured, high-level behavioral data. Deploying Zeek on an Ubuntu
+server establishes a dedicated, scalable network sensor capable of
+passive traffic inspection, protocol decoding, and real-time anomaly
+detection. This article explains the primary role of Zeek on Ubuntu,
+detailing its architecture, metadata generation capabilities, and
+integration into modern enterprise security workflows.</p>
+<h2 id="passive-network-traffic-monitoring">Passive Network Traffic
+Monitoring</h2>
+<p>Unlike active intrusion prevention systems (IPS) or firewalls, Zeek
+operates passively. When installed on an Ubuntu system connected to a
+SPAN (port mirroring) port or a network TAP, Zeek inspects packets
+without modifying, delaying, or injecting traffic into the network
+stream.</p>
+<p>On Ubuntu, administrators typically bind Zeek to dedicated capture
+interfaces using optimized packet acquisition mechanisms like AF_PACKET
+or PF_RING. This allows the system to process high-throughput network
+traffic efficiently across multi-core Ubuntu servers without dropping
+packets.</p>
+<h2 id="behavioral-event-engine-and-metadata-generation">Behavioral
+Event Engine and Metadata Generation</h2>
+<p>Zeek does not rely solely on static signatures to identify threats.
+Instead, its core engine reassembles raw packets into structured
+protocol streams and interprets network activity semantically. It breaks
+traffic into high-level network events, such as HTTP requests, SSL/TLS
+handshakes, DNS queries, and SSH connections.</p>
+<p>Once an event is processed, Zeek writes clear, structured logs
+detailing network transactions:</p>
+<ul>
+<li><strong>conn.log:</strong> Records every connection, IP addresses,
+ports, duration, and byte counts.</li>
+<li><strong>dns.log:</strong> Catalogs all domain queries, responses,
+TTL values, and lookup errors.</li>
+<li><strong>ssl.log:</strong> Extracts certificate details, TLS
+versions, cipher suites, and validation states.</li>
+<li><strong>http.log:</strong> Tracks URIs, user agents, response codes,
+and MIME types.</li>
+<li><strong>files.log:</strong> Details files transferred over protocols
+like HTTP, FTP, and SMTP, including calculated MD5 and SHA-256
+hashes.</li>
+</ul>
+<p>These logs provide security analysts with deep visibility into
+network activity without requiring the storage overhead of full packet
+captures (PCAP).</p>
+<h2 id="custom-detection-through-the-zeek-scripting-language">Custom
+Detection Through the Zeek Scripting Language</h2>
+<p>Zeek features a Turing-complete, event-driven scripting language. On
+Ubuntu, these scripts reside in
+<code>/usr/local/zeek/share/zeek/site/</code> (or
+<code>/opt/zeek/</code>) and allow administrators to automate custom
+detection policies.</p>
+<p>Through scripting, Zeek can:</p>
+<ul>
+<li>Identify brute-force login attempts across protocols like SSH or
+FTP.</li>
+<li>Alert on the use of deprecated or insecure TLS certificates.</li>
+<li>Detect anomalous data staging and potential exfiltration.</li>
+<li>Automatically flag connections to known malicious domains or IP
+addresses using threat intelligence feeds.</li>
+</ul>
+<h2
+id="integration-with-siem-and-threat-detection-pipelines">Integration
+with SIEM and Threat Detection Pipelines</h2>
+<p>A critical role of an Ubuntu-hosted Zeek sensor is feeding structured
+data into centralized Security Information and Event Management (SIEM)
+systems and log aggregators.</p>
+<p>Because Ubuntu natively supports tools like Filebeat, Fluentd, and
+Logstash, Zeek logs (formatted as TSV or JSON) can be shipped seamlessly
+to Elasticsearch, Splunk, or cloud data lakes. This turns the Ubuntu
+host into a primary telemetry provider, enabling long-term security
+auditing, threat hunting, and automated incident response across the
+enterprise.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

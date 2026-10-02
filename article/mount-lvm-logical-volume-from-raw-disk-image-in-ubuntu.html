@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mount LVM Logical Volume from Raw Disk Image in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward method to mount an LVM (Logical Volume Manager) partition directly from a raw disk image (.img or .raw) in Ubuntu. By associating the raw image with a loop device that scans for partition tables, you can discover, ac">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/mount-lvm-logical-volume-from-raw-disk-image-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mount LVM Logical Volume from Raw Disk Image in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/mount-lvm-logical-volume-from-raw-disk-image-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward method to mount an LVM (Logical Volume Manager) partition directly from a raw disk image (.img or .raw) in Ubuntu. By associating the raw image with a loop device that scans for partition tables, you can discover, ac" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="mount-lvm-logical-volume-from-raw-disk-image-in-ubuntu">Mount
+LVM Logical Volume from Raw Disk Image in Ubuntu</h1>
+<p>This guide provides a straightforward method to mount an LVM (Logical
+Volume Manager) partition directly from a raw disk image
+(<code>.img</code> or <code>.raw</code>) in Ubuntu. By associating the
+raw image with a loop device that scans for partition tables, you can
+discover, activate, and mount the underlying logical volumes to your
+filesystem without modifying the original host partition structure.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have the required LVM tools installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install lvm2</span></code></pre></div>
+<h3 id="step-1-attach-the-image-to-a-loop-device">Step 1: Attach the
+Image to a Loop Device</h3>
+<p>Use <code>losetup</code> with the <code>-P</code> flag to
+automatically scan and create partition nodes for the attached
+image:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> losetup <span class="at">-Pf</span> /path/to/disk_image.img</span></code></pre></div>
+<p>To find which loop device was assigned, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">losetup</span> <span class="at">-a</span></span></code></pre></div>
+<p>Assume the output identifies the device as
+<code>/dev/loop0</code>.</p>
+<h3 id="step-2-scan-for-lvm-structures">Step 2: Scan for LVM
+Structures</h3>
+<p>Scan the system to detect the Physical Volumes (PV) and Volume Groups
+(VG) located inside the newly attached image:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pvscan</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vgscan</span></code></pre></div>
+<p>The output will display the discovered Volume Group name (e.g.,
+<code>vg_guest</code>).</p>
+<h3 id="step-3-activate-the-volume-group">Step 3: Activate the Volume
+Group</h3>
+<p>Activate all logical volumes within the identified volume group:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vgchange <span class="at">-ay</span> <span class="op">&lt;</span>volume_group_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;volume_group_name&gt;</code> with the actual name
+discovered in Step 2.</p>
+<p>To list the specific logical volumes available to mount:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lvs</span></code></pre></div>
+<p>The volumes will now be accessible at
+<code>/dev/&lt;volume_group_name&gt;/&lt;logical_volume_name&gt;</code>
+or
+<code>/dev/mapper/&lt;volume_group_name&gt;-&lt;logical_volume_name&gt;</code>.</p>
+<h3 id="step-4-mount-the-logical-volume">Step 4: Mount the Logical
+Volume</h3>
+<p>Create a mount point and mount the logical volume:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /mnt/image_lv</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/<span class="op">&lt;</span>volume_group_name<span class="op">&gt;</span>/<span class="op">&lt;</span>logical_volume_name<span class="op">&gt;</span> /mnt/image_lv</span></code></pre></div>
+<p>You can now access the files inside <code>/mnt/image_lv</code>.</p>
+<h3 id="step-5-clean-up-and-detach">Step 5: Clean Up and Detach</h3>
+<p>Once you have finished working with the files, safely unmount and
+detach the image:</p>
+<ol type="1">
+<li><p>Unmount the filesystem:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> umount /mnt/image_lv</span></code></pre></div></li>
+<li><p>Deactivate the Volume Group:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> vgchange <span class="at">-an</span> <span class="op">&lt;</span>volume_group_name<span class="op">&gt;</span></span></code></pre></div></li>
+<li><p>Detach the loop device:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> losetup <span class="at">-d</span> /dev/loop0</span></code></pre></div></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Kernel Modules with MOK on Ubuntu Secure Boot - ubuntu</title>
+    <meta name="description" content="UEFI Secure Boot prevents unauthorized code execution by verifying digital signatures before loading kernel modules into memory. On Ubuntu systems, custom compiled kernel modules will fail to load unless they are signed by a trusted cryptographic key. Th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/sign-kernel-modules-with-mok-on-ubuntu-secure-boot">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sign Kernel Modules with MOK on Ubuntu Secure Boot - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/sign-kernel-modules-with-mok-on-ubuntu-secure-boot" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="UEFI Secure Boot prevents unauthorized code execution by verifying digital signatures before loading kernel modules into memory. On Ubuntu systems, custom compiled kernel modules will fail to load unless they are signed by a trusted cryptographic key. Th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="sign-kernel-modules-with-mok-on-ubuntu-secure-boot">Sign Kernel
+Modules with MOK on Ubuntu Secure Boot</h1>
+<p>UEFI Secure Boot prevents unauthorized code execution by verifying
+digital signatures before loading kernel modules into memory. On Ubuntu
+systems, custom compiled kernel modules will fail to load unless they
+are signed by a trusted cryptographic key. This guide walks you through
+creating a Machine Owner Key (MOK), enrolling it into the UEFI firmware
+using Ubuntu's <code>mokutil</code> utility, and signing your custom
+<code>.ko</code> kernel module so it loads seamlessly without
+compromising system security.</p>
+<h3 id="1-install-required-tools">1. Install Required Tools</h3>
+<p>Before generating keys and signing modules, install the necessary
+cryptographic and build utilities:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install openssl mokutil sbsigntool linux-headers-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span></span></code></pre></div>
+<h3 id="2-generate-a-machine-owner-key-mok">2. Generate a Machine Owner
+Key (MOK)</h3>
+<p>Create a dedicated directory to store your keys. Ensure appropriate
+permissions are set so the private key remains secure.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/mok-keys</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/mok-keys</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 ~/mok-keys</span></code></pre></div>
+<p>Create an OpenSSL configuration file named
+<code>mokconfig.cnf</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[ req ]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">default_bits </span><span class="ot">=</span><span class="st"> </span><span class="dv">4096</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">distinguished_name </span><span class="ot">=</span><span class="st"> req_distinguished_name</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">prompt </span><span class="ot">=</span><span class="st"> </span><span class="kw">no</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="dt">x509_extensions </span><span class="ot">=</span><span class="st"> myexts</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[ req_distinguished_name ]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">CN </span><span class="ot">=</span><span class="st"> Custom Module Signing Key</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[ myexts ]</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="dt">basicConstraints</span><span class="ot">=</span><span class="st">critical,CA:FALSE</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="dt">keyUsage</span><span class="ot">=</span><span class="st">digitalSignature</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="dt">subjectKeyIdentifier</span><span class="ot">=</span><span class="st">hash</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="dt">authorityKeyIdentifier</span><span class="ot">=</span><span class="st">keyid</span></span></code></pre></div>
+<p>Generate the key pair (private key and public X.509 certificate):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> req <span class="at">-x509</span> <span class="at">-new</span> <span class="at">-nodes</span> <span class="at">-utf8</span> <span class="at">-sha256</span> <span class="at">-days</span> 3650 <span class="at">-batch</span> <span class="at">-config</span> mokconfig.cnf <span class="at">-outform</span> DER <span class="at">-out</span> MOK.der <span class="at">-keyout</span> MOK.priv</span></code></pre></div>
+<h3 id="3-enroll-the-key-into-the-uefi-firmware">3. Enroll the Key into
+the UEFI Firmware</h3>
+<p>Use <code>mokutil</code> to register the public key
+(<code>MOK.der</code>) with the Shim bootloader:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mokutil <span class="at">--import</span> MOK.der</span></code></pre></div>
+<p>You will be prompted to create a temporary password. Remember this
+password, as you must enter it during the next system reboot.</p>
+<h3 id="4-reboot-and-confirm-enrollment">4. Reboot and Confirm
+Enrollment</h3>
+<p>Restart the computer:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>During boot, the UEFI Shim loader will display the blue "Perform MOK
+management" screen:</p>
+<ol type="1">
+<li>Select <strong>Enroll MOK</strong>.</li>
+<li>Select <strong>View key 0</strong> to confirm it is your key, then
+select <strong>Continue</strong>.</li>
+<li>Select <strong>Yes</strong> when prompted to enroll the key.</li>
+<li>Enter the temporary password you created in step 3.</li>
+<li>Select <strong>Reboot</strong>.</li>
+</ol>
+<p>Once the system boots back into Ubuntu, verify that the key is
+active:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mokutil</span> <span class="at">--list-enrolled</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Custom Module Signing Key&quot;</span></span></code></pre></div>
+<h3 id="5-sign-the-compiled-kernel-module">5. Sign the Compiled Kernel
+Module</h3>
+<p>Ubuntu provides a dedicated signing utility called
+<code>sign-file</code> within the kernel headers directory. Use this
+tool along with your private key and public certificate to sign your
+compiled <code>.ko</code> file.</p>
+<p>Run the following command, replacing <code>/path/to/module.ko</code>
+with the path to your module:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /usr/src/linux-headers-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span>/scripts/sign-file sha256 ~/mok-keys/MOK.priv ~/mok-keys/MOK.der /path/to/module.ko</span></code></pre></div>
+<h3 id="6-verify-and-load-the-module">6. Verify and Load the Module</h3>
+<p>Check the module details to verify that the cryptographic signature
+block is attached:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">modinfo</span> /path/to/module.ko <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;signer|sig_key|sig_hashalgo&quot;</span></span></code></pre></div>
+<p>You should see your key's Common Name listed under the
+<code>signer</code> field. Finally, load the module into the running
+kernel:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> insmod /path/to/module.ko</span></code></pre></div>
+<p>Confirm that the module loaded without triggering Secure Boot
+rejection by checking the kernel log:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dmesg <span class="kw">|</span> <span class="fu">tail</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using virt-sysprep to Generalize Ubuntu VM Images - ubuntu</title>
+    <meta name="description" content="Generalizing a virtual machine is a critical step in creating a reusable template for virtualization environments. When cloning Ubuntu virtual machines, simply copying a disk image results in duplicated network configurations, machine IDs, and encryption">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/using-virt-sysprep-to-generalize-ubuntu-vm-images">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using virt-sysprep to Generalize Ubuntu VM Images - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/using-virt-sysprep-to-generalize-ubuntu-vm-images" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Generalizing a virtual machine is a critical step in creating a reusable template for virtualization environments. When cloning Ubuntu virtual machines, simply copying a disk image results in duplicated network configurations, machine IDs, and encryption" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-virt-sysprep-to-generalize-ubuntu-vm-images">Using
+virt-sysprep to Generalize Ubuntu VM Images</h1>
+<p>Generalizing a virtual machine is a critical step in creating a
+reusable template for virtualization environments. When cloning Ubuntu
+virtual machines, simply copying a disk image results in duplicated
+network configurations, machine IDs, and encryption keys that cause
+severe network and security conflicts. The <code>virt-sysprep</code>
+tool, part of the <code>guestfs-tools</code> suite, automates the
+process of stripping system-specific identifiers from an offline Ubuntu
+disk image, resetting the guest operating system so it can be cloned
+safely and spun up as distinct, independent instances.</p>
+<h3 id="the-purpose-of-system-generalization">The Purpose of System
+Generalization</h3>
+<p>When an Ubuntu virtual machine runs, it generates several unique
+identifiers tied specifically to that installation:</p>
+<ul>
+<li><strong>Machine ID:</strong> Located at <code>/etc/machine-id</code>
+(and often symlinked to <code>/var/lib/dbus/machine-id</code>), this
+unique string identifies the host for systemd services, DHCP address
+assignments, and D-Bus IPC.</li>
+<li><strong>SSH Host Keys:</strong> Unique cryptographic keys located in
+<code>/etc/ssh/</code> that identify the server to remote clients.</li>
+<li><strong>Persistent Network Rules:</strong> Hardware MAC address
+bindings, interface configurations, and Netplan settings.</li>
+<li><strong>Logs and Temporary Files:</strong> Historical log data in
+<code>/var/log</code> and transient files in <code>/tmp</code>.</li>
+</ul>
+<p>If a VM is cloned without removing these elements, all clones will
+share identical identities. On modern local networks using
+systemd-networkd, shared machine IDs cause DHCP servers to assign the
+exact same IP address to multiple clones, leading to immediate network
+collisions.</p>
+<h3 id="how-virt-sysprep-works">How virt-sysprep Works</h3>
+<p><code>virt-sysprep</code> operates directly on an offline guest disk
+image or a libvirt domain. Unlike manual cleanup methods that require
+logging into the guest operating system, running cleanup scripts, and
+shutting it down, <code>virt-sysprep</code> inspects and modifies the
+filesystem from the host side using <code>libguestfs</code>. This
+ensures that no new processes or temporary files are generated during
+the cleanup process itself.</p>
+<h3 id="key-operations-virt-sysprep-performs-on-ubuntu">Key Operations
+virt-sysprep Performs on Ubuntu</h3>
+<p>When executed against an Ubuntu guest, <code>virt-sysprep</code> runs
+a collection of modular operations enabled by default, including:</p>
+<ol type="1">
+<li><strong>Machine ID Truncation:</strong> It empties
+<code>/etc/machine-id</code> while leaving an empty file. This signals
+to Ubuntu on the next boot that a new, random machine ID must be
+generated.</li>
+<li><strong>SSH Host Key Deletion:</strong> It removes existing
+server-side host keys (<code>/etc/ssh/ssh_host_*_key*</code>). Upon
+subsequent boots, the <code>cloud-init</code> or SSH service regenerates
+fresh host keys.</li>
+<li><strong>Network Configuration Reset:</strong> It removes persistent
+MAC address mappings, udev network device rules, and cached DHCP leases,
+ensuring the cloned guest requests a fresh lease with its newly
+generated MAC address.</li>
+<li><strong>Log File and Cache Removal:</strong> It truncates system log
+files and flushes package manager caches (such as APT caches), which
+reduces overall template size.</li>
+<li><strong>User Artifact Sanitization:</strong> It removes shell
+history files (<code>.bash_history</code>), temporary directories
+(<code>/tmp/*</code>, <code>/var/tmp/*</code>), and mail spools.</li>
+</ol>
+<h3 id="basic-usage-workflow">Basic Usage Workflow</h3>
+<p>Before running <code>virt-sysprep</code>, the target Ubuntu VM must
+be completely shut down to avoid disk corruption.</p>
+<p>To inspect which operations will run against an Ubuntu disk
+image:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-sysprep</span> <span class="at">--list-operations</span></span></code></pre></div>
+<p>To generalize an image by libvirt domain name:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-sysprep</span> <span class="at">-d</span> ubuntu-template</span></code></pre></div>
+<p>To run the process directly against a QCOW2 or raw disk image
+file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-sysprep</span> <span class="at">-a</span> /var/lib/libvirt/images/ubuntu-base.qcow2</span></code></pre></div>
+<p>Administrators can also customize the operation by enabling or
+disabling specific modules, adding operations such as running custom
+scripts, injecting authorized SSH keys, or unregistering software
+licenses:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-sysprep</span> <span class="at">-a</span> /var/lib/libvirt/images/ubuntu-base.qcow2 <span class="at">--enable</span> machine-id,ssh-hostkeys,bash-history</span></code></pre></div>
+<h3 id="advantages-over-manual-generalization">Advantages Over Manual
+Generalization</h3>
+<p>Using <code>virt-sysprep</code> eliminates human error from the
+template creation lifecycle. Manual cleanup often leaves behind hidden
+artifacts, such as active DHCP leases or specific cloud-init artifacts
+in <code>/var/lib/cloud/</code>, that break automation frameworks.
+Because <code>virt-sysprep</code> works offline, it can be seamlessly
+embedded into automated image-building pipelines (such as Packer or
+CI/CD runner workflows) to create pristine, golden Ubuntu VM templates
+ready for rapid scaling.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

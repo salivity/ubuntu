@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install and Configure SSSD on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for installing and configuring the System Security Services Daemon (SSSD) on Ubuntu. SSSD allows local systems to connect to remote identity and authentication providers such as OpenLDAP, FreeIPA, or Micr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-sssd-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install and Configure SSSD on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-and-configure-sssd-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for installing and configuring the System Security Services Daemon (SSSD) on Ubuntu. SSSD allows local systems to connect to remote identity and authentication providers such as OpenLDAP, FreeIPA, or Micr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-and-configure-sssd-on-ubuntu">How to Install and
+Configure SSSD on Ubuntu</h1>
+<p>This guide provides a straightforward walkthrough for installing and
+configuring the System Security Services Daemon (SSSD) on Ubuntu. SSSD
+allows local systems to connect to remote identity and authentication
+providers such as OpenLDAP, FreeIPA, or Microsoft Active Directory. By
+following the steps below, you will learn how to install the required
+packages, create an authentication profile, securely configure the
+<code>/etc/sssd/sssd.conf</code> file, and enable automatic home
+directory creation for remote users.</p>
+<hr />
+<h3 id="step-1-update-your-system">Step 1: Update Your System</h3>
+<p>Before installing new packages, ensure your system repository cache
+and installed packages are up to date:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-install-sssd-packages">Step 2: Install SSSD Packages</h3>
+<p>Install SSSD along with common integration packages for PAM
+(Pluggable Authentication Modules) and NSS (Name Service Switch):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install sssd sssd-tools libpam-sss libnss-sss <span class="at">-y</span></span></code></pre></div>
+<p>If you are joining an Active Directory domain, you may also want to
+install the <code>realmd</code> and <code>adcli</code> packages to
+automate domain enrollment:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install realmd adcli <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-3-create-the-sssd-configuration-file">Step 3: Create the
+SSSD Configuration File</h3>
+<p>SSSD does not generate a default configuration file upon
+installation. You must create <code>/etc/sssd/sssd.conf</code>
+manually.</p>
+<p>Open the file in a text editor:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sssd/sssd.conf</span></code></pre></div>
+<p>Add your directory service details. Below is an example configuration
+for a standard LDAP directory:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[sssd]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">services </span><span class="ot">=</span><span class="st"> nss, pam</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">config_file_version </span><span class="ot">=</span><span class="st"> </span><span class="dv">2</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dt">domains </span><span class="ot">=</span><span class="st"> </span><span class="kw">default</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[nss]</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dt">homedir_substring </span><span class="ot">=</span><span class="st"> /home</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[pam]</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">[domain/default]</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="dt">id_provider </span><span class="ot">=</span><span class="st"> ldap</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="dt">auth_provider </span><span class="ot">=</span><span class="st"> ldap</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="dt">ldap_uri </span><span class="ot">=</span><span class="st"> ldap://ldap.example.com</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="dt">ldap_search_base </span><span class="ot">=</span><span class="st"> dc=example,dc=com</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="dt">ldap_id_use_start_tls </span><span class="ot">=</span><span class="st"> </span><span class="kw">True</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="dt">ldap_tls_cacertdir </span><span class="ot">=</span><span class="st"> /etc/ssl/certs</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="dt">cache_credentials </span><span class="ot">=</span><span class="st"> </span><span class="kw">True</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="dt">enumerate </span><span class="ot">=</span><span class="st"> </span><span class="kw">False</span></span></code></pre></div>
+<p><em>Note: Replace <code>ldap://ldap.example.com</code> and
+<code>dc=example,dc=com</code> with the actual URI and search base of
+your directory service.</em></p>
+<h3 id="step-4-secure-the-configuration-file">Step 4: Secure the
+Configuration File</h3>
+<p>SSSD will fail to start if the permissions on
+<code>/etc/sssd/sssd.conf</code> are too open. Set the ownership to
+<code>root:root</code> and restrict read and write permissions
+exclusively to the root user:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown root:root /etc/sssd/sssd.conf</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 600 /etc/sssd/sssd.conf</span></code></pre></div>
+<h3 id="step-5-enable-automatic-home-directory-creation">Step 5: Enable
+Automatic Home Directory Creation</h3>
+<p>Centralized users often do not have a pre-existing
+<code>/home/username</code> directory on the local machine. Enable the
+PAM module to create home directories automatically upon first
+login:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pam-auth-update <span class="at">--enable</span> mkhomedir</span></code></pre></div>
+<p>Ensure the <strong>"Create home directory on login"</strong> option
+is selected, then press <strong>OK</strong>.</p>
+<h3 id="step-6-start-and-enable-sssd">Step 6: Start and Enable SSSD</h3>
+<p>Restart the SSSD service to apply your changes, and enable it to
+launch automatically on system boot:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart sssd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable sssd</span></code></pre></div>
+<p>Verify that the service is running without errors:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status sssd</span></code></pre></div>
+<h3 id="step-7-test-the-configuration">Step 7: Test the
+Configuration</h3>
+<p>To confirm that SSSD communicates properly with your identity
+provider, query an existing user from your directory server using
+<code>getent</code> or <code>id</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">id</span> <span class="op">&lt;</span>username<span class="op">&gt;</span></span></code></pre></div>
+<p>or</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getent</span> passwd <span class="op">&lt;</span>username<span class="op">&gt;</span></span></code></pre></div>
+<p>If configured correctly, the command will return the UID, GID, and
+group memberships retrieved from the remote directory.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

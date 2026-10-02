@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure OS Login on a GCP Ubuntu Instance - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for setting up Google Cloud Platform's (GCP) OS Login feature on an Ubuntu virtual machine. OS Login links Linux user accounts to Google identities, eliminating the need to manually manage static SSH keys">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-os-login-on-a-gcp-ubuntu-instance">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure OS Login on a GCP Ubuntu Instance - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-os-login-on-a-gcp-ubuntu-instance" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for setting up Google Cloud Platform's (GCP) OS Login feature on an Ubuntu virtual machine. OS Login links Linux user accounts to Google identities, eliminating the need to manually manage static SSH keys" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-os-login-on-a-gcp-ubuntu-instance">Configure OS Login
+on a GCP Ubuntu Instance</h1>
+<p>This guide provides a straightforward walkthrough for setting up
+Google Cloud Platform's (GCP) OS Login feature on an Ubuntu virtual
+machine. OS Login links Linux user accounts to Google identities,
+eliminating the need to manually manage static SSH keys in metadata or
+local files. By completing the steps below, you will enable OS Login via
+metadata, assign the appropriate Identity and Access Management (IAM)
+permissions, and connect to your Ubuntu instance securely using standard
+Google Cloud tooling.</p>
+<h3 id="step-1-enable-os-login-in-gcp-metadata">Step 1: Enable OS Login
+in GCP Metadata</h3>
+<p>You can enable OS Login across your entire project or target a
+specific Ubuntu instance.</p>
+<h4 id="option-a-instance-level-recommended-for-testing">Option A:
+Instance-Level (Recommended for Testing)</h4>
+<p>Run the following command using the Google Cloud SDK
+(<code>gcloud</code>) to enable OS Login on a single instance:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gcloud</span> compute instances add-metadata INSTANCE_NAME <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--zone</span><span class="op">=</span>ZONE <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--metadata</span><span class="op">=</span>enable-oslogin=TRUE</span></code></pre></div>
+<h4 id="option-b-project-level">Option B: Project-Level</h4>
+<p>To enable OS Login for all current and future VM instances across the
+project:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gcloud</span> compute project-info add-metadata <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--metadata</span><span class="op">=</span>enable-oslogin=TRUE</span></code></pre></div>
+<p>Alternatively, you can navigate to the <strong>Compute
+Engine</strong> section in the Google Cloud Console, edit your instance
+or project metadata, and add a custom metadata key named
+<code>enable-oslogin</code> with the value <code>TRUE</code>.</p>
+<hr />
+<h3 id="step-2-configure-required-iam-permissions">Step 2: Configure
+Required IAM Permissions</h3>
+<p>For a user to log in via OS Login, their Google account must have
+specific IAM roles assigned at the project or instance level.</p>
+<ol type="1">
+<li><p><strong>Standard User Access (Non-root):</strong> Assign the
+Compute OS Login role:</p>
+<ul>
+<li><strong>Role:</strong> <code>roles/compute.osLogin</code></li>
+</ul></li>
+<li><p><strong>Administrator Access (Root/sudo privileges):</strong>
+Assign the Compute OS Admin Login role:</p>
+<ul>
+<li><strong>Role:</strong> <code>roles/compute.osAdminLogin</code></li>
+</ul></li>
+</ol>
+<p>To grant access using <code>gcloud</code>, execute:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gcloud</span> projects add-iam-policy-binding PROJECT_ID <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--member</span><span class="op">=</span><span class="st">&quot;user:USER_EMAIL@example.com&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--role</span><span class="op">=</span><span class="st">&quot;roles/compute.osAdminLogin&quot;</span></span></code></pre></div>
+<p><em>Note: If the instance uses a custom service account, the user
+also requires the <code>roles/iam.serviceAccountUser</code>
+role.</em></p>
+<hr />
+<h3 id="step-3-verify-the-ubuntu-guest-environment">Step 3: Verify the
+Ubuntu Guest Environment</h3>
+<p>Official GCP Ubuntu images come pre-installed with the Google Compute
+Engine guest environment, which includes the OS Login daemon. If you are
+using a standard Ubuntu image, ensure the packages are active:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status google-oslogin-cache.timer</span></code></pre></div>
+<p>If you are using a custom or minimal Ubuntu image where the guest
+environment is missing, install the OS Login package:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> google-compute-engine-oslogin</span></code></pre></div>
+<hr />
+<h3 id="step-4-connect-to-the-instance">Step 4: Connect to the
+Instance</h3>
+<p>Once metadata and IAM permissions are configured, connect to the
+instance using the <code>gcloud compute ssh</code> command. The Google
+Cloud CLI will automatically look up your OS Login profile and
+authenticate the session:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gcloud</span> compute ssh INSTANCE_NAME <span class="at">--zone</span><span class="op">=</span>ZONE</span></code></pre></div>
+<p>Upon successful connection, your Linux username will automatically
+match the format generated by your Google Workspace or Cloud Identity
+profile (typically <code>username_domain_com</code> or
+<code>username</code>).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

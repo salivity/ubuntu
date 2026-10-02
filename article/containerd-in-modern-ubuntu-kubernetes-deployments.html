@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Containerd in Modern Ubuntu Kubernetes Deployments - ubuntu</title>
+    <meta name="description" content="In a modern Ubuntu Kubernetes cluster, the container runtime is the engine that executes containers and manages images directly on the host operating system. This article provides a focused analysis of the role containerd plays in modern Ubuntu Kubernete">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/containerd-in-modern-ubuntu-kubernetes-deployments">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Containerd in Modern Ubuntu Kubernetes Deployments - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/containerd-in-modern-ubuntu-kubernetes-deployments" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In a modern Ubuntu Kubernetes cluster, the container runtime is the engine that executes containers and manages images directly on the host operating system. This article provides a focused analysis of the role containerd plays in modern Ubuntu Kubernete" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="containerd-in-modern-ubuntu-kubernetes-deployments">Containerd
+in Modern Ubuntu Kubernetes Deployments</h1>
+<p>In a modern Ubuntu Kubernetes cluster, the container runtime is the
+engine that executes containers and manages images directly on the host
+operating system. This article provides a focused analysis of the role
+containerd plays in modern Ubuntu Kubernetes environments, exploring its
+direct integration via the Container Runtime Interface (CRI), system
+resource efficiency, Ubuntu-specific OS integration, and how it handles
+the end-to-end container lifecycle beneath the Kubernetes control
+plane.</p>
+<h3 id="the-standard-container-runtime-interface-cri">The Standard
+Container Runtime Interface (CRI)</h3>
+<p>Kubernetes orchestrates applications across a cluster, but it does
+not run containers natively. It relies on the Container Runtime
+Interface (CRI) to delegate low-level container operations. Following
+the removal of Dockershim in Kubernetes v1.24, <code>containerd</code>
+became the industry-standard runtime for direct integration. In an
+Ubuntu deployment, the Kubernetes agent (<code>kubelet</code>)
+communicates directly with containerd’s built-in CRI plugin over a local
+UNIX domain socket (<code>/run/containerd/containerd.sock</code>),
+eliminating unnecessary abstraction layers and operational overhead.</p>
+<h3 id="core-lifecycle-and-image-management">Core Lifecycle and Image
+Management</h3>
+<p>The primary responsibility of containerd is managing the complete
+lifecycle of containers running on the Ubuntu host. When the
+<code>kubelet</code> schedules a pod, containerd coordinates:</p>
+<ul>
+<li><strong>Image Ingestion:</strong> Pulling container images from
+registries, verifying signatures, unpackaging layers, and caching
+snapshots on the local Ubuntu filesystem (typically using the native
+<code>overlayfs</code> driver).</li>
+<li><strong>Container Execution:</strong> Creating and supervising the
+container processes. containerd uses an OCI-compliant
+runtime—predominantly <code>runc</code> on Ubuntu—to invoke the Linux
+kernel features that isolate workloads.</li>
+<li><strong>Process Supervision:</strong> Monitoring running processes,
+collecting metrics, capturing stdout and stderr streams, and handling
+container restarts without interrupting the host system.</li>
+</ul>
+<h3 id="integration-with-ubuntu-and-the-linux-kernel">Integration with
+Ubuntu and the Linux Kernel</h3>
+<p>Containerd serves as the translation layer between high-level
+Kubernetes requirements and low-level Linux kernel features provided by
+Ubuntu:</p>
+<ul>
+<li><strong>cgroups v2 Support:</strong> Modern Ubuntu releases (21.10
+and newer, including 22.04 and 24.04 LTS) enable cgroups v2 by default.
+Containerd natively interfaces with <code>systemd</code> cgroup drivers
+to enforce CPU, memory, and I/O resource limits specified in Kubernetes
+manifests, ensuring cluster stability and preventing resource
+exhaustion.</li>
+<li><strong>Security Enforcement:</strong> Containerd integrates with
+Ubuntu’s kernel security modules, applying default or custom AppArmor
+profiles and seccomp filters automatically during container
+initialization.</li>
+<li><strong>Storage and Networking:</strong> Containerd works alongside
+the Container Network Interface (CNI) to establish virtual network
+namespaces and binds them to pod sandboxes, ensuring isolated, secure
+communication.</li>
+</ul>
+<h3 id="performance-and-reliability-benefits">Performance and
+Reliability Benefits</h3>
+<p>Prior architectures that routed Kubernetes traffic through the Docker
+daemon introduced redundant APIs, higher memory usage, and additional
+failure domains. Utilizing containerd directly provides:</p>
+<ul>
+<li><strong>Lower Footprint:</strong> Containerd strips away
+developer-facing tooling, image-building capabilities, and interactive
+CLI features not needed on production cluster nodes, resulting in lower
+baseline memory and CPU consumption.</li>
+<li><strong>Higher Node Density:</strong> The reduced resource overhead
+allows cluster operators to allocate more host resources directly to
+tenant workloads.</li>
+<li><strong>Decoupled Upgrades:</strong> Containerd runs as an
+independent <code>systemd</code> service
+(<code>containerd.service</code>), allowing components of the Kubernetes
+control plane or worker nodes to restart or upgrade with minimal risk of
+destabilizing active container processes.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Standalone DFS Namespace with Samba on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide outlines the process of configuring Samba on Ubuntu to host a standalone Microsoft Distributed File System (DFS) namespace. By utilizing Samba's MS-DFS capabilities, administrators can present multiple network shares distributed across differe">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/setup-standalone-dfs-namespace-with-samba-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Setup Standalone DFS Namespace with Samba on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/setup-standalone-dfs-namespace-with-samba-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide outlines the process of configuring Samba on Ubuntu to host a standalone Microsoft Distributed File System (DFS) namespace. By utilizing Samba's MS-DFS capabilities, administrators can present multiple network shares distributed across differe" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="setup-standalone-dfs-namespace-with-samba-on-ubuntu">Setup
+Standalone DFS Namespace with Samba on Ubuntu</h1>
+<p>This guide outlines the process of configuring Samba on Ubuntu to
+host a standalone Microsoft Distributed File System (DFS) namespace. By
+utilizing Samba's MS-DFS capabilities, administrators can present
+multiple network shares distributed across different servers under a
+single, unified path without requiring an Active Directory domain.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An Ubuntu server with administrative (<code>sudo</code>)
+access.</li>
+<li>Target SMB/CIFS shares already configured and accessible on your
+local network.</li>
+<li>Proper network connectivity and DNS resolution between clients, the
+DFS host, and the target servers.</li>
+</ul>
+<h2 id="step-1-install-samba">Step 1: Install Samba</h2>
+<p>Update your package repositories and install the Samba packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install samba samba-common-bin <span class="at">-y</span></span></code></pre></div>
+<p>Verify that the Samba service is active:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status smbd</span></code></pre></div>
+<h2 id="step-2-configure-samba-for-dfs">Step 2: Configure Samba for
+DFS</h2>
+<p>Open the Samba configuration file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/samba/smb.conf</span></code></pre></div>
+<p>Add the <code>host msdfs</code> parameter to the
+<code>[global]</code> section to enable DFS support:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[global]</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">   workgroup </span><span class="ot">=</span><span class="st"> WORKGROUP</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="dt">   server string </span><span class="ot">=</span><span class="st"> %h Samba DFS Server</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="dt">   netbios name </span><span class="ot">=</span><span class="st"> SAMBADFS</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="dt">   security </span><span class="ot">=</span><span class="st"> user</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="dt">   map to guest </span><span class="ot">=</span><span class="st"> Bad User</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="dt">   dns proxy </span><span class="ot">=</span><span class="st"> </span><span class="kw">no</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="dt">   </span><span class="co"># Enable DFS hosting</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="dt">   host msdfs </span><span class="ot">=</span><span class="st"> </span><span class="kw">yes</span></span></code></pre></div>
+<p>At the bottom of the file, define the DFS root share:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[dfs]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">   comment </span><span class="ot">=</span><span class="st"> DFS Root Directory</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">   path </span><span class="ot">=</span><span class="st"> /srv/samba/dfsroot</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dt">   browseable </span><span class="ot">=</span><span class="st"> </span><span class="kw">yes</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dt">   read only </span><span class="ot">=</span><span class="st"> </span><span class="kw">no</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dt">   guest ok </span><span class="ot">=</span><span class="st"> </span><span class="kw">yes</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dt">   msdfs root </span><span class="ot">=</span><span class="st"> </span><span class="kw">yes</span></span></code></pre></div>
+<p>Save and exit the file.</p>
+<h2 id="step-3-create-the-dfs-root-directory">Step 3: Create the DFS
+Root Directory</h2>
+<p>Create the directory designated as the DFS path in the
+configuration:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /srv/samba/dfsroot</span></code></pre></div>
+<p>Set permissions to allow the Samba daemon and connected users to read
+the namespace:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> nobody:nogroup /srv/samba/dfsroot</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod <span class="at">-R</span> 0755 /srv/samba/dfsroot</span></code></pre></div>
+<h2 id="step-4-create-dfs-links-symlinks">Step 4: Create DFS Links
+(Symlinks)</h2>
+<p>Samba creates DFS links using symbolic links pointing to a specific
+URI scheme: <code>msdfs:&lt;server&gt;\&lt;share&gt;</code>.</p>
+<p>Navigate to the DFS root directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /srv/samba/dfsroot</span></code></pre></div>
+<p>Create a symlink for each target share:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> <span class="st">&#39;msdfs:server1.local\documents&#39;</span> docs</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> <span class="st">&#39;msdfs:192.168.1.50\backups&#39;</span> backups</span></code></pre></div>
+<ul>
+<li><code>docs</code> and <code>backups</code> will appear as folders
+inside the <code>dfs</code> share.</li>
+<li>When users access these folders, Samba sends a referral redirecting
+them to <code>\\server1.local\documents</code> or
+<code>\\192.168.1.50\backups</code>.</li>
+</ul>
+<h2 id="step-5-validate-and-restart-services">Step 5: Validate and
+Restart Services</h2>
+<p>Check the configuration for syntax errors:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">testparm</span></span></code></pre></div>
+<p>Restart the Samba services to apply the changes:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart smbd</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart nmbd</span></code></pre></div>
+<p>If you have a firewall enabled (such as UFW), ensure the Samba ports
+are allowed:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow samba</span></code></pre></div>
+<h2 id="step-6-connect-to-the-namespace">Step 6: Connect to the
+Namespace</h2>
+<p>Clients can now connect to the standalone DFS namespace using
+standard UNC paths:</p>
+<ul>
+<li><strong>Windows:</strong> Open File Explorer and navigate to
+<code>\\&lt;Ubuntu_IP_or_Hostname&gt;\dfs</code></li>
+<li><strong>Linux:</strong> Mount using SMB:
+<code>mount -t cifs //192.168.1.10/dfs /mnt/dfs -o guest</code></li>
+</ul>
+<p>Opening the link folders will seamlessly redirect client requests to
+the respective target file servers.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Wacom Tablet Pressure Curve in Ubuntu - ubuntu</title>
+    <meta name="description" content="Adjusting the pressure sensitivity curve of a Wacom tablet on Ubuntu allows digital artists to achieve precise stroke weights and responsiveness tailored to their drawing style. This guide covers how to calibrate pressure response using Ubuntu's built-in">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/set-up-wacom-tablet-pressure-curve-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Set Up Wacom Tablet Pressure Curve in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/set-up-wacom-tablet-pressure-curve-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Adjusting the pressure sensitivity curve of a Wacom tablet on Ubuntu allows digital artists to achieve precise stroke weights and responsiveness tailored to their drawing style. This guide covers how to calibrate pressure response using Ubuntu's built-in" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="set-up-wacom-tablet-pressure-curve-in-ubuntu">Set Up Wacom
+Tablet Pressure Curve in Ubuntu</h1>
+<p>Adjusting the pressure sensitivity curve of a Wacom tablet on Ubuntu
+allows digital artists to achieve precise stroke weights and
+responsiveness tailored to their drawing style. This guide covers how to
+calibrate pressure response using Ubuntu's built-in GNOME Settings for
+basic adjustments, as well as using the OpenTabletDriver GUI and
+application-level tools for detailed, visual bezier-curve
+customization.</p>
+<h3 id="method-1-adjusting-tip-feel-via-native-ubuntu-settings">Method
+1: Adjusting Tip Feel via Native Ubuntu Settings</h3>
+<p>Ubuntu includes built-in support for Wacom devices via the GNOME
+Control Center. While it does not display a full bezier-curve graph, it
+provides a straightforward slider to control the pressure curve
+threshold from soft to firm.</p>
+<ol type="1">
+<li>Open <strong>Settings</strong> from the Ubuntu application
+menu.</li>
+<li>Scroll down the left sidebar and select <strong>Wacom
+Tablet</strong>.</li>
+<li>Select your connected tablet from the list.</li>
+<li>Click on the <strong>Stylus</strong> (or <strong>Pen</strong>)
+section.</li>
+<li>Locate the <strong>Tip Feel</strong> slider.
+<ul>
+<li>Move the slider toward <strong>Soft</strong> to trigger maximum
+pressure with lighter touches.</li>
+<li>Move the slider toward <strong>Firm</strong> if you have a heavy
+hand and want to prevent reaching full brush size too quickly.</li>
+</ul></li>
+<li>Use the <strong>Test Settings</strong> scratchpad area on the screen
+to draw sample strokes and test the responsiveness in real time.</li>
+</ol>
+<h3 id="method-2-custom-bezier-curves-with-opentabletdriver-gui">Method
+2: Custom Bezier Curves with OpenTabletDriver GUI</h3>
+<p>For an exact, graphical pressure curve editor with movable control
+points, OpenTabletDriver provides a full-featured graphical interface
+for Linux.</p>
+<ol type="1">
+<li>Download and install <strong>OpenTabletDriver</strong> and its GUI
+package (<code>opentabletdriver</code> or <code>.deb</code> packages
+from its official repository).</li>
+<li>Launch <strong>OpenTabletDriver</strong> from your application
+launcher.</li>
+<li>Select your active stylus profile from the top tabs.</li>
+<li>Go to the <strong>Pen</strong> or <strong>Advanced</strong> tab to
+locate the <strong>Pressure</strong> settings.</li>
+<li>Enable custom pressure settings and click the <strong>Curve</strong>
+editor.</li>
+<li>Drag the control points on the graph to shape the
+input-versus-output response (e.g., an S-curve for fine control at low
+pressure and high pressure, or an exponential curve for light
+strokes).</li>
+<li>Click <strong>Apply</strong> to lock in your custom curve globally
+across your system.</li>
+</ol>
+<h3 id="method-3-in-application-curve-configuration-krita--gimp">Method
+3: In-Application Curve Configuration (Krita / GIMP)</h3>
+<p>If you only need a customized pressure curve for specific artwork
+software, you can configure it directly inside applications like Krita
+without modifying system-wide settings.</p>
+<ol type="1">
+<li>Open your creative software (e.g., <strong>Krita</strong>).</li>
+<li>Navigate to <strong>Settings</strong> &gt; <strong>Configure
+Krita</strong> &gt; <strong>Tablet Settings</strong>.</li>
+<li>Under the <strong>Tablet Pressure Curve</strong> section, click and
+drag the control points on the graphical grid to shape the curve.</li>
+<li>Use the built-in testing canvas to confirm the response before
+clicking <strong>OK</strong>.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure lm-sensors for CPU Temperature on Ubuntu - ubuntu</title>
+    <meta name="description" content="Monitoring CPU thermal metrics is critical for maintaining server health and preventing thermal throttling or hardware damage. This guide demonstrates how to install, configure, and fine-tune lm-sensors on an Ubuntu server. Following these steps will all">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-lm-sensors-for-cpu-temperature-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure lm-sensors for CPU Temperature on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-lm-sensors-for-cpu-temperature-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Monitoring CPU thermal metrics is critical for maintaining server health and preventing thermal throttling or hardware damage. This guide demonstrates how to install, configure, and fine-tune lm-sensors on an Ubuntu server. Following these steps will all" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-lm-sensors-for-cpu-temperature-on-ubuntu">Configure
+lm-sensors for CPU Temperature on Ubuntu</h1>
+<p>Monitoring CPU thermal metrics is critical for maintaining server
+health and preventing thermal throttling or hardware damage. This guide
+demonstrates how to install, configure, and fine-tune
+<code>lm-sensors</code> on an Ubuntu server. Following these steps will
+allow the operating system to detect onboard sensor chips, load the
+required kernel drivers, and accurately report individual CPU core
+temperatures from the command line.</p>
+<h2 id="1-install-lm-sensors">1. Install lm-sensors</h2>
+<p>First, update your local package index and install the
+<code>lm-sensors</code> package using <code>apt</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install lm-sensors <span class="at">-y</span></span></code></pre></div>
+<h2 id="2-detect-hardware-sensors">2. Detect Hardware Sensors</h2>
+<p>Once installed, run the interactive sensor detection utility. This
+tool probes your system hardware to identify thermal and voltage sensors
+on the motherboard and CPU.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sensors-detect</span></code></pre></div>
+<p>During execution, the prompt will ask several times if it should scan
+specific hardware buses (such as I2C or ISA).</p>
+<ul>
+<li>In most production environments, answering <strong>YES</strong> (or
+pressing <code>Enter</code> to accept defaults) to all safe prompts is
+recommended.</li>
+<li>At the final prompt, it will ask: <em>"Do you want to add these
+lines to /etc/modules automatically?"</em> Answer <strong>yes</strong>
+so the system automatically loads the appropriate kernel modules at
+boot.</li>
+</ul>
+<h2 id="3-load-the-detected-kernel-modules">3. Load the Detected Kernel
+Modules</h2>
+<p>To start monitoring temperatures immediately without rebooting the
+server, load the newly configured kernel modules into memory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-modules-load.service</span></code></pre></div>
+<p>Depending on your CPU architecture, you can also load the primary
+monitoring driver manually:</p>
+<ul>
+<li>For Intel CPUs:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe coretemp</span></code></pre></div></li>
+<li>For AMD CPUs:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> modprobe k10temp</span></code></pre></div></li>
+</ul>
+<h2 id="4-read-the-temperatures">4. Read the Temperatures</h2>
+<p>To view your current CPU temperatures, execute:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sensors</span></span></code></pre></div>
+<p>The output will display the detected hardware and temperatures for
+each core (e.g., <code>Core 0</code>, <code>Core 1</code>) along with
+high and critical thermal thresholds:</p>
+<pre class="text"><code>coretemp-isa-0000
+Adapter: ISA adapter
+Package id 0:  +42.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 0:        +39.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 1:        +41.0°C  (high = +80.0°C, crit = +100.0°C)</code></pre>
+<h2 id="5-adjusting-sensor-accuracy-and-labels-optional">5. Adjusting
+Sensor Accuracy and Labels (Optional)</h2>
+<p>If sensor readings show misleading labels or require an offset to
+match manufacturer-verified temperatures, create a custom configuration
+file:</p>
+<ol type="1">
+<li><p>Create a custom configuration file in the
+<code>/etc/sensors.d/</code> directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sensors.d/cpu-custom.conf</span></code></pre></div></li>
+<li><p>Add custom labels or offset adjustments using your chip's
+identifier (found in the output of the <code>sensors</code>
+command):</p>
+<pre class="text"><code>chip &quot;coretemp-isa-*&quot;
+    label temp2 &quot;CPU Package&quot;
+    label temp3 &quot;CPU Core 0&quot;
+    label temp4 &quot;CPU Core 1&quot;
+    # Example: Add a +2°C offset if the diode reads low
+    # compute temp3 @+2, @-2</code></pre></li>
+<li><p>Save the file and reload the sensors configuration:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sensors <span class="at">-s</span></span></code></pre></div></li>
+</ol>
+<p>To continuously monitor temperatures in real time, run:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 sensors</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

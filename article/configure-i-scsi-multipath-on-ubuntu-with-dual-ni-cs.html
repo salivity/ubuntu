@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure iSCSI Multipath on Ubuntu with Dual NICs - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for configuring an iSCSI initiator on Ubuntu to use Multipath I/O (MPIO) across two separate network interface cards (NICs). By binding separate iSCSI interfaces to distinct physical adapters and managing th">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-i-scsi-multipath-on-ubuntu-with-dual-ni-cs">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure iSCSI Multipath on Ubuntu with Dual NICs - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-i-scsi-multipath-on-ubuntu-with-dual-ni-cs" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for configuring an iSCSI initiator on Ubuntu to use Multipath I/O (MPIO) across two separate network interface cards (NICs). By binding separate iSCSI interfaces to distinct physical adapters and managing th" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-iscsi-multipath-on-ubuntu-with-dual-nics">Configure
+iSCSI Multipath on Ubuntu with Dual NICs</h1>
+<p>This guide provides a step-by-step walkthrough for configuring an
+iSCSI initiator on Ubuntu to use Multipath I/O (MPIO) across two
+separate network interface cards (NICs). By binding separate iSCSI
+interfaces to distinct physical adapters and managing the resulting
+block devices with the Device Mapper Multipath utility, you will
+establish a redundant, high-performance storage connection that provides
+automatic failover and load balancing.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have two physical network interfaces configured with
+static IP addresses, preferably on separate subnets corresponding to
+separate iSCSI target portals. For this guide, we assume:</p>
+<ul>
+<li>Primary NIC (<code>eth1</code>): <code>192.168.10.50</code></li>
+<li>Secondary NIC (<code>eth2</code>): <code>192.168.20.50</code></li>
+<li>Target Portal 1: <code>192.168.10.100:3260</code></li>
+<li>Target Portal 2: <code>192.168.20.100:3260</code></li>
+</ul>
+<h3 id="step-1-install-the-required-packages">Step 1: Install the
+Required Packages</h3>
+<p>Install the iSCSI initiator and multipath management utilities:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install open-iscsi multipath-tools <span class="at">-y</span></span></code></pre></div>
+<p>Verify that the initiator name exists in
+<code>/etc/iscsi/initiatorname.iscsi</code>. If required by your storage
+array, register this InitiatorName (IQN) on your storage target.</p>
+<h3 id="step-2-define-iscsi-interfaces-bound-to-nics">Step 2: Define
+iSCSI Interfaces Bound to NICs</h3>
+<p>To force iSCSI traffic across both network interfaces independently,
+create and bind two iSCSI interface definitions
+(<code>ifaces</code>).</p>
+<ol type="1">
+<li>Create and bind the first interface:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> iface <span class="at">-I</span> iface_eth1 <span class="at">--op</span><span class="op">=</span>new</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> iface <span class="at">-I</span> iface_eth1 <span class="at">--op</span><span class="op">=</span>update <span class="at">-n</span> iface.net_ifacename <span class="at">-v</span> eth1</span></code></pre></div>
+<ol start="2" type="1">
+<li>Create and bind the second interface:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> iface <span class="at">-I</span> iface_eth2 <span class="at">--op</span><span class="op">=</span>new</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> iface <span class="at">-I</span> iface_eth2 <span class="at">--op</span><span class="op">=</span>update <span class="at">-n</span> iface.net_ifacename <span class="at">-v</span> eth2</span></code></pre></div>
+<ol start="3" type="1">
+<li>Verify the bindings:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> iface</span></code></pre></div>
+<h3 id="step-3-discover-and-log-into-the-targets">Step 3: Discover and
+Log into the Targets</h3>
+<p>Use the defined interfaces to discover and establish sessions to the
+storage target.</p>
+<ol type="1">
+<li>Discover available targets through both interfaces:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> discovery <span class="at">-t</span> sendtargets <span class="at">-p</span> 192.168.10.100 <span class="at">-I</span> iface_eth1</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> discovery <span class="at">-t</span> sendtargets <span class="at">-p</span> 192.168.20.100 <span class="at">-I</span> iface_eth2</span></code></pre></div>
+<ol start="2" type="1">
+<li>Set the sessions to log in automatically on boot:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> node <span class="at">--op</span><span class="op">=</span>update <span class="at">-n</span> node.startup <span class="at">-v</span> automatic</span></code></pre></div>
+<ol start="3" type="1">
+<li>Log in to all discovered portals:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> node <span class="at">-l</span></span></code></pre></div>
+<ol start="4" type="1">
+<li>Verify that two distinct sessions are active:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iscsiadm <span class="at">-m</span> session <span class="at">-P</span> 1</span></code></pre></div>
+<p>You should see separate sessions mapped to each interface, and
+running <code>lsblk</code> will show two separate SCSI block devices
+(such as <code>/dev/sdb</code> and <code>/dev/sdc</code>) representing
+the same remote LUN.</p>
+<h3 id="step-4-configure-multipath-tools">Step 4: Configure
+Multipath-Tools</h3>
+<p>Generate a configuration file to combine the duplicate SCSI devices
+into a single multipath device.</p>
+<ol type="1">
+<li>Create or edit <code>/etc/multipath.conf</code>:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/multipath.conf</span></code></pre></div>
+<ol start="2" type="1">
+<li>Insert a standard configuration:</li>
+</ol>
+<pre class="text"><code>defaults {
+    user_friendly_names yes
+    find_multipaths yes
+    path_grouping_policy multibus
+    path_checker tur
+    failback immediate
+    no_path_retry queue
+}
+
+blacklist {
+    devnode &quot;^(ram|raw|loop|fd|md|dm-|sr|scd|st)[0-9]*&quot;
+    devnode &quot;^hd[a-z]&quot;
+    devnode &quot;^sda$&quot;
+}</code></pre>
+<p><em>Note: Adjust <code>path_grouping_policy</code> (e.g., to
+<code>group_by_prio</code> or <code>failover</code>) according to your
+storage vendor's recommendations (ALUA vs. Active/Active).</em></p>
+<ol start="3" type="1">
+<li>Restart and enable the multipath service:</li>
+</ol>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart multipathd</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable multipathd</span></code></pre></div>
+<h3 id="step-5-verify-the-multipath-setup">Step 5: Verify the Multipath
+Setup</h3>
+<p>Run the multipath status command:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> multipath <span class="at">-ll</span></span></code></pre></div>
+<p>The output will display the consolidated device (e.g.,
+<code>mpatha</code> located at <code>/dev/mapper/mpatha</code>) along
+with the two underlying paths (<code>sdb</code> and <code>sdc</code>),
+showing both paths as <code>active</code> and <code>ready</code>. You
+can now format and mount <code>/dev/mapper/mpatha</code> for read/write
+operations with redundant path failover.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

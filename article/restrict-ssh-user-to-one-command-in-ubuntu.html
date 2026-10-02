@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restrict SSH User to One Command in Ubuntu - ubuntu</title>
+    <meta name="description" content="Restricting an SSH user to execute only a specific command enhances server security by preventing interactive shell access and unauthorized tasks. On Ubuntu, this is achieved natively through OpenSSH by prepending the command option to the user's public">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/restrict-ssh-user-to-one-command-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Restrict SSH User to One Command in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/restrict-ssh-user-to-one-command-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Restricting an SSH user to execute only a specific command enhances server security by preventing interactive shell access and unauthorized tasks. On Ubuntu, this is achieved natively through OpenSSH by prepending the command option to the user's public" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="restrict-ssh-user-to-one-command-in-ubuntu">Restrict SSH User to
+One Command in Ubuntu</h1>
+<p>Restricting an SSH user to execute only a specific command enhances
+server security by preventing interactive shell access and unauthorized
+tasks. On Ubuntu, this is achieved natively through OpenSSH by
+prepending the <code>command</code> option to the user's public key in
+the <code>~/.ssh/authorized_keys</code> file. This guide covers how to
+locate the file, configure the directive, add hardening flags, and test
+the restricted connection.</p>
+<h2 id="1-access-the-target-users-authorized_keys-file">1. Access the
+Target User's <code>authorized_keys</code> File</h2>
+<p>Log into your Ubuntu server as a user with administrative privileges,
+or directly as the user whose access you want to restrict.</p>
+<p>Navigate to the user's <code>.ssh</code> directory and open the
+<code>authorized_keys</code> file:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> /home/<span class="op">&lt;</span>username<span class="op">&gt;</span>/.ssh/authorized_keys</span></code></pre></div>
+<p>Ensure the correct file permissions are applied:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 /home/<span class="op">&lt;</span>username<span class="op">&gt;</span>/.ssh</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 /home/<span class="op">&lt;</span>username<span class="op">&gt;</span>/.ssh/authorized_keys</span></code></pre></div>
+<h2 id="2-add-the-command-directive">2. Add the <code>command</code>
+Directive</h2>
+<p>In the <code>authorized_keys</code> file, prepend the
+<code>command="..."</code> attribute directly before the SSH key type
+(e.g., <code>ssh-ed25519</code> or <code>ssh-rsa</code>). Use the
+absolute path to the executable or script.</p>
+<p>Example format:</p>
+<pre class="text"><code>command=&quot;/usr/local/bin/backup-script.sh&quot; ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... user@client</code></pre>
+<p>When this key is used to authenticate, the server immediately
+executes <code>/usr/local/bin/backup-script.sh</code> and terminates the
+session upon completion.</p>
+<h2 id="3-harden-the-connection-with-security-directives">3. Harden the
+Connection with Security Directives</h2>
+<p>By default, an SSH session may allow port forwarding, agent
+forwarding, or terminal allocation (PTY). To fully lock down the
+session, combine the <code>command</code> option with additional OpenSSH
+security flags separated by commas:</p>
+<ul>
+<li><code>no-port-forwarding</code>: Disables local and remote TCP port
+forwarding.</li>
+<li><code>no-X11-forwarding</code>: Disables X11 graphical
+forwarding.</li>
+<li><code>no-agent-forwarding</code>: Prevents forwarding the
+authentication agent.</li>
+<li><code>no-pty</code>: Prevents the allocation of a
+pseudo-terminal.</li>
+</ul>
+<p>Updated configuration entry:</p>
+<pre class="text"><code>command=&quot;/usr/local/bin/backup-script.sh&quot;,no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... user@client</code></pre>
+<p>Save and exit the text editor.</p>
+<h2 id="4-test-the-configuration">4. Test the Configuration</h2>
+<p>From the client machine, connect to the Ubuntu server using the
+corresponding private key:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-i</span> ~/.ssh/id_ed25519 <span class="op">&lt;</span>username<span class="op">&gt;</span>@<span class="op">&lt;</span>server-ip<span class="op">&gt;</span></span></code></pre></div>
+<p>Upon connection:</p>
+<ul>
+<li>The specified command runs automatically.</li>
+<li>Any command specified by the client (e.g.,
+<code>ssh user@server "ls -l"</code>) is ignored in favor of the
+configured command.</li>
+<li>Once the command finishes executing, the connection closes
+automatically without offering an interactive shell.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

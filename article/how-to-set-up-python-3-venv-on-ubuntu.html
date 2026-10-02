@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Set Up python3-venv on Ubuntu - ubuntu</title>
+    <meta name="description" content="Setting up an isolated Python environment on Ubuntu prevents dependency conflicts and ensures clean package management across different projects. This guide provides a straightforward walkthrough on installing the python3-venv package, generating an isol">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-set-up-python-3-venv-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Set Up python3-venv on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-set-up-python-3-venv-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up an isolated Python environment on Ubuntu prevents dependency conflicts and ensures clean package management across different projects. This guide provides a straightforward walkthrough on installing the python3-venv package, generating an isol" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-set-up-python3-venv-on-ubuntu">How to Set Up python3-venv
+on Ubuntu</h1>
+<p>Setting up an isolated Python environment on Ubuntu prevents
+dependency conflicts and ensures clean package management across
+different projects. This guide provides a straightforward walkthrough on
+installing the <code>python3-venv</code> package, generating an isolated
+environment, activating it to install dependencies safely, and
+deactivating it once work is complete.</p>
+<h3 id="step-1-update-system-repositories">Step 1: Update System
+Repositories</h3>
+<p>Before installing any new packages, refresh your local package index
+to ensure you download the latest compatible versions.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<h3 id="step-2-install-python3-venv">Step 2: Install python3-venv</h3>
+<p>Ubuntu typically ships with Python 3 installed, but the
+<code>venv</code> module must be installed separately. Run the following
+command:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install python3-venv <span class="at">-y</span></span></code></pre></div>
+<p>If you use a specific Python version (for example, Python 3.11),
+install the version-specific package instead:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install python3.11-venv <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-3-create-a-project-directory">Step 3: Create a Project
+Directory</h3>
+<p>Create a dedicated directory for your project and navigate into
+it:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/my_python_project</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/my_python_project</span></code></pre></div>
+<h3 id="step-4-create-the-virtual-environment">Step 4: Create the
+Virtual Environment</h3>
+<p>Use the <code>venv</code> module to create a virtual environment.
+Replace <code>myenv</code> with your preferred environment name:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv myenv</span></code></pre></div>
+<p>This creates a directory named <code>myenv</code> containing a
+standalone Python interpreter, standard libraries, and support
+files.</p>
+<h3 id="step-5-activate-the-virtual-environment">Step 5: Activate the
+Virtual Environment</h3>
+<p>To start using the isolated environment, activate it using the
+<code>source</code> command:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> myenv/bin/activate</span></code></pre></div>
+<p>Once activated, your terminal prompt will display the environment's
+name in parentheses, such as
+<code>(myenv) user@ubuntu:~/my_python_project$</code>.</p>
+<h3 id="step-6-verify-and-install-packages">Step 6: Verify and Install
+Packages</h3>
+<p>Check that <code>python</code> and <code>pip</code> point to the
+virtual environment rather than the system-wide installation:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span> python</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span> pip</span></code></pre></div>
+<p>You can now install project dependencies without affecting the rest
+of the operating system:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install requests</span></code></pre></div>
+<h3 id="step-7-deactivate-the-environment">Step 7: Deactivate the
+Environment</h3>
+<p>When you finish working on the project, exit the virtual environment
+by running:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">deactivate</span></span></code></pre></div>
+<p>The environment name prefix will disappear, returning your shell to
+the default system environment.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

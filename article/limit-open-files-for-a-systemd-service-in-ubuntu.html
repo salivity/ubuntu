@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limit Open Files for a Systemd Service in Ubuntu - ubuntu</title>
+    <meta name="description" content="Managing resource consumption on Ubuntu servers is essential for maintaining application performance and stability. This guide explains how to configure the maximum number of open files (file descriptors) for an individual service managed by systemd usin">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/limit-open-files-for-a-systemd-service-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Limit Open Files for a Systemd Service in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/limit-open-files-for-a-systemd-service-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing resource consumption on Ubuntu servers is essential for maintaining application performance and stability. This guide explains how to configure the maximum number of open files (file descriptors) for an individual service managed by systemd usin" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="limit-open-files-for-a-systemd-service-in-ubuntu">Limit Open
+Files for a Systemd Service in Ubuntu</h1>
+<p>Managing resource consumption on Ubuntu servers is essential for
+maintaining application performance and stability. This guide explains
+how to configure the maximum number of open files (file descriptors) for
+an individual service managed by systemd using the
+<code>LimitNOFILE</code> directive. Following these steps, you will
+learn how to check existing limits, create a persistent drop-in
+configuration override, and verify that the new open file limits are
+active.</p>
+<h2 id="1-check-the-current-open-file-limit">1. Check the Current Open
+File Limit</h2>
+<p>Before modifying limits, determine what the target service is
+currently using. Replace <code>&lt;service-name&gt;</code> with your
+actual service (for example, <code>nginx</code> or
+<code>mysql</code>):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> show <span class="op">&lt;</span>service-name<span class="op">&gt;</span> -p LimitNOFILE</span></code></pre></div>
+<p>Alternatively, find the process ID (PID) of the running service and
+inspect its runtime limits directly from the proc filesystem:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/<span class="va">$(</span><span class="ex">pgrep</span> <span class="at">-o</span> <span class="op">&lt;</span>service-name<span class="op">&gt;</span><span class="va">)</span>/limits <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Max open files&quot;</span></span></code></pre></div>
+<h2 id="2-create-a-systemd-override-file">2. Create a Systemd Override
+File</h2>
+<p>Modifying default unit files under <code>/lib/systemd/system/</code>
+is discouraged because package updates will overwrite your changes.
+Instead, use <code>systemctl edit</code> to create a drop-in
+override:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl edit <span class="op">&lt;</span>service-name<span class="op">&gt;</span></span></code></pre></div>
+<p>This command opens a text editor. Add the following lines:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">LimitNOFILE</span><span class="ot">=</span><span class="dv">65536</span></span></code></pre></div>
+<h3 id="specifying-soft-and-hard-limits">Specifying Soft and Hard
+Limits</h3>
+<p>You can configure separate soft and hard limits by separating the
+values with a colon (<code>soft:hard</code>):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">LimitNOFILE</span><span class="ot">=</span><span class="st">8192:65536</span></span></code></pre></div>
+<p>To remove the file descriptor constraint entirely, you can set the
+value to <code>infinity</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">LimitNOFILE</span><span class="ot">=</span><span class="st">infinity</span></span></code></pre></div>
+<p>Save and exit the editor. The override file is saved automatically
+under
+<code>/etc/systemd/system/&lt;service-name&gt;.service.d/override.conf</code>.</p>
+<h2 id="3-apply-the-changes">3. Apply the Changes</h2>
+<p>If you created the override file manually instead of using
+<code>systemctl edit</code>, reload the systemd configuration:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span></code></pre></div>
+<p>Restart the service to apply the new file descriptor limits:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart <span class="op">&lt;</span>service-name<span class="op">&gt;</span></span></code></pre></div>
+<h2 id="4-verify-the-new-file-limits">4. Verify the New File Limits</h2>
+<p>Confirm that systemd has registered the updated directive:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> show <span class="op">&lt;</span>service-name<span class="op">&gt;</span> -p LimitNOFILE</span></code></pre></div>
+<p>Finally, inspect the running process to ensure the kernel has applied
+the new <code>Max open files</code> values:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/<span class="va">$(</span><span class="ex">pgrep</span> <span class="at">-o</span> <span class="op">&lt;</span>service-name<span class="op">&gt;</span><span class="va">)</span>/limits <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Max open files&quot;</span></span></code></pre></div>
+<p>The output will display the updated Soft and Hard limits for the
+running service.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Rebuild GRUB Boot Menu in Ubuntu - ubuntu</title>
+    <meta name="description" content="When you modify the GRUB bootloader configuration file located at /etc/default/grub, changes do not take effect automatically. You must regenerate the main grub.cfg file so that your system applies your new boot settings on the next restart. This guide e">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-rebuild-grub-boot-menu-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Rebuild GRUB Boot Menu in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-rebuild-grub-boot-menu-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When you modify the GRUB bootloader configuration file located at /etc/default/grub, changes do not take effect automatically. You must regenerate the main grub.cfg file so that your system applies your new boot settings on the next restart. This guide e" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-rebuild-grub-boot-menu-in-ubuntu">How to Rebuild GRUB
+Boot Menu in Ubuntu</h1>
+<p>When you modify the GRUB bootloader configuration file located at
+<code>/etc/default/grub</code>, changes do not take effect
+automatically. You must regenerate the main <code>grub.cfg</code> file
+so that your system applies your new boot settings on the next restart.
+This guide explains the primary command used to update the GRUB
+configuration in Ubuntu, how the process works under the hood, and how
+to verify that your changes took effect properly.</p>
+<h3 id="the-primary-command">The Primary Command</h3>
+<p>To rebuild the GRUB boot menu in Ubuntu, open your terminal and run
+the following command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-grub</span></code></pre></div>
+<p>This command runs with administrative privileges and reads the
+settings defined in <code>/etc/default/grub</code> along with the helper
+scripts inside the <code>/etc/grub.d/</code> directory. It then
+automatically compiles and overwrites the main configuration file
+located at <code>/boot/grub/grub.cfg</code>.</p>
+<h3 id="the-underlying-alternative">The Underlying Alternative</h3>
+<p>The <code>update-grub</code> command is essentially a Ubuntu-specific
+wrapper script. If you are working in an environment where
+<code>update-grub</code> is unavailable or if you prefer to use the
+standard GNU GRUB utility, execute:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> grub-mkconfig <span class="at">-o</span> /boot/grub/grub.cfg</span></code></pre></div>
+<p>Both commands yield the exact same result: they detect installed
+Linux kernels, other operating systems, and initramfs images, then
+update the boot loader configuration accordingly.</p>
+<h3 id="expected-output-and-verification">Expected Output and
+Verification</h3>
+<p>After running the update command, you will see output in the terminal
+detailing the detection of boot images and other installed systems:</p>
+<pre class="text"><code>Sourcing file `/etc/default/grub&#39;
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-...
+Found initrd image: /boot/initrd.img-...
+done</code></pre>
+<p>Once the terminal returns <code>done</code> without any syntax
+errors, your configuration has been successfully rebuilt. You can safely
+restart your system with <code>sudo reboot</code> to apply the updated
+boot parameters.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

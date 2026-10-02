@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Hold a Specific Snap Package in Ubuntu - ubuntu</title>
+    <meta name="description" content="By default, Ubuntu's Snap daemon (snapd) automatically refreshes installed packages in the background multiple times per day to ensure system security and stability. However, you can prevent specific snap packages from updating automatically by using the">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-hold-a-specific-snap-package-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Hold a Specific Snap Package in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-hold-a-specific-snap-package-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="By default, Ubuntu's Snap daemon (snapd) automatically refreshes installed packages in the background multiple times per day to ensure system security and stability. However, you can prevent specific snap packages from updating automatically by using the" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-hold-a-specific-snap-package-in-ubuntu">How to Hold a
+Specific Snap Package in Ubuntu</h1>
+<p>By default, Ubuntu's Snap daemon (<code>snapd</code>) automatically
+refreshes installed packages in the background multiple times per day to
+ensure system security and stability. However, you can prevent specific
+snap packages from updating automatically by using the native hold
+functionality available in modern versions of <code>snapd</code>. This
+guide outlines how to hold individual snaps indefinitely, hold them for
+a temporary duration, check their hold status, and release the hold when
+you are ready to resume updates.</p>
+<h3 id="check-your-snapd-version">Check Your snapd Version</h3>
+<p>The ability to hold snap updates requires <code>snapd</code> version
+2.58 or later. Verify your current version by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> version</span></code></pre></div>
+<p>Ensure the <code>snapd</code> version listed is 2.58 or higher. If it
+is outdated, update your system using standard package manager commands
+before proceeding.</p>
+<h3 id="hold-a-specific-snap-indefinitely">Hold a Specific Snap
+Indefinitely</h3>
+<p>To indefinitely prevent a specific snap from receiving automatic
+updates, run the <code>snap refresh</code> command with the
+<code>--hold</code> flag:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--hold</span> <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;package-name&gt;</code> with the actual name of the
+snap you wish to pin (for example,
+<code>sudo snap refresh --hold firefox</code>). This halts automatic
+background updates for that package until you explicitly unhold it.</p>
+<h3 id="hold-a-specific-snap-for-a-specified-time">Hold a Specific Snap
+for a Specified Time</h3>
+<p>If you only want to freeze a snap temporarily (for example, to test
+stability or bypass a known bug), you can define a specific hold
+duration using hours (<code>h</code>) or days (<code>d</code>):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--hold</span><span class="op">=</span>72h <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>or</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--hold</span><span class="op">=</span>14d <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Once the designated duration expires, <code>snapd</code> will
+automatically resume regular updates for the package.</p>
+<h3 id="verify-the-hold-status">Verify the Hold Status</h3>
+<p>To confirm that the package is held and see when updates will resume,
+check the snap's information details:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> info <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Look for the <code>hold:</code> line in the output. If the package is
+held indefinitely, it will display <code>forever</code>. If it has a
+timed hold, it will state the exact timestamp when the hold will
+expire.</p>
+<p>Alternatively, to see an overview of refresh timers and all held
+packages across your system, run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> refresh <span class="at">--time</span></span></code></pre></div>
+<h3 id="unhold-a-snap-package">Unhold a Snap Package</h3>
+<p>When you are ready to allow the package to update automatically
+again, remove the hold with the <code>--unhold</code> flag:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--unhold</span> <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Once released, the snap will return to its standard update schedule
+and refresh during the next automated cycle, or immediately if you
+execute a manual
+<code>sudo snap refresh &lt;package-name&gt;</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

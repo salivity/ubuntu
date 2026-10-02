@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch Ubuntu to Development Branch via sources.list - ubuntu</title>
+    <meta name="description" content="Switching an existing Ubuntu installation to the active development branch allows developers and advanced users to test upcoming features, updated kernels, and the latest software stacks before the next official release. This guide outlines the manual pr">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/switch-ubuntu-to-development-branch-via-sources-list">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Switch Ubuntu to Development Branch via sources.list - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/switch-ubuntu-to-development-branch-via-sources-list" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Switching an existing Ubuntu installation to the active development branch allows developers and advanced users to test upcoming features, updated kernels, and the latest software stacks before the next official release. This guide outlines the manual pr" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="switch-ubuntu-to-development-branch-via-sourceslist">Switch
+Ubuntu to Development Branch via sources.list</h1>
+<p>Switching an existing Ubuntu installation to the active development
+branch allows developers and advanced users to test upcoming features,
+updated kernels, and the latest software stacks before the next official
+release. This guide outlines the manual process of updating the APT
+package repository files—specifically pointing the system release
+codename to the <code>devel</code> branch—followed by upgrading
+installed packages directly through the command line.</p>
+<h3 id="step-1-back-up-current-repository-configurations">Step 1: Back
+Up Current Repository Configurations</h3>
+<p>Before making manual changes to your system repository lists, create
+a backup copy of your current configuration to easily revert changes if
+necessary.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/apt/sources.list /etc/apt/sources.list.bak</span></code></pre></div>
+<p><em>Note for Ubuntu 24.04 LTS and newer:</em> Newer releases use the
+deb822 format located at
+<code>/etc/apt/sources.list.d/ubuntu.sources</code>. If your system
+utilizes this file instead of the legacy <code>sources.list</code>, back
+it up with:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak</span></code></pre></div>
+<h3 id="step-2-edit-the-repository-configuration">Step 2: Edit the
+Repository Configuration</h3>
+<p>Open your repository configuration file in a terminal-based text
+editor with root privileges.</p>
+<p>For traditional <code>sources.list</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apt/sources.list</span></code></pre></div>
+<p>Locate all instances of your current release codename (such as
+<code>jammy</code>, <code>focal</code>, or <code>noble</code>) and
+replace them with <code>devel</code>.</p>
+<p>Alternatively, you can replace all occurrences automatically using
+<code>sed</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;current_codename&gt;/devel/g&#39;</span> /etc/apt/sources.list</span></code></pre></div>
+<p><em>(Replace <code>&lt;current_codename&gt;</code> with your active
+release, e.g., <code>noble</code>)</em></p>
+<p>If your system uses
+<code>/etc/apt/sources.list.d/ubuntu.sources</code>, open that file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/apt/sources.list.d/ubuntu.sources</span></code></pre></div>
+<p>Find the line beginning with <code>Suites:</code> and change the
+listed codenames to point to <code>devel</code>,
+<code>devel-updates</code>, <code>devel-security</code>, and
+<code>devel-backports</code>:</p>
+<pre class="text"><code>Suites: devel devel-updates devel-backports devel-security</code></pre>
+<p>Save the file and exit the text editor (in Nano, press
+<code>Ctrl + O</code>, <code>Enter</code>, then
+<code>Ctrl + X</code>).</p>
+<h3 id="step-3-refresh-package-indexes">Step 3: Refresh Package
+Indexes</h3>
+<p>Update your system's package index files to fetch the package lists
+from the development repositories.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<p>Review the terminal output to ensure that all repositories fetch
+successfully without 404 or authentication errors.</p>
+<h3 id="step-4-perform-the-distribution-upgrade">Step 4: Perform the
+Distribution Upgrade</h3>
+<p>Run a full distribution upgrade. This command handles changing
+dependencies, installing new packages, and removing obsolete packages as
+required by the development branch.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt full-upgrade</span></code></pre></div>
+<p>Review the list of packages to be upgraded, removed, or installed,
+then confirm the prompt by typing <code>Y</code> and pressing
+<code>Enter</code>.</p>
+<h3 id="step-5-reboot-and-verify">Step 5: Reboot and Verify</h3>
+<p>Once the upgrade process finishes, restart the machine to boot into
+the newly installed kernel and core libraries.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>After rebooting, verify that your system is actively tracking the
+development branch:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsb_release</span> <span class="at">-a</span></span></code></pre></div>
+<p>The output should reflect the current development codename and
+version status.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

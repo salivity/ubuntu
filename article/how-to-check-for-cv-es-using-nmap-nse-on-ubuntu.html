@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Check for CVEs Using Nmap NSE on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide demonstrates how to detect known Common Vulnerabilities and Exposures (CVEs) on network-accessible systems using the Nmap Scripting Engine (NSE) on Ubuntu. It covers installing Nmap, locating built-in vulnerability detection scripts, querying">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-check-for-cv-es-using-nmap-nse-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Check for CVEs Using Nmap NSE on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-check-for-cv-es-using-nmap-nse-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide demonstrates how to detect known Common Vulnerabilities and Exposures (CVEs) on network-accessible systems using the Nmap Scripting Engine (NSE) on Ubuntu. It covers installing Nmap, locating built-in vulnerability detection scripts, querying" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-check-for-cves-using-nmap-nse-on-ubuntu">How to Check for
+CVEs Using Nmap NSE on Ubuntu</h1>
+<p>This guide demonstrates how to detect known Common Vulnerabilities
+and Exposures (CVEs) on network-accessible systems using the Nmap
+Scripting Engine (NSE) on Ubuntu. It covers installing Nmap, locating
+built-in vulnerability detection scripts, querying specific CVE
+identifiers, and extending detection capabilities with vulnerability
+databases like Vulners to audit system security.</p>
+<h2 id="installing-nmap-on-ubuntu">Installing Nmap on Ubuntu</h2>
+<p>Nmap includes the NSE runtime and standard script libraries by
+default. Ensure the package and its script database are up to date via
+the standard package manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nmap</span></code></pre></div>
+<p>To update the local script database index after installation:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nmap <span class="at">--script-updatedb</span></span></code></pre></div>
+<h2 id="locating-built-in-cve-scripts">Locating Built-in CVE
+Scripts</h2>
+<p>Nmap stores its NSE scripts in <code>/usr/share/nmap/scripts/</code>.
+Many scripts are specifically designed to detect known CVEs without
+exploiting them.</p>
+<p>To locate scripts addressing a specific CVE identifier, use
+<code>grep</code> or <code>find</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Search for scripts mentioning a specific CVE (e.g., CVE-2020-0796)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-l</span> <span class="st">&quot;CVE-2020-0796&quot;</span> /usr/share/nmap/scripts/<span class="pp">*</span>.nse</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Search by a known vulnerability name (e.g., Heartbleed)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> /usr/share/nmap/scripts/<span class="pp">*</span>heartbleed<span class="pp">*</span></span></code></pre></div>
+<p>NSE scripts are categorized by function. The <code>vuln</code>
+category contains scripts specifically created to identify known
+vulnerabilities.</p>
+<h2 id="scanning-for-specific-cves">Scanning for Specific CVEs</h2>
+<p>Once the appropriate script name is identified, execute the scan
+against the target IP address or hostname.</p>
+<h3 id="checking-for-a-single-known-vulnerability">Checking for a Single
+Known Vulnerability</h3>
+<p>Specify the exact script name using the <code>--script</code> flag,
+along with the relevant port to reduce unnecessary network traffic:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-p</span> 445 <span class="at">--script</span> smb-vuln-ms17-010 <span class="op">&lt;</span>target-ip<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="passing-cve-arguments">Passing CVE Arguments</h3>
+<p>Certain scripts accept arguments to tailor the detection logic:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-p</span> 80,443 <span class="at">--script</span> http-vuln-cve2017-5638 <span class="at">--script-args</span> uri=/struts2-showcase/ <span class="op">&lt;</span>target-ip<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="running-all-vulnerability-scripts">Running All Vulnerability
+Scripts</h3>
+<p>To run the entire suite of built-in vulnerability detection scripts
+against open services:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-sV</span> <span class="at">--script</span> vuln <span class="op">&lt;</span>target-ip<span class="op">&gt;</span></span></code></pre></div>
+<p>The <code>-sV</code> flag enables service version detection, which is
+necessary for scripts that rely on software version fingerprinting.</p>
+<h2 id="checking-cves-with-the-vulners-script">Checking CVEs with the
+Vulners Script</h2>
+<p>The built-in NSE library covers specific high-profile
+vulnerabilities, but broader CVE auditing requires querying an external
+vulnerability database. The <code>vulners</code> script correlates
+detected software versions against the Vulners database to report
+matching CVEs.</p>
+<ol type="1">
+<li>Ensure service version detection (<code>-sV</code>) is enabled.</li>
+<li>Run the <code>vulners</code> script:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-sV</span> <span class="at">--script</span> vulners <span class="op">&lt;</span>target-ip<span class="op">&gt;</span></span></code></pre></div>
+<p>To filter results by Common Vulnerability Scoring System (CVSS)
+score:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-sV</span> <span class="at">--script</span> vulners <span class="at">--script-args</span> mincvss=7.0 <span class="op">&lt;</span>target-ip<span class="op">&gt;</span></span></code></pre></div>
+<h2 id="interpreting-the-output">Interpreting the Output</h2>
+<p>When a check finds a matching vulnerability, Nmap displays a
+dedicated section under the corresponding port:</p>
+<ul>
+<li><strong>State</strong>: Indicates whether the target is
+<code>VULNERABLE</code>, <code>LIKELY VULNERABLE</code>, or not
+affected.</li>
+<li><strong>IDs</strong>: Lists relevant CVE numbers and database
+identifiers.</li>
+<li><strong>Risk Factor / CVSS</strong>: Displays the severity score
+assigned to the vulnerability.</li>
+<li><strong>Description</strong>: Summarizes the vulnerability and
+provides reference URLs for remediation details.</li>
+</ul>
+<p>If no vulnerability is detected, the script output is omitted from
+the scan report unless verbose mode (<code>-v</code>) is enabled.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitLab Runner Docker Executor on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article examines the role of the GitLab Runner Docker executor when building CI/CD jobs on an Ubuntu system. It covers the core functionality of the executor, its architecture and execution lifecycle, the benefits of containerized isolation over she">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/git-lab-runner-docker-executor-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="GitLab Runner Docker Executor on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/git-lab-runner-docker-executor-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines the role of the GitLab Runner Docker executor when building CI/CD jobs on an Ubuntu system. It covers the core functionality of the executor, its architecture and execution lifecycle, the benefits of containerized isolation over she" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="gitlab-runner-docker-executor-on-ubuntu">GitLab Runner Docker
+Executor on Ubuntu</h1>
+<p>This article examines the role of the GitLab Runner Docker executor
+when building CI/CD jobs on an Ubuntu system. It covers the core
+functionality of the executor, its architecture and execution lifecycle,
+the benefits of containerized isolation over shell-based execution, and
+key configuration practices for optimizing build pipelines on
+Ubuntu.</p>
+<h2 id="what-is-the-docker-executor">What is the Docker Executor?</h2>
+<p>The GitLab Runner Docker executor is an execution environment that
+runs CI/CD jobs inside isolated Docker containers. When configured on an
+Ubuntu host, the runner uses the local Docker engine daemon to provision
+a clean container for each job defined in your
+<code>.gitlab-ci.yml</code> pipeline, executes the specified commands,
+extracts artifacts, and terminates the container upon completion.</p>
+<h2 id="primary-roles-and-functions">Primary Roles and Functions</h2>
+<h3 id="1-environment-isolation-and-reproducibility">1. Environment
+Isolation and Reproducibility</h3>
+<p>Unlike the standard Shell executor, which executes commands directly
+on the host Ubuntu operating system, the Docker executor isolates each
+pipeline run inside a self-contained container. This guarantees:</p>
+<ul>
+<li><strong>Clean State:</strong> Every job starts in an immutable
+environment, preventing residual artifacts or temporary files from
+affecting subsequent runs.</li>
+<li><strong>No Host Pollution:</strong> Build dependencies, packages,
+and custom libraries are installed inside the container, leaving the
+underlying Ubuntu server clean and stable.</li>
+<li><strong>Consistency:</strong> Developers can define the exact
+runtime environment (e.g., Node.js, Python, Golang, or specific Ubuntu
+versions) directly in the pipeline configuration, ensuring identical
+execution across local and remote environments.</li>
+</ul>
+<h3 id="2-multi-language-and-multi-version-flexibility">2.
+Multi-Language and Multi-Version Flexibility</h3>
+<p>A single Ubuntu host running GitLab Runner can simultaneously handle
+diverse projects requiring conflicting software versions. One job can
+run inside a container using Python 3.8, while another runs using Python
+3.12, without necessitating multiple runtime installations or complex
+environment managers on the Ubuntu host.</p>
+<h3 id="3-service-orchestration">3. Service Orchestration</h3>
+<p>The Docker executor can link sidecar containers to the primary build
+container using the <code>services</code> keyword in
+<code>.gitlab-ci.yml</code>. This allows jobs to easily interface with
+disposable databases (e.g., PostgreSQL, MySQL) or caching systems (e.g.,
+Redis) that are automatically spun up and torn down alongside the
+job.</p>
+<h3 id="4-security-and-sandboxing">4. Security and Sandboxing</h3>
+<p>Because commands are executed within a container, malicious or
+erroneous scripts are restricted to the containerized environment. This
+shields the host Ubuntu kernel, file system, and network services from
+accidental destruction or unauthorized access, provided the container is
+not running in privileged mode.</p>
+<h2 id="how-the-docker-executor-works-on-ubuntu">How the Docker Executor
+Works on Ubuntu</h2>
+<p>When a job is triggered, the interaction between GitLab Runner and
+Ubuntu follows a distinct lifecycle:</p>
+<ol type="1">
+<li><strong>Job Dispatch:</strong> The GitLab Runner daemon on Ubuntu
+polls the GitLab instance and receives a job assignment.</li>
+<li><strong>Image Pulling:</strong> The runner communicates with the
+local Docker daemon (<code>/var/run/docker.sock</code>) to pull the
+designated Docker image from Docker Hub or a private container
+registry.</li>
+<li><strong>Container Creation:</strong> Docker initializes the build
+container and any specified service containers on a private bridge
+network.</li>
+<li><strong>Code Checkout:</strong> The runner clones the repository
+into the container via an automatically created volume mount.</li>
+<li><strong>Execution:</strong> The commands defined in the
+<code>before_script</code> and <code>script</code> sections execute
+sequentially inside the container.</li>
+<li><strong>Artifact Upload:</strong> Generated artifacts or cache files
+are compressed and sent back to GitLab.</li>
+<li><strong>Cleanup:</strong> The Docker daemon stops and removes the
+job containers, releasing compute and memory resources back to the
+Ubuntu host.</li>
+</ol>
+<h2 id="essential-configuration-on-ubuntu">Essential Configuration on
+Ubuntu</h2>
+<p>The runner’s behavior is defined in
+<code>/etc/gitlab-runner/config.toml</code> on the Ubuntu host. A
+standard Docker executor configuration includes:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode toml"><code class="sourceCode toml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[[runners]]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">name</span> <span class="op">=</span> <span class="st">&quot;ubuntu-docker-runner&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span> <span class="op">=</span> <span class="st">&quot;https://gitlab.com/&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">token</span> <span class="op">=</span> <span class="st">&quot;RUNNER_TOKEN&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">executor</span> <span class="op">=</span> <span class="st">&quot;docker&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[runners.custom_build_dir]</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[runners.docker]</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">tls_verify</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">image</span> <span class="op">=</span> <span class="st">&quot;ubuntu:22.04&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">privileged</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">disable_entrypoint_overwrite</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">oom_kill_disable</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">disable_cache</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volumes</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;/cache&quot;</span><span class="op">]</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">shm_size</span> <span class="op">=</span> <span class="dv">0</span></span></code></pre></div>
+<ul>
+<li><strong><code>image</code>:</strong> Sets the default fallback image
+if none is specified in <code>.gitlab-ci.yml</code>.</li>
+<li><strong><code>privileged</code>:</strong> When set to
+<code>false</code>, it protects the host Ubuntu kernel. It is only set
+to <code>true</code> when implementing Docker-in-Docker (DinD) for
+building container images within the CI/CD pipeline.</li>
+<li><strong><code>volumes</code>:</strong> Manages caching between jobs
+to improve execution speed by persisting package managers' download
+directories.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

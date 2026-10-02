@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install React Native CLI on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for setting up the React Native Command Line Interface (CLI) on an Ubuntu workstation. You will learn how to install essential dependencies—including Node.js, OpenJDK, and Android Studio—configure req">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-react-native-cli-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install React Native CLI on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-react-native-cli-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for setting up the React Native Command Line Interface (CLI) on an Ubuntu workstation. You will learn how to install essential dependencies—including Node.js, OpenJDK, and Android Studio—configure req" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-react-native-cli-on-ubuntu">How to Install React
+Native CLI on Ubuntu</h1>
+<p>This guide provides a straightforward walkthrough for setting up the
+React Native Command Line Interface (CLI) on an Ubuntu workstation. You
+will learn how to install essential dependencies—including Node.js,
+OpenJDK, and Android Studio—configure required Android environment
+variables, and create your first React Native project using the native
+CLI.</p>
+<h3 id="step-1-install-nodejs-and-watchman">Step 1: Install Node.js and
+Watchman</h3>
+<p>React Native requires Node.js. The recommended approach is using Node
+Version Manager (NVM) to manage Node versions.</p>
+<ol type="1">
+<li>Open your terminal and install NVM:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-o-</span> https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<li>Reload your shell configuration:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div></li>
+<li>Install the current Long Term Support (LTS) version of Node.js:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nvm</span> install <span class="at">--lts</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">nvm</span> use <span class="at">--lts</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-2-install-the-java-development-kit-jdk">Step 2: Install the
+Java Development Kit (JDK)</h3>
+<p>React Native Android development currently requires OpenJDK 17.</p>
+<ol type="1">
+<li>Update package lists and install OpenJDK 17:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> openjdk-17-jdk</span></code></pre></div></li>
+<li>Verify the installation:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">javac</span> <span class="at">-version</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-3-install-android-studio-and-sdk-components">Step 3:
+Install Android Studio and SDK Components</h3>
+<ol type="1">
+<li>Download Android Studio from the official Android developer website
+or install it via Ubuntu Snap:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap install android-studio <span class="at">--classic</span></span></code></pre></div></li>
+<li>Launch Android Studio to complete the setup wizard. Choose the
+<strong>Standard</strong> setup type.</li>
+<li>Open <strong>SDK Manager</strong> from Android Studio settings
+(<strong>More Actions &gt; SDK Manager</strong> or <strong>Settings &gt;
+Appearance &amp; Behavior &gt; System Settings &gt; Android
+SDK</strong>).</li>
+<li>Under the <strong>SDK Platforms</strong> tab, check the box next to
+<strong>Show Package Details</strong> and select the latest stable
+Android SDK platform (e.g., Android 14 / UpsideDownCake).</li>
+<li>Under the <strong>SDK Tools</strong> tab, ensure the following are
+installed:
+<ul>
+<li>Android SDK Build-Tools</li>
+<li>Android SDK Command-line Tools (latest)</li>
+<li>Android Emulator</li>
+<li>Android SDK Platform-Tools</li>
+</ul></li>
+<li>Click <strong>Apply</strong> and follow the prompts to complete the
+download.</li>
+</ol>
+<h3 id="step-4-configure-environment-variables">Step 4: Configure
+Environment Variables</h3>
+<p>You must expose the Android SDK path to your shell environment.</p>
+<ol type="1">
+<li>Open your terminal profile file (such as <code>~/.bashrc</code> or
+<code>~/.profile</code>):
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.bashrc</span></code></pre></div></li>
+<li>Append the following lines at the end of the file:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANDROID_HOME</span><span class="op">=</span><span class="va">$HOME</span>/Android/Sdk</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/emulator</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/platform-tools</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:<span class="va">$ANDROID_HOME</span>/cmdline-tools/latest/bin</span></code></pre></div></li>
+<li>Save the file (<code>Ctrl+O</code>, then <code>Enter</code>), exit
+nano (<code>Ctrl+X</code>), and apply the changes:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div></li>
+<li>Confirm <code>adb</code> is recognized:
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">--version</span></span></code></pre></div></li>
+</ol>
+<h3 id="step-5-initialize-a-react-native-application">Step 5: Initialize
+a React Native Application</h3>
+<p>React Native recommends invoking the CLI directly using
+<code>npx</code> rather than installing it globally.</p>
+<ol type="1">
+<li>Generate a new project using the React Native CLI:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> @react-native-community/cli init MyAwesomeProject</span></code></pre></div></li>
+<li>Navigate into your project directory:
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> MyAwesomeProject</span></code></pre></div></li>
+<li>Start the Metro bundler:
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> start</span></code></pre></div></li>
+<li>In a separate terminal window, launch the app on an active Android
+emulator or connected device:
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run android</span></code></pre></div></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

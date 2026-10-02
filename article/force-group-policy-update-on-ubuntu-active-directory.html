@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Group Policy Update on Ubuntu Active Directory - ubuntu</title>
+    <meta name="description" content="Updating Group Policy Objects (GPOs) on an Ubuntu machine joined to Active Directory depends directly on the integration tool managing the domain join. While Windows natively uses gpupdate /force, Ubuntu relies on client utilities such as Canonical's ADs">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/force-group-policy-update-on-ubuntu-active-directory">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Force Group Policy Update on Ubuntu Active Directory - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/force-group-policy-update-on-ubuntu-active-directory" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Updating Group Policy Objects (GPOs) on an Ubuntu machine joined to Active Directory depends directly on the integration tool managing the domain join. While Windows natively uses gpupdate /force, Ubuntu relies on client utilities such as Canonical's ADs" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="force-group-policy-update-on-ubuntu-active-directory">Force
+Group Policy Update on Ubuntu Active Directory</h1>
+<p>Updating Group Policy Objects (GPOs) on an Ubuntu machine joined to
+Active Directory depends directly on the integration tool managing the
+domain join. While Windows natively uses <code>gpupdate /force</code>,
+Ubuntu relies on client utilities such as Canonical's ADsys, SSSD, or
+PBIS Open to fetch and enforce policy changes. This guide provides the
+exact commands required to force an immediate policy refresh across each
+common configuration.</p>
+<h3 id="1-ubuntu-systems-using-adsys-default-for-modern-ubuntu">1.
+Ubuntu Systems Using ADsys (Default for Modern Ubuntu)</h3>
+<p>For Ubuntu Desktop and Server (version 20.04 LTS and newer) using
+Canonical's native Active Directory integration tool,
+<strong>ADsys</strong>, the command to manually force a policy update
+is:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adsysctl policy update</span></code></pre></div>
+<p>To update policies for both the computer and all active users
+immediately, use:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adsysctl update <span class="at">--all</span></span></code></pre></div>
+<p>You can verify the applied policies and check for errors by reviewing
+the status:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adsysctl</span> policy status</span></code></pre></div>
+<hr />
+<h3 id="2-systems-using-sssd-gpo-access-control">2. Systems Using SSSD
+(GPO Access Control)</h3>
+<p>If your Ubuntu machine is joined via <code>realmd</code> and
+<strong>SSSD</strong> (System Security Services Daemon), SSSD primarily
+evaluates GPOs for access control rules (such as logon rights). SSSD
+does not have a standalone GPO engine command, but you can force an
+immediate refresh by purging the local cache:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sss_cache <span class="at">-E</span></span></code></pre></div>
+<p>After expiring the cache, restart the SSSD service to fetch the
+newest rules from the domain controller:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart sssd</span></code></pre></div>
+<hr />
+<h3 id="3-systems-using-pbis-open-beyondtrust--likewise">3. Systems
+Using PBIS Open (BeyondTrust / Likewise)</h3>
+<p>If the system was integrated into the domain using <strong>PBIS
+Open</strong> (formerly PowerBroker Identity Services), a native command
+mimicking the Windows tool is available:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /opt/pbis/bin/gpupdate</span></code></pre></div>
+<hr />
+<h3 id="summary-table">Summary Table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Client Solution</th>
+<th style="text-align: left;">Command to Force Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>ADsys (Ubuntu
+Native)</strong></td>
+<td
+style="text-align: left;"><code>sudo adsysctl policy update</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SSSD</strong></td>
+<td
+style="text-align: left;"><code>sudo sss_cache -E &amp;&amp; sudo systemctl restart sssd</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>PBIS Open</strong></td>
+<td
+style="text-align: left;"><code>sudo /opt/pbis/bin/gpupdate</code></td>
+</tr>
+</tbody>
+</table></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

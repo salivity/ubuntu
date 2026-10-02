@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Ubuntu Kernel Crash Dump with Crash Utility - ubuntu</title>
+    <meta name="description" content="When an Ubuntu system experiences a critical kernel panic, it can automatically capture the system memory state into a crash dump (vmcore) file using kdump. This guide explains how to inspect and analyze an Ubuntu kernel crash dump using the crash debugg">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/analyze-ubuntu-kernel-crash-dump-with-crash-utility">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Analyze Ubuntu Kernel Crash Dump with Crash Utility - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/analyze-ubuntu-kernel-crash-dump-with-crash-utility" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When an Ubuntu system experiences a critical kernel panic, it can automatically capture the system memory state into a crash dump (vmcore) file using kdump. This guide explains how to inspect and analyze an Ubuntu kernel crash dump using the crash debugg" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="analyze-ubuntu-kernel-crash-dump-with-crash-utility">Analyze
+Ubuntu Kernel Crash Dump with Crash Utility</h1>
+<p>When an Ubuntu system experiences a critical kernel panic, it can
+automatically capture the system memory state into a crash dump
+(<code>vmcore</code>) file using <code>kdump</code>. This guide explains
+how to inspect and analyze an Ubuntu kernel crash dump using the
+<code>crash</code> debugging utility. By setting up the necessary debug
+symbols, pointing the tool to the appropriate uncompressed kernel image
+and dump file, and using targeted commands, administrators can identify
+the exact kernel function, process, or hardware fault that triggered the
+crash.</p>
+<h3 id="1-install-the-crash-utility-and-kernel-debug-symbols">1. Install
+the Crash Utility and Kernel Debug Symbols</h3>
+<p>To analyze a dump, the <code>crash</code> tool requires the
+unstripped kernel binary (<code>vmlinux</code>) containing debugging
+symbols (<code>dbgsym</code>) corresponding exactly to the kernel
+version that generated the dump.</p>
+<p>Install the <code>crash</code> package:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> crash</span></code></pre></div>
+<p>Enable the Ubuntu debug symbol repositories:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> ubuntu-dbgsym-keyring</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;deb http://ddebs.ubuntu.com </span><span class="va">$(</span><span class="ex">lsb_release</span> <span class="at">-cs</span><span class="va">)</span><span class="st"> main restricted universe multiverse</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">deb http://ddebs.ubuntu.com </span><span class="va">$(</span><span class="ex">lsb_release</span> <span class="at">-cs</span><span class="va">)</span><span class="st">-updates main restricted universe multiverse&quot;</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tee /etc/apt/sources.list.d/ddebs.list</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<p>Install the debug symbols matching the kernel version that crashed
+(replace <code>&lt;kernel-version&gt;</code> with your target version,
+e.g., <code>5.15.0-88-generic</code>):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> linux-image-<span class="op">&lt;</span>kernel-version<span class="op">&gt;</span>-dbgsym</span></code></pre></div>
+<p>The unstripped <code>vmlinux</code> binary will be installed to
+<code>/usr/lib/debug/boot/vmlinux-&lt;kernel-version&gt;</code>.</p>
+<h3 id="2-locate-the-crash-dump">2. Locate the Crash Dump</h3>
+<p>Ubuntu typically saves kernel dumps managed by
+<code>kdump-tools</code> in the <code>/var/crash/</code> directory. Each
+crash event usually generates a timestamped directory containing the
+dump file:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-lh</span> /var/crash/</span></code></pre></div>
+<p>The dump file is often named <code>dump.&lt;timestamp&gt;</code> or
+<code>vmcore</code>.</p>
+<h3 id="3-launch-the-crash-utility">3. Launch the Crash Utility</h3>
+<p>Start the interactive crash session by providing the debug kernel
+image and the path to the crash dump:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">crash</span> /usr/lib/debug/boot/vmlinux-<span class="op">&lt;</span>kernel-version<span class="op">&gt;</span> /var/crash/<span class="op">&lt;</span>timestamp<span class="op">&gt;</span>/dump.<span class="op">&lt;</span>timestamp<span class="op">&gt;</span></span></code></pre></div>
+<p>Once the environment loads, you will enter the interactive
+<code>crash&gt;</code> shell prompt displaying system metadata and the
+panic message.</p>
+<h3 id="4-essential-crash-commands-for-analysis">4. Essential Crash
+Commands for Analysis</h3>
+<p>Execute the following commands within the <code>crash&gt;</code>
+prompt to determine the root cause of the crash:</p>
+<ul>
+<li><strong><code>sys</code></strong>: Displays high-level system
+information, including the hostname, kernel release, system uptime, and
+the specific panic string (e.g., "Kernel panic - not syncing: Fatal
+exception").</li>
+<li><strong><code>bt</code></strong>: Prints the kernel stack backtrace
+of the active task at the time of the crash. To view the backtrace of a
+specific PID or task, use <code>bt &lt;PID&gt;</code>. This pinpointed
+trace reveals the sequence of function calls leading to the
+failure.</li>
+<li><strong><code>log</code></strong>: Outputs the kernel ring buffer
+(<code>dmesg</code>). This allows you to inspect the log messages, call
+traces, and hardware warnings logged immediately prior to the
+crash.</li>
+<li><strong><code>ps</code></strong>: Lists all active processes at the
+time of the panic. The process running on the CPU that crashed is
+typically highlighted or marked with an asterisk
+(<code>&gt;</code>).</li>
+<li><strong><code>kmem -i</code></strong>: Displays kernel and system
+memory utilization statistics, helping determine if memory exhaustion or
+slab leaks caused the panic.</li>
+<li><strong><code>dis -l &lt;address&gt;</code></strong>: Disassembles
+the machine instructions at a specific memory address or function name,
+mapping assembly code back to source line numbers when debug symbols are
+present.</li>
+</ul>
+<p>Once the faulting instruction, offending driver, or invalid memory
+dereference is identified, exit the utility:</p>
+<pre class="text"><code>crash&gt; exit</code></pre></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor GPU Usage with nvidia-smi on Ubuntu - ubuntu</title>
+    <meta name="description" content="Monitoring your NVIDIA graphics card's metrics on Ubuntu is vital for tracking system health, debugging machine learning workloads, or optimizing graphical tasks. This guide outlines how to track GPU utilization, temperature, and VRAM in real-time using">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/monitor-gpu-usage-with-nvidia-smi-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Monitor GPU Usage with nvidia-smi on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/monitor-gpu-usage-with-nvidia-smi-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Monitoring your NVIDIA graphics card's metrics on Ubuntu is vital for tracking system health, debugging machine learning workloads, or optimizing graphical tasks. This guide outlines how to track GPU utilization, temperature, and VRAM in real-time using" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="monitor-gpu-usage-with-nvidia-smi-on-ubuntu">Monitor GPU Usage
+with nvidia-smi on Ubuntu</h1>
+<p>Monitoring your NVIDIA graphics card's metrics on Ubuntu is vital for
+tracking system health, debugging machine learning workloads, or
+optimizing graphical tasks. This guide outlines how to track GPU
+utilization, temperature, and VRAM in real-time using the native
+<code>nvidia-smi</code> command-line utility, ranging from simple looped
+displays to customized output formats.</p>
+<h3 id="standard-real-time-monitoring-with-nvidia-smi">Standard
+Real-Time Monitoring with nvidia-smi</h3>
+<p>The easiest way to track metrics continuously is using the built-in
+loop flag (<code>-l</code> or <code>--loop</code>) within
+<code>nvidia-smi</code>. This command refreshes the standard status
+table at a specified second interval:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nvidia-smi</span> <span class="at">-l</span> 1</span></code></pre></div>
+<p>Replace <code>1</code> with any desired interval in seconds. Each
+refresh displays:</p>
+<ul>
+<li><strong>Temperature:</strong> Current core temperature shown in
+Celsius under the <code>Temp</code> column.</li>
+<li><strong>VRAM Usage:</strong> Allocated memory versus total capacity
+under the <code>Memory-Usage</code> column.</li>
+<li><strong>GPU Utilization:</strong> Percentage of time the graphics
+processor kernel was active under the <code>GPU-Util</code> column.</li>
+</ul>
+<h3 id="using-the-ubuntu-watch-command">Using the Ubuntu
+<code>watch</code> Command</h3>
+<p>Alternatively, the Linux <code>watch</code> utility provides a clean,
+flicker-free interface that clears the terminal on each update:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 nvidia-smi</span></code></pre></div>
+<p>The <code>-n 1</code> flag configures the terminal to redraw the
+screen every second. Press <code>Ctrl + C</code> to exit the view.</p>
+<h3 id="displaying-only-usage-temperature-and-vram">Displaying Only
+Usage, Temperature, and VRAM</h3>
+<p>If you require a clean, minimal output or need to pipe data to a log
+file, query specific metrics directly using the <code>--query-gpu</code>
+flag combined with the loop command:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nvidia-smi</span> <span class="at">--query-gpu</span><span class="op">=</span>timestamp,temperature.gpu,utilization.gpu,memory.used,memory.total <span class="at">--format</span><span class="op">=</span>csv <span class="at">-l</span> 1</span></code></pre></div>
+<p>This returns a real-time CSV stream containing:</p>
+<ul>
+<li><code>timestamp</code>: Current system time.</li>
+<li><code>temperature.gpu</code>: Core GPU temperature in degrees
+Celsius.</li>
+<li><code>utilization.gpu</code>: Real-time percentage of compute
+load.</li>
+<li><code>memory.used</code>: Current VRAM in use (in MiB).</li>
+<li><code>memory.total</code>: Total available VRAM on the hardware (in
+MiB).</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

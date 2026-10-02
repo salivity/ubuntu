@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Lutris Wine Prefixes and Dependencies on Ubuntu - ubuntu</title>
+    <meta name="description" content="Managing Windows software on Ubuntu is streamlined using Lutris, an open-source gaming client that acts as a centralized manager for Wine environments. This guide explains how to configure Lutris to handle isolated Wine prefixes, customize Wine runner ve">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-lutris-wine-prefixes-and-dependencies-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure Lutris Wine Prefixes and Dependencies on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-lutris-wine-prefixes-and-dependencies-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing Windows software on Ubuntu is streamlined using Lutris, an open-source gaming client that acts as a centralized manager for Wine environments. This guide explains how to configure Lutris to handle isolated Wine prefixes, customize Wine runner ve" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1
+id="configure-lutris-wine-prefixes-and-dependencies-on-ubuntu">Configure
+Lutris Wine Prefixes and Dependencies on Ubuntu</h1>
+<p>Managing Windows software on Ubuntu is streamlined using Lutris, an
+open-source gaming client that acts as a centralized manager for Wine
+environments. This guide explains how to configure Lutris to handle
+isolated Wine prefixes, customize Wine runner versions, and install
+critical Windows runtime dependencies such as DirectX, Visual C++
+Redistributables, and .NET Framework via Winetricks to ensure maximum
+software compatibility.</p>
+<h3 id="1-install-lutris-and-wine-dependencies">1. Install Lutris and
+Wine Dependencies</h3>
+<p>Before configuring Lutris, ensure that Ubuntu has the latest graphics
+drivers and core Wine dependencies installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">--add-architecture</span> i386</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install wine64 wine32 libasound2-plugins:i386 libsdl2-2.0-0:i386 libdbus-1-3:i386 libsqlite3-0:i386</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:lutris-team/lutris</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install lutris</span></code></pre></div>
+<h3 id="2-add-your-windows-application-to-lutris">2. Add Your Windows
+Application to Lutris</h3>
+<ol type="1">
+<li>Launch Lutris from your application menu.</li>
+<li>Click the <strong>+</strong> (Add) button in the top-left corner and
+select <strong>Add a locally installed game</strong>.</li>
+<li>Under the <strong>Game info</strong> tab:
+<ul>
+<li>Name your software.</li>
+<li>Set the <strong>Runner</strong> to <strong>Wine (Runs Windows
+games)</strong>.</li>
+</ul></li>
+<li>Under the <strong>Game options</strong> tab:
+<ul>
+<li><strong>Executable</strong>: Browse to and select the
+<code>.exe</code> file of the installer or program.</li>
+<li><strong>Wine prefix</strong>: Specify a directory where you want
+this application's isolated Windows environment to live (e.g.,
+<code>/home/username/Games/prefixes/my-app</code>). If the directory
+does not exist, Lutris will create it automatically.</li>
+<li><strong>Prefix architecture</strong>: Choose <strong>Auto</strong>,
+<strong>64-bit</strong>, or <strong>32-bit</strong> (use 32-bit for
+older software to improve compatibility).</li>
+</ul></li>
+</ol>
+<h3 id="3-configure-the-wine-runner">3. Configure the Wine Runner</h3>
+<p>Lutris allows you to decouple your system Wine from the version used
+by your software:</p>
+<ol type="1">
+<li>In the main Lutris window, hover over <strong>Wine</strong> under
+the "Runners" section in the left sidebar and click the <strong>Manage
+versions</strong> icon.</li>
+<li>Check and download specialized runners, such as
+<strong>lutris-GE-Proton</strong> or custom Wine-GE builds, which
+contain targeted patches for software and games.</li>
+<li>Right-click your application in Lutris, select
+<strong>Configure</strong>, and open the <strong>Runner options</strong>
+tab.</li>
+<li>Set the <strong>Wine version</strong> to the runner you
+downloaded.</li>
+<li>Enable or disable translation layers depending on your application's
+requirements:
+<ul>
+<li><strong>Enable DXVK/VKD3D</strong>: Translates DirectX 9/10/11/12
+calls to Vulkan (recommended for modern 3D software).</li>
+<li><strong>Enable Esync / Fsync</strong>: Enhances multithreading
+performance for compatible kernels.</li>
+</ul></li>
+</ol>
+<h3 id="4-install-dependencies-using-winetricks">4. Install Dependencies
+Using Winetricks</h3>
+<p>Many Windows programs require specific shared libraries to function
+properly. Lutris provides direct access to Winetricks for prefix
+management:</p>
+<ol type="1">
+<li>Select your application in the Lutris interface.</li>
+<li>In the bottom toolbar, click the arrow next to the
+<strong>Wine</strong> icon (the wine glass) to open the control
+menu.</li>
+<li>Select <strong>Winetricks</strong>.</li>
+<li>In the Winetricks interface, select <strong>Select the default
+wineprefix</strong> and click <strong>OK</strong>.</li>
+<li>Select <strong>Install a Windows DLL or component</strong>.</li>
+<li>Select the dependencies required by your software. Common packages
+include:
+<ul>
+<li><code>vcrun2015</code>, <code>vcrun2019</code>, or
+<code>vcrun2022</code> (Visual C++ Runtimes)</li>
+<li><code>d3dx9</code>, <code>d3dcompiler_43</code>,
+<code>d3dcompiler_47</code> (DirectX runtimes)</li>
+<li><code>dotnet48</code> (.NET Framework)</li>
+<li><code>corefonts</code> (Standard Microsoft fonts)</li>
+</ul></li>
+<li>Click <strong>OK</strong> and follow the automated prompts until the
+installation completes.</li>
+</ol>
+<h3 id="5-configure-wine-and-dll-overrides">5. Configure Wine and DLL
+Overrides</h3>
+<p>If a dependency requires a specific loading order:</p>
+<ol type="1">
+<li>Click the Wine icon menu at the bottom and choose <strong>Wine
+configuration</strong> (<code>winecfg</code>).</li>
+<li>Navigate to the <strong>Libraries</strong> tab to verify or add DLL
+overrides (ensuring they are set to <code>native</code> or
+<code>native, builtin</code>).</li>
+<li>In the <strong>Applications</strong> tab, set the <strong>Windows
+Version</strong> (e.g., Windows 10 or Windows 7) based on what the
+application expects.</li>
+<li>Click <strong>Apply</strong> and <strong>OK</strong>.</li>
+</ol>
+<p>You can now launch the software directly from the Lutris dashboard
+with all prefix parameters and dependencies preserved independently from
+other applications on your system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

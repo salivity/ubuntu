@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable TCP Offloading with Ethtool on Ubuntu - ubuntu</title>
+    <meta name="description" content="TCP offloading delegates network packet processing tasks from the system CPU to the Network Interface Card (NIC) to improve throughput. While beneficial in high-traffic environments, it can cause packet capture distortion, checksum errors, latency jitter">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/disable-tcp-offloading-with-ethtool-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Disable TCP Offloading with Ethtool on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/disable-tcp-offloading-with-ethtool-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="TCP offloading delegates network packet processing tasks from the system CPU to the Network Interface Card (NIC) to improve throughput. While beneficial in high-traffic environments, it can cause packet capture distortion, checksum errors, latency jitter" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="disable-tcp-offloading-with-ethtool-on-ubuntu">Disable TCP
+Offloading with Ethtool on Ubuntu</h1>
+<p>TCP offloading delegates network packet processing tasks from the
+system CPU to the Network Interface Card (NIC) to improve throughput.
+While beneficial in high-traffic environments, it can cause packet
+capture distortion, checksum errors, latency jitter, and compatibility
+issues with specific virtualized environments or packet inspection
+tools. This guide explains how to inspect your current offload settings
+and use the <code>ethtool</code> utility to disable TCP offloading on an
+Ubuntu system, both temporarily and permanently.</p>
+<h3 id="step-1-install-ethtool">Step 1: Install Ethtool</h3>
+<p>Most Ubuntu installations do not include <code>ethtool</code> by
+default. Install it using the <code>apt</code> package manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ethtool <span class="at">-y</span></span></code></pre></div>
+<h3 id="step-2-identify-your-network-interface">Step 2: Identify Your
+Network Interface</h3>
+<p>Find the logical name of the network interface you want to modify by
+listing all available interfaces:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> link show</span></code></pre></div>
+<p>Note the interface name you need to configure (for example,
+<code>eth0</code>, <code>enp3s0</code>, or <code>ens33</code>).</p>
+<h3 id="step-3-view-current-tcp-offload-settings">Step 3: View Current
+TCP Offload Settings</h3>
+<p>Query the current offload parameters of the interface using the
+<code>-k</code> (or <code>--show-features</code>) flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ethtool</span> <span class="at">-k</span> eth0</span></code></pre></div>
+<p>Look for the following common TCP offloading features:</p>
+<ul>
+<li><strong>tcp-segmentation-offload (tso):</strong> Offloads TCP packet
+segmentation.</li>
+<li><strong>generic-segmentation-offload (gso):</strong> Offloads
+segmentation for protocols beyond standard TCP.</li>
+<li><strong>generic-receive-offload (gro):</strong> Reassembles incoming
+packets at the NIC layer.</li>
+<li><strong>large-receive-offload (lro):</strong> Aggregates incoming
+TCP segments into larger buffers.</li>
+<li><strong>rx-checksumming / tx-checksumming:</strong> Offloads packet
+checksum calculations.</li>
+</ul>
+<h3 id="step-4-disable-tcp-offloading-temporarily">Step 4: Disable TCP
+Offloading Temporarily</h3>
+<p>Use the <code>-K</code> (or <code>--offload</code>) flag to turn off
+specific offloading features. To disable the primary TCP offload
+mechanisms, run:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ethtool <span class="at">-K</span> eth0 tso off gso off gro off rx off tx off</span></code></pre></div>
+<p>Verify that the changes were applied:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ethtool</span> <span class="at">-k</span> eth0 <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;segmentation|receive-offload|checksumming&quot;</span></span></code></pre></div>
+<p><em>Note: Changes made directly via the <code>ethtool</code> command
+apply immediately but will revert after a system reboot or interface
+restart.</em></p>
+<h3 id="step-5-make-the-changes-persistent">Step 5: Make the Changes
+Persistent</h3>
+<p>Ubuntu uses Netplan and <code>systemd-networkd</code> for network
+management. To ensure offload settings persist across reboots, use a
+<code>systemd</code> <code>.link</code> configuration.</p>
+<ol type="1">
+<li>Determine the MAC address of your interface:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/class/net/eth0/address</span></code></pre></div>
+<ol start="2" type="1">
+<li>Create a custom <code>.link</code> file in
+<code>/etc/systemd/network/</code>:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/network/10-disable-offload.link</span></code></pre></div>
+<ol start="3" type="1">
+<li>Add the following configuration, replacing <code>eth0</code> and the
+MAC address with your device details:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Match]</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">MACAddress</span><span class="ot">=</span><span class="st">00:11:22:33:44:55</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">OriginalName</span><span class="ot">=</span><span class="st">eth0</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[Link]</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="dt">ReceiveChecksumOffload</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="dt">TransmitChecksumOffload</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="dt">TCPSegmentationOffload</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="dt">GenericSegmentationOffload</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="dt">GenericReceiveOffload</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="dt">LargeReceiveOffload</span><span class="ot">=</span><span class="kw">no</span></span></code></pre></div>
+<ol start="4" type="1">
+<li>Update your initramfs and apply the configuration:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-networkd</span></code></pre></div>
+<p>Alternatively, you can create a dedicated <code>systemd</code>
+one-shot service to run the <code>ethtool</code> command at boot if you
+prefer not to manage <code>systemd.link</code> files:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/disable-offload.service</span></code></pre></div>
+<p>Insert the following:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Disable TCP Offloading via ethtool</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network.target</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">oneshot</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/sbin/ethtool -K eth0 tso off gso off gro off rx off tx off</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="dt">RemainAfterExit</span><span class="ot">=</span><span class="kw">true</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div>
+<p>Enable the service to run on startup:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable disable-offload.service</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

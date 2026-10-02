@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Julia with Official Binaries on Ubuntu - ubuntu</title>
+    <meta name="description" content="Installing Julia on Ubuntu using the official generic Linux binaries ensures you receive an up-to-date, optimized, and officially supported release rather than an outdated version from default repositories. This guide walks through downloading the latest">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-julia-with-official-binaries-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install Julia with Official Binaries on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-julia-with-official-binaries-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Installing Julia on Ubuntu using the official generic Linux binaries ensures you receive an up-to-date, optimized, and officially supported release rather than an outdated version from default repositories. This guide walks through downloading the latest" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-julia-with-official-binaries-on-ubuntu">Install Julia
+with Official Binaries on Ubuntu</h1>
+<p>Installing Julia on Ubuntu using the official generic Linux binaries
+ensures you receive an up-to-date, optimized, and officially supported
+release rather than an outdated version from default repositories. This
+guide walks through downloading the latest official Julia tarball,
+extracting it to a standard directory, creating a system-wide symbolic
+link, and verifying your installation via the terminal.</p>
+<h3 id="step-1-update-system-packages-and-install-prerequisites">Step 1:
+Update System Packages and Install Prerequisites</h3>
+<p>Ensure your package list is up to date and that common download tools
+are installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> wget tar</span></code></pre></div>
+<h3 id="step-2-download-the-official-julia-binary">Step 2: Download the
+Official Julia Binary</h3>
+<p>Determine whether your system is running an x86_64 or ARM
+architecture. Most modern PCs and cloud instances use 64-bit x86.</p>
+<p>Download the latest stable release (for example, Julia 1.10.4 for
+64-bit x86) directly using <code>wget</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.4-linux-x86_64.tar.gz</span></code></pre></div>
+<p><em>(Note: Replace the version number in the URL if a newer version
+is available).</em></p>
+<h3 id="step-3-extract-the-binary-to-opt">Step 3: Extract the Binary to
+<code>/opt</code></h3>
+<p>The <code>/opt</code> directory is standard for installing
+self-contained software packages on Linux.</p>
+<ol type="1">
+<li>Extract the downloaded archive:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xvzf</span> julia-1.10.4-linux-x86_64.tar.gz</span></code></pre></div>
+<ol start="2" type="1">
+<li>Move the extracted directory to <code>/opt</code>:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv julia-1.10.4 /opt/julia-1.10.4</span></code></pre></div>
+<ol start="3" type="1">
+<li>(Optional) Remove the downloaded <code>.tar.gz</code> archive to
+free up disk space:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> julia-1.10.4-linux-x86_64.tar.gz</span></code></pre></div>
+<h3 id="step-4-create-a-system-wide-symbolic-link">Step 4: Create a
+System-Wide Symbolic Link</h3>
+<p>To run the <code>julia</code> command from any terminal without
+specifying its full path, create a symlink in
+<code>/usr/local/bin</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> /opt/julia-1.10.4/bin/julia /usr/local/bin/julia</span></code></pre></div>
+<p>If you previously installed another version of Julia linked this way,
+remove the old link first using
+<code>sudo rm /usr/local/bin/julia</code>.</p>
+<h3 id="step-5-verify-the-installation">Step 5: Verify the
+Installation</h3>
+<p>Check that Julia is correctly accessible and displays the installed
+version:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">julia</span> <span class="at">--version</span></span></code></pre></div>
+<p>You should see output similar to:</p>
+<pre class="text"><code>julia version 1.10.4</code></pre>
+<p>To launch the Julia interactive REPL session, simply run:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">julia</span></span></code></pre></div>
+<p>Type <code>exit()</code> or press <code>Ctrl + D</code> to exit the
+REPL.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Could Not Get Lock /var/lib/dpkg/lock in Ubuntu - ubuntu</title>
+    <meta name="description" content="The "Could not get lock /var/lib/dpkg/lock" error occurs in Ubuntu when the Advanced Package Tool (APT) or DPKG package manager is blocked by another running process, such as background system updates, or when an earlier installation terminated unexpecte">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/fix-could-not-get-lock-var-lib-dpkg-lock-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Fix Could Not Get Lock /var/lib/dpkg/lock in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/fix-could-not-get-lock-var-lib-dpkg-lock-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The "Could not get lock /var/lib/dpkg/lock" error occurs in Ubuntu when the Advanced Package Tool (APT) or DPKG package manager is blocked by another running process, such as background system updates, or when an earlier installation terminated unexpecte" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="fix-could-not-get-lock-varlibdpkglock-in-ubuntu">Fix Could Not
+Get Lock /var/lib/dpkg/lock in Ubuntu</h1>
+<p>The "Could not get lock /var/lib/dpkg/lock" error occurs in Ubuntu
+when the Advanced Package Tool (APT) or DPKG package manager is blocked
+by another running process, such as background system updates, or when
+an earlier installation terminated unexpectedly without releasing its
+lock file. This guide provides a safe, step-by-step process to identify
+active package management tasks, close them safely, clean up stale lock
+files if necessary, and reconfigure the package manager to restore full
+functionality without corrupting system packages.</p>
+<h3 id="step-1-check-for-running-apt-processes">Step 1: Check for
+Running APT Processes</h3>
+<p>Before deleting any files, check if Ubuntu is actively running an
+update, upgrade, or unattended background installation in the
+background.</p>
+<p>Open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">&quot;apt|dpkg&quot;</span></span></code></pre></div>
+<p>Alternatively, see which process holds the specific lock:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lsof /var/lib/dpkg/lock</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lsof /var/lib/dpkg/lock-frontend</span></code></pre></div>
+<p>If processes such as <code>unattended-upgr</code>, <code>apt</code>,
+or <code>apt-get</code> are returned with active PIDs (Process IDs), the
+system is likely applying scheduled security updates.</p>
+<h3 id="step-2-allow-the-process-to-finish-or-terminate-it-safely">Step
+2: Allow the Process to Finish or Terminate It Safely</h3>
+<p>If a background update is actively running, the safest action is to
+wait several minutes for it to complete on its own.</p>
+<p>If the process is frozen or unresponsive, terminate it gracefully
+using its PID:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kill <span class="at">-SIGTERM</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;PID&gt;</code> with the process ID identified in
+Step 1. Wait a few moments for the process to exit. If it refuses to
+terminate, force it to stop:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kill <span class="at">-SIGKILL</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span></code></pre></div>
+<p>To stop all hung APT instances at once:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> killall <span class="at">-9</span> apt apt-get</span></code></pre></div>
+<h3 id="step-3-remove-the-stale-lock-files">Step 3: Remove the Stale
+Lock Files</h3>
+<p>If no APT or DPKG processes are running, but the error persists, the
+lock files were left behind by a system crash or improper shutdown.
+Remove the lock files safely:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /var/lib/apt/lists/lock</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /var/cache/apt/archives/lock</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /var/lib/dpkg/lock</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /var/lib/dpkg/lock-frontend</span></code></pre></div>
+<h3 id="step-4-reconfigure-dpkg-and-repair-packages">Step 4: Reconfigure
+DPKG and Repair Packages</h3>
+<p>Removing lock files while an installation was pending can leave
+packages in a half-configured state. Reconfigure the package database to
+fix broken dependencies:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">--configure</span> <span class="at">-a</span></span></code></pre></div>
+<p>Once the reconfiguration finishes without errors, refresh the package
+lists to ensure everything operates normally:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

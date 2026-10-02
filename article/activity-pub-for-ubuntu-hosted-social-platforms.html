@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActivityPub for Ubuntu Hosted Social Platforms - ubuntu</title>
+    <meta name="description" content="This article explores how the ActivityPub protocol functions as the foundational communication layer for decentralized social platforms deployed on Ubuntu servers. It details the protocol's client-to-server and server-to-server architecture, how it handl">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/activity-pub-for-ubuntu-hosted-social-platforms">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ActivityPub for Ubuntu Hosted Social Platforms - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/activity-pub-for-ubuntu-hosted-social-platforms" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how the ActivityPub protocol functions as the foundational communication layer for decentralized social platforms deployed on Ubuntu servers. It details the protocol's client-to-server and server-to-server architecture, how it handl" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="activitypub-for-ubuntu-hosted-social-platforms">ActivityPub for
+Ubuntu Hosted Social Platforms</h1>
+<p>This article explores how the ActivityPub protocol functions as the
+foundational communication layer for decentralized social platforms
+deployed on Ubuntu servers. It details the protocol's client-to-server
+and server-to-server architecture, how it handles cross-server data
+exchange via JSON-LD, and the specific role of Ubuntu's infrastructure
+in processing, queuing, and securing federated interactions across the
+wider Fediverse.</p>
+<h3 id="the-foundation-of-decentralized-social-networking">The
+Foundation of Decentralized Social Networking</h3>
+<p>ActivityPub is an open, decentralized social networking protocol
+standardized by the World Wide Web Consortium (W3C). It provides a
+uniform API for creating, updating, and deleting content across
+independent nodes. When social platforms such as Mastodon, Lemmy,
+Pixelfed, or PeerTube are hosted on Ubuntu environments, ActivityPub
+acts as the common language that allows these distinct applications to
+communicate with each other, forming a unified network known as the
+Fediverse.</p>
+<h3 id="server-to-server-federation-mechanics">Server-to-Server
+Federation Mechanics</h3>
+<p>The primary role of ActivityPub in an Ubuntu deployment is managing
+server-to-server (federation) communication. Under this model:</p>
+<ul>
+<li><strong>Actors and Objects:</strong> Users, bots, and groups are
+represented as "Actors." Content such as posts, images, and videos are
+represented as "Objects."</li>
+<li><strong>Inboxes and Outboxes:</strong> Every actor has an
+<code>inbox</code> endpoint to receive data and an <code>outbox</code>
+endpoint to publish data.</li>
+<li><strong>Activities:</strong> When a user creates a post or interacts
+with content (e.g., a <code>Like</code>, <code>Follow</code>, or
+<code>Announce</code>), the platform serializes this action into an
+ActivityStreams 2.0 payload formatted as JSON-LD.</li>
+</ul>
+<p>When a user on an Ubuntu-hosted instance publishes a post, the host
+platform processes the activity and delivers the JSON-LD payload over
+HTTPS to the inbox endpoints of remote servers that follow that user.
+Conversely, when external nodes send updates, the Ubuntu server verifies
+the incoming HTTP signature and routes the activity to the local
+recipient's inbox.</p>
+<h3 id="interoperability-across-diverse-applications">Interoperability
+Across Diverse Applications</h3>
+<p>ActivityPub abstracts the specific features of individual platforms
+into universal actions. Because the protocol relies on standardized
+vocabulary, an Ubuntu-hosted microblogging instance (like Mastodon) can
+seamlessly interact with a link aggregator (like Lemmy) or a video
+platform (like PeerTube). The host operating system simply serves the
+network requests; ActivityPub ensures that content semantics remain
+coherent across different user interfaces and data schemas.</p>
+<h3 id="infrastructure-integration-on-ubuntu">Infrastructure Integration
+on Ubuntu</h3>
+<p>Implementing ActivityPub on an Ubuntu server involves several core
+infrastructure components that ensure reliable federation:</p>
+<ul>
+<li><strong>Reverse Proxies:</strong> Web servers like Nginx or Apache
+terminate TLS connections and forward signed HTTP requests directly to
+the application layer. Proper configuration is critical, as ActivityPub
+requires valid SSL certificates and strict header forwarding
+(specifically <code>Host</code>, <code>Signature</code>, and
+<code>Digest</code>).</li>
+<li><strong>Background Queues:</strong> Federation creates bursty,
+asynchronous network traffic. Ubuntu services typically rely on Redis
+and background job managers (such as Sidekiq or Celery) to queue
+outgoing and incoming activities, preventing system slowdowns when
+delivering payloads to thousands of remote instances.</li>
+<li><strong>Cryptographic Verification:</strong> Ubuntu handles the
+cryptographic workload required by ActivityPub. Every message sent
+between servers is signed with the user's private RSA key, and the
+receiving server fetches the public key from the sender's origin to
+verify authenticity before committing the data to the database.</li>
+</ul>
+<p>By providing the protocol specifications for discovery, subscription,
+and message passing, ActivityPub transforms standalone Ubuntu servers
+into interconnected, resilient participants in the global decentralized
+web.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

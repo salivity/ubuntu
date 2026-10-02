@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Network Drives on Login Using pam_mount in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to automatically mount network shares—such as SMB/CIFS or NFS—upon user login in Ubuntu using the pammount module. By integrating with the Pluggable Authentication Module (PAM) architecture, pammount dynamically mounts assigne">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/map-network-drives-on-login-using-pam-mount-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Map Network Drives on Login Using pam_mount in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/map-network-drives-on-login-using-pam-mount-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to automatically mount network shares—such as SMB/CIFS or NFS—upon user login in Ubuntu using the pammount module. By integrating with the Pluggable Authentication Module (PAM) architecture, pammount dynamically mounts assigne" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="map-network-drives-on-login-using-pam_mount-in-ubuntu">Map
+Network Drives on Login Using pam_mount in Ubuntu</h1>
+<p>This guide explains how to automatically mount network shares—such as
+SMB/CIFS or NFS—upon user login in Ubuntu using the
+<code>pam_mount</code> module. By integrating with the Pluggable
+Authentication Module (PAM) architecture, <code>pam_mount</code>
+dynamically mounts assigned remote directories using the user's active
+session credentials and unmounts them upon logout, eliminating the need
+to store plaintext passwords in configuration files.</p>
+<h3 id="step-1-install-required-packages">Step 1: Install Required
+Packages</h3>
+<p>First, update your package lists and install
+<code>libpam-mount</code>. If you plan to mount Windows or Samba shares
+(SMB/CIFS), you will also need the <code>cifs-utils</code> package:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libpam-mount cifs-utils</span></code></pre></div>
+<p>For NFS shares, ensure <code>nfs-common</code> is installed
+instead:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nfs-common</span></code></pre></div>
+<h3 id="step-2-configure-pam-integration">Step 2: Configure PAM
+Integration</h3>
+<p>During installation, Ubuntu typically updates PAM configurations
+automatically. You can verify that the <code>pam_mount</code> module is
+enabled by running:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pam-auth-update</span></code></pre></div>
+<p>Ensure that the option for <strong>PAM mount</strong> is selected
+with an asterisk <code>[*]</code>, then select <strong>OK</strong> to
+save and exit.</p>
+<h3 id="step-3-configure-pam_mountconfxml">Step 3: Configure
+pam_mount.conf.xml</h3>
+<p>All volume definitions are managed in
+<code>/etc/security/pam_mount.conf.xml</code>. Open this file in a text
+editor with administrative privileges:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/security/pam_mount.conf.xml</span></code></pre></div>
+<p>Locate the <code>&lt;!-- Volume definitions --&gt;</code> section and
+add your mount definition inside the <code>&lt;pam_mount&gt;</code>
+block.</p>
+<h4 id="example-mounting-an-smbcifs-share">Example: Mounting an SMB/CIFS
+Share</h4>
+<p>To mount an SMB share matching the user's system username to a local
+folder named <code>NetworkShare</code> in their home directory,
+insert:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">volume</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">user=</span><span class="st">&quot;*&quot;</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">fstype=</span><span class="st">&quot;cifs&quot;</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">server=</span><span class="st">&quot;nas.local&quot;</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">path=</span><span class="st">&quot;shares/%(USER)&quot;</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">mountpoint=</span><span class="st">&quot;~/NetworkShare&quot;</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">options=</span><span class="st">&quot;vers=3.0,uid=%(USERUID),gid=%(USERGID)&quot;</span> /&gt;</span></code></pre></div>
+<p>Key attributes include:</p>
+<ul>
+<li><strong>user</strong>: Defines which local users this rule applies
+to. Using <code>*</code> applies it to all users, or you can specify a
+single username.</li>
+<li><strong>fstype</strong>: The filesystem type (typically
+<code>cifs</code> for Samba or <code>nfs</code> for NFS).</li>
+<li><strong>server</strong>: The hostname or IP address of the file
+server.</li>
+<li><strong>path</strong>: The path to the shared folder on the remote
+server. Variable <code>%(USER)</code> expands to the logged-in
+username.</li>
+<li><strong>mountpoint</strong>: The local target path where the share
+will appear.</li>
+<li><strong>options</strong>: Mount parameters.
+<code>uid=%(USERUID),gid=%(USERGID)</code> ensures the user retains
+ownership and write permissions over the mounted directory.</li>
+</ul>
+<p>Save the file and exit the editor.</p>
+<h3 id="step-4-create-the-local-mount-point">Step 4: Create the Local
+Mount Point</h3>
+<p>The local mount directory must exist for the process to succeed. For
+a single user, create the directory inside their home folder:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/NetworkShare</span></code></pre></div>
+<p>If configuring for multiple users, you can ensure each user gets this
+directory created automatically by adding it to
+<code>/etc/skel/</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/skel/NetworkShare</span></code></pre></div>
+<h3 id="step-5-test-the-configuration">Step 5: Test the
+Configuration</h3>
+<p>Log out of your current Ubuntu session and log back in using your
+credentials. Open a terminal and check if the share is active:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-h</span></span></code></pre></div>
+<p>If the share mounted properly, you will see your network location
+mapped to <code>~/NetworkShare</code>. If the share does not appear,
+inspect the system authentication logs to debug potential connectivity
+or permission errors:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> journalctl <span class="at">-u</span> systemd-logind <span class="at">-b</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

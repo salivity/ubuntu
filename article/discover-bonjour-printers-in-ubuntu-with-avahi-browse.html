@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Bonjour Printers in Ubuntu with avahi-browse - ubuntu</title>
+    <meta name="description" content="In Ubuntu, network printers often announce their availability using Zeroconf and Apple Bonjour protocols, allowing for automatic setup without manual IP configuration. The avahi-browse command serves as an essential command-line utility for querying, dis">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/discover-bonjour-printers-in-ubuntu-with-avahi-browse">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Discover Bonjour Printers in Ubuntu with avahi-browse - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/discover-bonjour-printers-in-ubuntu-with-avahi-browse" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In Ubuntu, network printers often announce their availability using Zeroconf and Apple Bonjour protocols, allowing for automatic setup without manual IP configuration. The avahi-browse command serves as an essential command-line utility for querying, dis" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="discover-bonjour-printers-in-ubuntu-with-avahi-browse">Discover
+Bonjour Printers in Ubuntu with avahi-browse</h1>
+<p>In Ubuntu, network printers often announce their availability using
+Zeroconf and Apple Bonjour protocols, allowing for automatic setup
+without manual IP configuration. The <code>avahi-browse</code> command
+serves as an essential command-line utility for querying, discovering,
+and diagnosing these multicast DNS (mDNS) and DNS Service Discovery
+(DNS-SD) broadcasts on a local network. This article explains how
+<code>avahi-browse</code> works, the role it plays in printer
+identification, and how administrators can use it to troubleshoot
+printing services.</p>
+<h3 id="understanding-zeroconf-and-avahi-in-ubuntu">Understanding
+Zeroconf and Avahi in Ubuntu</h3>
+<p>Zeroconf (Zero Configuration Networking) relies on two key
+technologies to make devices discoverable: mDNS, which translates
+hostnames to IP addresses without a central DNS server, and DNS-SD,
+which advertises specific services offered by a device.</p>
+<p>In Ubuntu, the Avahi daemon (<code>avahi-daemon</code>) provides the
+system-level implementation of Zeroconf and Bonjour. While the daemon
+works in the background to register and listen for network events,
+user-space utilities like <code>avahi-browse</code> provide a direct
+interface to inspect the real-time service announcements passing through
+the network.</p>
+<h3 id="the-role-of-avahi-browse-in-printer-discovery">The Role of
+avahi-browse in Printer Discovery</h3>
+<p>The primary role of <code>avahi-browse</code> in printer discovery is
+service inspection and resolution. When a modern network printer
+connects to a local subnet, it broadcasts service types indicating its
+printing capabilities.</p>
+<p>Ubuntu's printing architecture (CUPS and <code>cups-browsed</code>)
+listens to the Avahi daemon to automatically create queues for
+driverless printing. When an administrator or user runs
+<code>avahi-browse</code>, the tool sends queries to the network and
+collects these broadcast packets. This allows users to:</p>
+<ul>
+<li><strong>Verify Service Advertisement:</strong> Confirm whether a
+printer is actively broadcasting its presence or if network barriers
+(such as mDNS-blocking switches or isolated VLANs) are suppressing the
+packets.</li>
+<li><strong>Identify Supported Protocols:</strong> Determine which
+specific protocols the printer supports, such as Internet Printing
+Protocol (IPP), IPP Everywhere, LPD, or raw socket printing.</li>
+<li><strong>Resolve Connection Details:</strong> Translate abstract
+service names into concrete connection parameters, including hostnames,
+IP addresses, port numbers, and specific queue paths.</li>
+<li><strong>Read Configuration Metadata:</strong> Access TXT records
+embedded in the broadcast, which contain critical driverless printing
+metadata like supported page description languages (PDF, PWG-Raster,
+PostScript), printer model names, and duplexing capabilities.</li>
+</ul>
+<h3 id="key-print-services-scanned-by-avahi-browse">Key Print Services
+Scanned by avahi-browse</h3>
+<p>Network printers register different service subtypes depending on
+their firmware and enabled features. The most common service types
+targeted with <code>avahi-browse</code> include:</p>
+<ul>
+<li><code>_ipp._tcp</code>: Standard Internet Printing Protocol (used by
+modern IPP and driverless setups).</li>
+<li><code>_ipps._tcp</code>: Secure Internet Printing Protocol over
+TLS/SSL.</li>
+<li><code>_printer._tcp</code>: Legacy Line Printer Daemon (LPD)
+service.</li>
+<li><code>_pdl-datastream._tcp</code>: HP JetDirect / AppSocket raw port
+(typically port 9100).</li>
+</ul>
+<h3 id="using-avahi-browse-to-locate-printers">Using avahi-browse to
+Locate Printers</h3>
+<p>The utility is provided by the <code>avahi-utils</code> package in
+Ubuntu:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install avahi-utils</span></code></pre></div>
+<h4 id="discovering-all-active-print-services">Discovering All Active
+Print Services</h4>
+<p>To scan the local network specifically for IPP-compatible printers,
+use the <code>-r</code> (resolve) and <code>-t</code> (terminate after
+dump) flags:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">avahi-browse</span> <span class="at">-rt</span> _ipp._tcp</span></code></pre></div>
+<h4 id="understanding-the-output">Understanding the Output</h4>
+<p>When resolving an IPP printer, <code>avahi-browse</code> returns
+several critical fields:</p>
+<ul>
+<li><strong>Service Name:</strong> The user-friendly name advertised by
+the device (e.g., <code>HP Color LaserJet @ office</code>).</li>
+<li><strong>Hostname and Address:</strong> The mDNS address (e.g.,
+<code>printer.local</code>) and its resolved IPv4 or IPv6 address.</li>
+<li><strong>Port:</strong> The listening port (standard IPP is
+<code>631</code>).</li>
+<li><strong>TXT Record Attributes:</strong> Crucial parameters used by
+CUPS, such as:
+<ul>
+<li><code>rp</code>: The resource path or queue name (e.g.,
+<code>ipp/print</code>).</li>
+<li><code>ty</code>: The exact make and model of the printer.</li>
+<li><code>pdl</code>: Supported MIME types and PDLs, confirming if the
+device supports driverless IPP Everywhere (<code>image/urf</code>,
+<code>application/pdf</code>).</li>
+</ul></li>
+</ul>
+<h3 id="diagnostic-value-in-cups-troubleshooting">Diagnostic Value in
+CUPS Troubleshooting</h3>
+<p>When a network printer fails to appear in Ubuntu's default printer
+settings panel, <code>avahi-browse</code> acts as the first line of
+diagnosis. If <code>avahi-browse -rt _ipp._tcp</code> returns the
+printer with valid host and TXT information, the issue lies within CUPS
+configuration or local firewall settings. If <code>avahi-browse</code>
+finds nothing, the problem is typically physical connectivity, printer
+firmware settings, or network routers blocking multicast UDP traffic on
+port 5353.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

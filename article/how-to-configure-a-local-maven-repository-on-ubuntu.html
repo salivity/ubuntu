@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure a Local Maven Repository on Ubuntu - ubuntu</title>
+    <meta name="description" content="Configuring a local Apache Maven repository on Ubuntu ensures your Java projects cache dependencies locally, reducing build times and network bandwidth. This guide walks you through verifying your Java and Maven installation, locating the default local r">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-a-local-maven-repository-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure a Local Maven Repository on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-a-local-maven-repository-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring a local Apache Maven repository on Ubuntu ensures your Java projects cache dependencies locally, reducing build times and network bandwidth. This guide walks you through verifying your Java and Maven installation, locating the default local r" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-configure-a-local-maven-repository-on-ubuntu">How to
+Configure a Local Maven Repository on Ubuntu</h1>
+<p>Configuring a local Apache Maven repository on Ubuntu ensures your
+Java projects cache dependencies locally, reducing build times and
+network bandwidth. This guide walks you through verifying your Java and
+Maven installation, locating the default local repository, customizing
+the storage path via Maven's <code>settings.xml</code> file, and
+verifying the configuration using the command line.</p>
+<h3 id="step-1-install-openjdk-and-apache-maven">Step 1: Install OpenJDK
+and Apache Maven</h3>
+<p>Before setting up the repository, ensure Java Development Kit (JDK)
+and Maven are installed on your Ubuntu system.</p>
+<p>Update the package lists and install both packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install openjdk-17-jdk maven <span class="at">-y</span></span></code></pre></div>
+<p>Confirm the installations by checking their versions:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-version</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mvn</span> <span class="at">-version</span></span></code></pre></div>
+<h3 id="step-2-understand-the-default-repository-location">Step 2:
+Understand the Default Repository Location</h3>
+<p>By default, Maven stores all downloaded project dependencies,
+plugins, and artifacts in a hidden directory inside your user's home
+folder:</p>
+<pre class="text"><code>/home/&lt;your-username&gt;/.m2/repository</code></pre>
+<p>Maven creates this directory automatically the first time you execute
+a build command (such as <code>mvn package</code> or
+<code>mvn compile</code>).</p>
+<h3 id="step-3-configure-a-custom-local-repository-path">Step 3:
+Configure a Custom Local Repository Path</h3>
+<p>If you need to change the repository location—such as moving it to a
+secondary drive or a shared directory—you can override the default path
+using Maven’s configuration file.</p>
+<ol type="1">
+<li>Create the new directory where you want to store your Maven
+artifacts:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /path/to/your/custom-repo</span></code></pre></div>
+<p>Ensure your user account has read and write permissions to this
+directory:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> <span class="va">$USER</span>:<span class="va">$USER</span> /path/to/your/custom-repo</span></code></pre></div>
+<ol start="2" type="1">
+<li>Open or create the user-specific <code>settings.xml</code> file in
+your <code>~/.m2</code> directory:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.m2/settings.xml</span></code></pre></div>
+<p><em>(Note: To apply this change system-wide for all users, edit
+<code>/etc/maven/settings.xml</code> instead).</em></p>
+<ol start="3" type="1">
+<li>Add the <code>&lt;localRepository&gt;</code> tag inside the
+<code>&lt;settings&gt;</code> root element, specifying the absolute path
+to your custom directory:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">settings</span> <span class="ot">xmlns=</span><span class="st">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>          <span class="ot">xmlns:xsi=</span><span class="st">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>          <span class="ot">xsi:schemaLocation=</span><span class="st">&quot;http://maven.apache.org/SETTINGS/1.0.0</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">                              https://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">localRepository</span>&gt;/path/to/your/custom-repo&lt;/<span class="kw">localRepository</span>&gt;</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">settings</span>&gt;</span></code></pre></div>
+<ol start="4" type="1">
+<li>Save and close the file (in <code>nano</code>, press
+<code>Ctrl+O</code>, <code>Enter</code>, and then
+<code>Ctrl+X</code>).</li>
+</ol>
+<h3 id="step-4-verify-the-new-configuration">Step 4: Verify the New
+Configuration</h3>
+<p>Verify that Maven recognizes your newly configured local repository
+path by running the following command:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mvn</span> help:evaluate <span class="at">-Dexpression</span><span class="op">=</span>settings.localRepository <span class="at">-q</span> <span class="at">-DforceStdout</span></span></code></pre></div>
+<p>The terminal will output the absolute path to your active local
+repository. Any subsequent Maven builds will now download and cache
+dependencies to this designated directory.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

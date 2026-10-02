@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy High Availability PostgreSQL with Patroni on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a direct, step-by-step walkthrough for deploying a production-ready, highly available PostgreSQL cluster on Ubuntu using Patroni and etcd. By implementing Patroni as an orchestration template and etcd as the Distributed Configuration">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/deploy-high-availability-postgre-sql-with-patroni-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deploy High Availability PostgreSQL with Patroni on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/deploy-high-availability-postgre-sql-with-patroni-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a direct, step-by-step walkthrough for deploying a production-ready, highly available PostgreSQL cluster on Ubuntu using Patroni and etcd. By implementing Patroni as an orchestration template and etcd as the Distributed Configuration" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1
+id="deploy-high-availability-postgresql-with-patroni-on-ubuntu">Deploy
+High Availability PostgreSQL with Patroni on Ubuntu</h1>
+<p>This guide provides a direct, step-by-step walkthrough for deploying
+a production-ready, highly available PostgreSQL cluster on Ubuntu using
+Patroni and etcd. By implementing Patroni as an orchestration template
+and etcd as the Distributed Configuration Store (DCS), your database
+infrastructure achieves automatic failover, consensus-driven leader
+election, and resilient state synchronization across multiple nodes.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>To build a fault-tolerant cluster, provision three Ubuntu 22.04 or
+24.04 LTS servers to prevent split-brain scenarios:</p>
+<ul>
+<li><strong>Node 1:</strong> <code>192.168.1.11</code></li>
+<li><strong>Node 2:</strong> <code>192.168.1.12</code></li>
+<li><strong>Node 3:</strong> <code>192.168.1.13</code></li>
+</ul>
+<p>Each node requires root or <code>sudo</code> privileges. Ensure
+firewalls allow communication across ports
+<code>2379</code>/<code>2380</code> (etcd), <code>5432</code>
+(PostgreSQL), and <code>8008</code> (Patroni REST API).</p>
+<hr />
+<h3 id="step-1-install-and-configure-etcd">Step 1: Install and Configure
+etcd</h3>
+<p>etcd manages the cluster state and ensures consensus during leader
+election. Run the following on all three nodes to install
+<code>etcd</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> etcd</span></code></pre></div>
+<p>Edit <code>/etc/default/etcd</code> on each node to define the
+cluster endpoints. Replace the node-specific IP addresses
+accordingly:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_NAME</span><span class="op">=</span><span class="st">&quot;node1&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_DATA_DIR</span><span class="op">=</span><span class="st">&quot;/var/lib/etcd/default.etcd&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_QUOTES_URLS</span><span class="op">=</span><span class="st">&quot;http://0.0.0.0:2379&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_PEER_URLS</span><span class="op">=</span><span class="st">&quot;http://0.0.0.0:2380&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span class="op">=</span><span class="st">&quot;http://192.168.1.11:2380&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ADVERTISE_CLIENT_URLS</span><span class="op">=</span><span class="st">&quot;http://192.168.1.11:2379&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER</span><span class="op">=</span><span class="st">&quot;node1=http://192.168.1.11:2380,node2=http://192.168.1.12:2380,node3=http://192.168.1.13:2380&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_TOKEN</span><span class="op">=</span><span class="st">&quot;etcd-cluster-token&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_STATE</span><span class="op">=</span><span class="st">&quot;new&quot;</span></span></code></pre></div>
+<p>Restart and enable etcd:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart etcd</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable etcd</span></code></pre></div>
+<p>Verify cluster health from any node:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">etcdctl</span> cluster-health</span></code></pre></div>
+<hr />
+<h3 id="step-2-install-postgresql-and-patroni">Step 2: Install
+PostgreSQL and Patroni</h3>
+<p>Install PostgreSQL and required dependencies on all three nodes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> postgresql-common</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> install <span class="at">-d</span> /usr/share/postgresql-common/pgdg</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> curl <span class="at">-o</span> /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc <span class="at">--fail</span> https://www.postgresql.org/media/keys/ACCC4CF8.asc</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sh <span class="at">-c</span> <span class="st">&#39;echo &quot;deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main&quot; &gt; /etc/apt/sources.list.d/pgdg.list&#39;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> postgresql-16 python3-pip python3-psycopg2</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pip3 install patroni<span class="pp">[</span><span class="ss">etcd3</span><span class="pp">]</span></span></code></pre></div>
+<p>Stop and disable the default PostgreSQL service, as Patroni will
+manage the PostgreSQL process:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop postgresql</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable postgresql</span></code></pre></div>
+<hr />
+<h3 id="step-3-configure-patroni">Step 3: Configure Patroni</h3>
+<p>Create a configuration file at <code>/etc/patroni/patroni.yml</code>
+on each node. Ensure you adjust the node name and IP addresses for each
+host:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scope</span><span class="kw">:</span><span class="at"> pg-cluster</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">namespace</span><span class="kw">:</span><span class="at"> /service</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> node1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">restapi</span><span class="kw">:</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">listen</span><span class="kw">:</span><span class="at"> 192.168.1.11:8008</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">connect_address</span><span class="kw">:</span><span class="at"> 192.168.1.11:8008</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">etcd3</span><span class="kw">:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> 192.168.1.11:2379</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> 192.168.1.12:2379</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> 192.168.1.13:2379</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">bootstrap</span><span class="kw">:</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">dcs</span><span class="kw">:</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ttl</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">loop_wait</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_timeout</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">maximum_lag_on_failover</span><span class="kw">:</span><span class="at"> </span><span class="dv">1048576</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">postgresql</span><span class="kw">:</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">use_pg_rewind</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">parameters</span><span class="kw">:</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">max_connections</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">wal_level</span><span class="kw">:</span><span class="at"> replica</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">hot_standby</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;on&quot;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">max_wal_senders</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">max_replication_slots</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">initdb</span><span class="kw">:</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">encoding</span><span class="kw">:</span><span class="at"> UTF8</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> data-checksums</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pg_hba</span><span class="kw">:</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> host replication replicator 192.168.1.0/24 md5</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> host all all 0.0.0.0/0 md5</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">postgresql</span><span class="kw">:</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">listen</span><span class="kw">:</span><span class="at"> 0.0.0.0:5432</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">connect_address</span><span class="kw">:</span><span class="at"> 192.168.1.11:5432</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">data_dir</span><span class="kw">:</span><span class="at"> /var/lib/postgresql/16/main</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">bin_dir</span><span class="kw">:</span><span class="at"> /usr/lib/postgresql/16/bin</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pgpass</span><span class="kw">:</span><span class="at"> /var/lib/postgresql/.pgpass</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">authentication</span><span class="kw">:</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">replication</span><span class="kw">:</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">username</span><span class="kw">:</span><span class="at"> replicator</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">password</span><span class="kw">:</span><span class="at"> ReplicatePassword123</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">superuser</span><span class="kw">:</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">username</span><span class="kw">:</span><span class="at"> postgres</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">password</span><span class="kw">:</span><span class="at"> SuperuserPassword123</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="fu">tags</span><span class="kw">:</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">nofailover</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">noloadbalance</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">clonefrom</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">nosync</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span></code></pre></div>
+<p>Set appropriate ownership:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/patroni</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> postgres:postgres /etc/patroni</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> postgres:postgres /var/lib/postgresql</span></code></pre></div>
+<hr />
+<h3 id="step-4-create-a-systemd-service-for-patroni">Step 4: Create a
+Systemd Service for Patroni</h3>
+<p>Create the systemd service file on all nodes at
+<code>/etc/systemd/system/patroni.service</code>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Patroni Orchestrator for PostgreSQL</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network.target etcd.service</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="dt">Requires</span><span class="ot">=</span><span class="st">etcd.service</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">simple</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="dt">User</span><span class="ot">=</span><span class="st">postgres</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="dt">Group</span><span class="ot">=</span><span class="st">postgres</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/usr/local/bin/patroni /etc/patroni/patroni.yml</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecReload</span><span class="ot">=</span><span class="st">/bin/kill -s HUP $MAINPID</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="dt">KillMode</span><span class="ot">=</span><span class="st">process</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="dt">TimeoutSec</span><span class="ot">=</span><span class="dv">30</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="dt">Restart</span><span class="ot">=</span><span class="kw">no</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div>
+<p>Reload systemd, enable, and start Patroni:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable patroni</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start patroni</span></code></pre></div>
+<p>Start the service on <strong>Node 1</strong> first so it bootstraps
+the database, followed by Node 2 and Node 3 to join as replicas.</p>
+<hr />
+<h3 id="step-5-verify-cluster-topology">Step 5: Verify Cluster
+Topology</h3>
+<p>Check the status of the cluster using <code>patronictl</code>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">patronictl</span> <span class="at">-c</span> /etc/patroni/patroni.yml list</span></code></pre></div>
+<p>The output will display the primary node (Leader), replicas, their
+running states, and replication lag.</p>
+<p>To test automatic failover:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl stop patroni <span class="co"># Run on the current Leader node</span></span></code></pre></div>
+<p>Run <code>patronictl list</code> on any surviving node to verify that
+an operational standby node has been automatically promoted to the new
+Leader.</p>
+<hr />
+<h3 id="step-6-route-traffic-using-haproxy">Step 6: Route Traffic Using
+HAProxy</h3>
+<p>To expose a unified database endpoint, deploy HAProxy on an
+independent load-balancer node or across client machines:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> haproxy</span></code></pre></div>
+<p>Append the configuration to
+<code>/etc/haproxy/haproxy.cfg</code>:</p>
+<pre class="haproxy"><code>frontend pg_primary_in
+    bind *:5000
+    default_backend pg_primary_backend
+
+backend pg_primary_backend
+    option httpchk GET /primary
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+    server node1 192.168.1.11:5432 maxconn 100 check port 8008
+    server node2 192.168.1.12:5432 maxconn 100 check port 8008
+    server node3 192.168.1.13:5432 maxconn 100 check port 8008
+
+frontend pg_replica_in
+    bind *:5001
+    default_backend pg_replica_backend
+
+backend pg_replica_backend
+    option httpchk GET /replica
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2
+    server node1 192.168.1.11:5432 maxconn 100 check port 8008
+    server node2 192.168.1.12:5432 maxconn 100 check port 8008
+    server node3 192.168.1.13:5432 maxconn 100 check port 8008</code></pre>
+<p>Restart HAProxy:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart haproxy</span></code></pre></div>
+<p>Applications can now direct write traffic to port <code>5000</code>
+(automatically routed to the Patroni leader) and read-only queries to
+port <code>5001</code> (distributed across replicas).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

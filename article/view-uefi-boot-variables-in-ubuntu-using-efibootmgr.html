@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View UEFI Boot Variables in Ubuntu Using efibootmgr - ubuntu</title>
+    <meta name="description" content="Managing UEFI boot entries in Ubuntu is straightforward using the built-in userspace utility efibootmgr. This guide explains how to view your system's UEFI boot variables, displays the exact commands needed to inspect both standard and verbose boot data,">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/view-uefi-boot-variables-in-ubuntu-using-efibootmgr">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="View UEFI Boot Variables in Ubuntu Using efibootmgr - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/view-uefi-boot-variables-in-ubuntu-using-efibootmgr" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing UEFI boot entries in Ubuntu is straightforward using the built-in userspace utility efibootmgr. This guide explains how to view your system's UEFI boot variables, displays the exact commands needed to inspect both standard and verbose boot data," />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="view-uefi-boot-variables-in-ubuntu-using-efibootmgr">View UEFI
+Boot Variables in Ubuntu Using efibootmgr</h1>
+<p>Managing UEFI boot entries in Ubuntu is straightforward using the
+built-in userspace utility <code>efibootmgr</code>. This guide explains
+how to view your system's UEFI boot variables, displays the exact
+commands needed to inspect both standard and verbose boot data, and
+covers how to interpret the output directly from your Ubuntu
+terminal.</p>
+<h3 id="the-command-to-view-uefi-boot-variables">The Command to View
+UEFI Boot Variables</h3>
+<p>To display the current UEFI boot configuration and variables, open
+your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> efibootmgr</span></code></pre></div>
+<p>Running <code>efibootmgr</code> without additional flags provides a
+summary of the active boot order, the current boot device, and a list of
+configured boot entries.</p>
+<h3 id="viewing-detailed-verbose-boot-variables">Viewing Detailed
+(Verbose) Boot Variables</h3>
+<p>To see the complete UEFI boot variables—including file paths, disk
+UUIDs, and loader partitions—use the verbose flag (<code>-v</code> or
+<code>--verbose</code>):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> efibootmgr <span class="at">-v</span></span></code></pre></div>
+<p>This command outputs the raw and full path information associated
+with each boot variable stored in NVRAM.</p>
+<h3 id="understanding-the-output">Understanding the Output</h3>
+<p>When you run <code>sudo efibootmgr -v</code>, the output displays
+several key variables:</p>
+<ul>
+<li><strong>BootCurrent:</strong> The identifier of the boot entry used
+to load the currently running operating system (e.g.,
+<code>0001</code>).</li>
+<li><strong>Timeout:</strong> The number of seconds the UEFI firmware
+waits for user input before loading the default entry.</li>
+<li><strong>BootOrder:</strong> A comma-separated list defining the
+priority sequence the firmware follows when attempting to boot an entry
+(e.g., <code>0001,0000,0002</code>).</li>
+<li><strong>BootNext:</strong> (Optional) Specifies an entry to be
+booted exclusively on the next restart.</li>
+<li><strong>BootXXXX:</strong> Each individual boot variable (such as
+<code>Boot0001* ubuntu</code>), followed by the hardware device path
+(PCI, HD partition UUID) and the EFI binary path (such as
+<code>\EFI\ubuntu\shimx64.efi</code>). The asterisk (<code>*</code>)
+indicates an active/enabled entry.</li>
+</ul>
+<h3 id="requirements">Requirements</h3>
+<p>To use this tool successfully:</p>
+<ol type="1">
+<li>Your Ubuntu system must be booted in UEFI mode, not Legacy BIOS
+mode.</li>
+<li>If <code>efibootmgr</code> is not installed on your system, install
+it via APT:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install efibootmgr</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

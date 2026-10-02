@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Calibrate Monitor with DisplayCAL on Ubuntu - ubuntu</title>
+    <meta name="description" content="Calibrating your monitor ensures accurate color reproduction, consistent contrast, and proper brightness for digital media, photography, and design work. This guide walks you through the complete process of calibrating your monitor on Ubuntu using Displa">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-calibrate-monitor-with-display-cal-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Calibrate Monitor with DisplayCAL on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-calibrate-monitor-with-display-cal-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Calibrating your monitor ensures accurate color reproduction, consistent contrast, and proper brightness for digital media, photography, and design work. This guide walks you through the complete process of calibrating your monitor on Ubuntu using Displa" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-calibrate-monitor-with-displaycal-on-ubuntu">How to
+Calibrate Monitor with DisplayCAL on Ubuntu</h1>
+<p>Calibrating your monitor ensures accurate color reproduction,
+consistent contrast, and proper brightness for digital media,
+photography, and design work. This guide walks you through the complete
+process of calibrating your monitor on Ubuntu using DisplayCAL, an
+open-source graphical frontend for ArgyllCMS. You will learn how to
+install the necessary software, connect your hardware colorimeter,
+adjust your monitor's hardware settings, run the profiling process, and
+apply the generated ICC profile to your Ubuntu system.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before beginning the calibration process, ensure you have:</p>
+<ul>
+<li>An external hardware colorimeter or spectrophotometer (such as a
+Calibrite ColorChecker Display, X-Rite i1Display, or Datacolor
+Spyder).</li>
+<li>Your monitor powered on and warmed up for at least 30 minutes to
+stabilize brightness and color output.</li>
+<li>Ambient lighting set to your typical working conditions.</li>
+</ul>
+<hr />
+<h3 id="step-1-install-displaycal-and-argyllcms">Step 1: Install
+DisplayCAL and ArgyllCMS</h3>
+<p>Modern versions of Ubuntu handle DisplayCAL best via Flatpak due to
+dependency requirements.</p>
+<ol type="1">
+<li>Open your terminal (<code>Ctrl + Alt + T</code>).</li>
+<li>Ensure Flatpak is installed:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install flatpak</span></code></pre></div></li>
+<li>Add the Flathub repository:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flatpak</span> remote-add <span class="at">--if-not-exists</span> flathub https://flathub.org/repo/flathub.flatpakrepo</span></code></pre></div></li>
+<li>Install DisplayCAL:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flatpak</span> install flathub net.displaycal.DisplayCAL</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-2-connect-the-calibration-device">Step 2: Connect the
+Calibration Device</h3>
+<ol type="1">
+<li>Connect your colorimeter to a direct USB port on your computer
+rather than through an unpowered USB hub.</li>
+<li>Launch DisplayCAL from your application menu or by running:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flatpak</span> run net.displaycal.DisplayCAL</span></code></pre></div></li>
+<li>Ensure the software detects your instrument under the
+<strong>Instrument</strong> dropdown menu. If it does not appear, click
+the refresh icon next to the list.</li>
+</ol>
+<hr />
+<h3 id="step-3-configure-calibration-settings">Step 3: Configure
+Calibration Settings</h3>
+<p>In the main DisplayCAL interface, configure the target
+parameters:</p>
+<ul>
+<li><strong>Display:</strong> Select the screen you wish to
+calibrate.</li>
+<li><strong>Correction:</strong> Choose the spectral correction matching
+your monitor type (e.g., White LED, OLED, or Wide Gamut) if
+prompted.</li>
+<li><strong>Whitepoint:</strong> Select <strong>Color
+temperature</strong> and set it to <strong>6500K</strong> (standard
+daylight/D65 for most digital workflows).</li>
+<li><strong>White Level:</strong> Set a target brightness between
+<strong>100 cd/m²</strong> and <strong>140 cd/m²</strong> depending on
+your room lighting (120 cd/m² is standard).</li>
+<li><strong>Tone Curve:</strong> Select <strong>Gamma 2.2</strong> or
+<strong>sRGB</strong>.</li>
+</ul>
+<hr />
+<h3 id="step-4-run-interactive-display-adjustment">Step 4: Run
+Interactive Display Adjustment</h3>
+<ol type="1">
+<li>Click <strong>Calibrate &amp; profile</strong> at the bottom of the
+window.</li>
+<li>Place the colorimeter flat against the center of your screen over
+the measurement area shown in the interactive preview window.</li>
+<li>Click <strong>Start measurement</strong>.</li>
+<li>Use your monitor's physical On-Screen Display (OSD) buttons to
+adjust the Red, Green, and Blue (RGB) gain controls until the indicators
+in DisplayCAL align with the target center mark.</li>
+<li>Adjust your monitor's hardware brightness to match the target White
+Level.</li>
+<li>Once the indicators show minimal error, click <strong>Stop
+measurement</strong> to proceed.</li>
+</ol>
+<hr />
+<h3 id="step-5-profile-the-display">Step 5: Profile the Display</h3>
+<ol type="1">
+<li>DisplayCAL will now automatically measure a sequence of color
+patches to evaluate how your display renders different tones.</li>
+<li>Ensure your room lighting remains consistent and avoid touching the
+mouse, keyboard, or colorimeter while measurements are running.</li>
+<li>The measurement process can take anywhere from 15 to 45 minutes
+depending on the selected profiling quality.</li>
+</ol>
+<hr />
+<h3 id="step-6-install-and-verify-the-profile">Step 6: Install and
+Verify the Profile</h3>
+<ol type="1">
+<li>When the process finishes, a <strong>Profile measurement
+results</strong> dialog will appear, displaying coverage percentages for
+color spaces like sRGB, Adobe RGB, and DCI-P3.</li>
+<li>Click <strong>Install profile</strong>.</li>
+<li>DisplayCAL will register the <code>.icc</code> profile to your user
+account and configure Ubuntu's color management system to load the
+calibration look-up tables (LUT) on startup.</li>
+<li>To verify the installation in Ubuntu, open <strong>Settings</strong>
+&gt; <strong>Color</strong>, select your monitor, and verify that the
+newly generated profile is selected and active.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

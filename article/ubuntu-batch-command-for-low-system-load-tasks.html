@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Batch Command for Low System Load Tasks - ubuntu</title>
+    <meta name="description" content="The batch command in Ubuntu provides an automated way to schedule and execute resource-intensive tasks exclusively when system resource demands are low. Part of the standard at scheduling suite, batch defers command execution until the operating system's">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ubuntu-batch-command-for-low-system-load-tasks">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu Batch Command for Low System Load Tasks - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ubuntu-batch-command-for-low-system-load-tasks" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The batch command in Ubuntu provides an automated way to schedule and execute resource-intensive tasks exclusively when system resource demands are low. Part of the standard at scheduling suite, batch defers command execution until the operating system's" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ubuntu-batch-command-for-low-system-load-tasks">Ubuntu Batch
+Command for Low System Load Tasks</h1>
+<p>The <code>batch</code> command in Ubuntu provides an automated way to
+schedule and execute resource-intensive tasks exclusively when system
+resource demands are low. Part of the standard <code>at</code>
+scheduling suite, <code>batch</code> defers command execution until the
+operating system's load average drops below a predefined threshold. This
+article explains how the <code>batch</code> command operates, how to
+configure its system load limits, and how to queue, monitor, and manage
+heavy background jobs without degrading overall system performance.</p>
+<h3 id="how-the-batch-command-works">How the Batch Command Works</h3>
+<p>Unlike tools like <code>cron</code> or <code>at</code>, which trigger
+tasks at strictly defined times or calendar intervals,
+<code>batch</code> schedules one-off tasks dynamically based on system
+health.</p>
+<p>When a job is submitted to <code>batch</code>, the underlying
+<code>atd</code> daemon reads the system's current load
+average—typically via <code>/proc/loadavg</code>. By default on Ubuntu,
+<code>batch</code> holds the execution of queued jobs until the system
+load average falls below 1.5. If the system is under heavy load, the job
+remains in the queue. Once the load stabilizes below the threshold, the
+daemon initiates the command.</p>
+<h3 id="installing-and-enabling-the-required-service">Installing and
+Enabling the Required Service</h3>
+<p>The <code>batch</code> command is bundled with the <code>at</code>
+package. If it is not pre-installed on your Ubuntu system, install it
+using <code>apt</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install at</span></code></pre></div>
+<p>Ensure the scheduling daemon (<code>atd</code>) is active and enabled
+to start automatically on boot:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> atd</span></code></pre></div>
+<h3 id="running-commands-with-batch">Running Commands with Batch</h3>
+<p>There are two primary ways to submit tasks to the <code>batch</code>
+queue: interactively and via standard input.</p>
+<h4 id="1-interactive-mode">1. Interactive Mode</h4>
+<p>Running <code>batch</code> by itself opens an interactive prompt
+(<code>at&gt;</code>) where you can enter one or more commands:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">batch</span></span></code></pre></div>
+<p>At the prompt, type the commands you wish to execute, then press
+<code>Ctrl + D</code> to save and exit:</p>
+<pre class="text"><code>at&gt; tar -czf /backup/large_dataset.tar.gz /var/data
+at&gt; python3 /opt/scripts/data_processing.py
+at&gt; &lt;EOT&gt;</code></pre>
+<h4 id="2-piping-commands-or-scripts">2. Piping Commands or Scripts</h4>
+<p>For automation or simple inline execution, pass commands directly
+using standard input:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;/usr/bin/python3 /scripts/render_video.py&quot;</span> <span class="kw">|</span> <span class="ex">batch</span></span></code></pre></div>
+<p>To queue an entire bash script:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">batch</span> <span class="op">&lt;</span> heavy_calculation.sh</span></code></pre></div>
+<p>Any standard output (stdout) or error output (stderr) generated by
+the command is typically emailed to the local user executing the task,
+unless redirected inside the command itself (e.g.,
+<code>command &gt; /path/to/log.txt 2&gt;&amp;1</code>).</p>
+<h3 id="managing-the-batch-queue">Managing the Batch Queue</h3>
+<p>Because jobs run asynchronously based on load, monitoring the queue
+is essential.</p>
+<ul>
+<li><strong>View Queued Jobs:</strong> Run <code>atq</code> to view
+pending jobs awaiting execution. The output displays the job ID,
+scheduling date/time, and queue name (batch jobs typically use queue
+<code>b</code>).</li>
+<li><strong>Inspect a Queued Job:</strong> Run
+<code>at -c [job_id]</code> to view the environment and commands
+registered for a specific job number.</li>
+<li><strong>Cancel a Queued Job:</strong> Use <code>atrm [job_id]</code>
+to remove a task from the queue before it begins executing.</li>
+</ul>
+<h3 id="customizing-the-load-threshold">Customizing the Load
+Threshold</h3>
+<p>The default threshold of 1.5 may not suit multi-core servers, where a
+load average of 1.5 represents relatively low CPU utilization. You can
+adjust this limit by passing the <code>-l</code> (load limit) flag to
+the <code>atd</code> daemon.</p>
+<ol type="1">
+<li>Edit the systemd service file for <code>atd</code>:
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl edit atd</span></code></pre></div></li>
+<li>Add the custom load limit configuration. For example, to set the
+load threshold to 4.0:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/usr/sbin/atd -l 4.0 -b 60</span></span></code></pre></div>
+<em>(The <code>-b</code> flag defines the minimum interval in seconds
+between the start of two batch jobs, which defaults to 60.)</em></li>
+<li>Restart the service to apply the change:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart atd</span></code></pre></div></li>
+</ol>
+<p>With this configuration, tasks submitted via <code>batch</code> will
+wait until the system load average drops below 4.0, ensuring
+multi-threaded workloads utilize spare hardware capacity
+efficiently.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

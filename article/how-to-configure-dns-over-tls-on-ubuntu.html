@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure DNS over TLS on Ubuntu - ubuntu</title>
+    <meta name="description" content="This article explains how to secure your internet requests by configuring DNS over TLS (DoT) on an Ubuntu client. Modern Ubuntu installations utilize the native systemd-resolved service, allowing you to encrypt standard plaintext DNS traffic without inst">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-configure-dns-over-tls-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure DNS over TLS on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-configure-dns-over-tls-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to secure your internet requests by configuring DNS over TLS (DoT) on an Ubuntu client. Modern Ubuntu installations utilize the native systemd-resolved service, allowing you to encrypt standard plaintext DNS traffic without inst" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-configure-dns-over-tls-on-ubuntu">How to Configure DNS
+over TLS on Ubuntu</h1>
+<p>This article explains how to secure your internet requests by
+configuring DNS over TLS (DoT) on an Ubuntu client. Modern Ubuntu
+installations utilize the native <code>systemd-resolved</code> service,
+allowing you to encrypt standard plaintext DNS traffic without
+installing third-party software. Following the steps below will route
+your DNS lookups through an encrypted TLS tunnel to prevent tampering
+and eavesdropping.</p>
+<h3 id="step-1-open-the-resolved-configuration-file">Step 1: Open the
+Resolved Configuration File</h3>
+<p><code>systemd-resolved</code> handles network name resolution on
+Ubuntu. To enable DoT, edit its configuration file with root
+privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/resolved.conf</span></code></pre></div>
+<h3 id="step-2-configure-upstream-dns-and-enable-dot">Step 2: Configure
+Upstream DNS and Enable DoT</h3>
+<p>Locate the <code>[Resolve]</code> section. You must specify upstream
+DNS providers that support DoT (such as Cloudflare or Quad9) along with
+their Server Name Indication (SNI) hostnames, and set
+<code>DNSOverTLS</code> to <code>yes</code>.</p>
+<p>Add or update the following directives:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Resolve]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">DNS</span><span class="ot">=</span><span class="st">1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 2606:4700:4700::1111#cloudflare-dns.com</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">FallbackDNS</span><span class="ot">=</span><span class="st">9.9.9.9#dns.quad9.net 149.112.112.112#dns.quad9.net</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="dt">DNSOverTLS</span><span class="ot">=</span><span class="kw">yes</span></span></code></pre></div>
+<ul>
+<li><strong><code>DNS</code></strong>: Specifies the primary encrypted
+DNS servers. The <code>#hostname</code> suffix is required for TLS
+certificate validation.</li>
+<li><strong><code>DNSOverTLS=yes</code></strong>: Strictly enforces
+encryption. If the encrypted connection fails, name resolution will fail
+rather than falling back to plaintext. You can use
+<code>opportunistic</code> instead if you want to fall back to plaintext
+when TLS is unavailable.</li>
+</ul>
+<p>Save the file and exit the editor (in <code>nano</code>, press
+<code>Ctrl+O</code>, <code>Enter</code>, then <code>Ctrl+X</code>).</p>
+<h3 id="step-3-restart-systemd-resolved">Step 3: Restart
+systemd-resolved</h3>
+<p>Apply the new configuration by restarting the resolution service:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart systemd-resolved</span></code></pre></div>
+<p>Ensure the service restarted without errors:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status systemd-resolved</span></code></pre></div>
+<h3 id="step-4-verify-the-configuration">Step 4: Verify the
+Configuration</h3>
+<p>Verify that DNS over TLS is active using <code>resolvectl</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">resolvectl</span> status</span></code></pre></div>
+<p>Check the output under the <strong>Global</strong> section. You
+should see:</p>
+<ul>
+<li><strong>DNS Servers</strong>: Listed with their IP addresses and SNI
+hostnames.</li>
+<li><strong>DNSOverTLS</strong>: Set to <code>yes</code>.</li>
+</ul>
+<p>To verify encrypted resolution in real-time, test a query:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">resolvectl</span> query example.com</span></code></pre></div>
+<p>You can confirm that queries are traveling over port 853 (standard
+DoT port) rather than standard port 53 by monitoring traffic with
+<code>tcpdump</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tcpdump <span class="at">-n</span> <span class="at">-i</span> any port 853</span></code></pre></div>
+<p>Run a DNS lookup in a separate terminal. If packets appear in the
+<code>tcpdump</code> output, your Ubuntu system is successfully
+encrypting its DNS traffic over TLS.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

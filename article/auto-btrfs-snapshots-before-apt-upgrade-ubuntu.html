@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Btrfs Snapshots Before Apt Upgrade Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to configure an Ubuntu system with a Btrfs root filesystem to automatically create snapshots before executing package updates or installations via apt. Using Snapper and its integrated APT plugin, you can maintain automatic "pre"">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/auto-btrfs-snapshots-before-apt-upgrade-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Auto Btrfs Snapshots Before Apt Upgrade Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/auto-btrfs-snapshots-before-apt-upgrade-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to configure an Ubuntu system with a Btrfs root filesystem to automatically create snapshots before executing package updates or installations via apt. Using Snapper and its integrated APT plugin, you can maintain automatic "pre"" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="auto-btrfs-snapshots-before-apt-upgrade-ubuntu">Auto Btrfs
+Snapshots Before Apt Upgrade Ubuntu</h1>
+<p>This guide explains how to configure an Ubuntu system with a Btrfs
+root filesystem to automatically create snapshots before executing
+package updates or installations via <code>apt</code>. Using Snapper and
+its integrated APT plugin, you can maintain automatic "pre" and "post"
+snapshots for every software modification, creating a reliable safety
+net that allows you to easily restore a working system state if an
+update introduces breaking changes.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure your root partition (<code>/</code>) is formatted with Btrfs.
+You can verify this by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-T</span> /</span></code></pre></div>
+<p>The output should show <code>btrfs</code> under the <code>Type</code>
+column.</p>
+<h3 id="step-1-install-snapper-and-the-apt-integration-plugin">Step 1:
+Install Snapper and the APT Integration Plugin</h3>
+<p>Snapper is a robust Btrfs management utility originally developed by
+openSUSE, and Ubuntu includes packages for Snapper along with a hook for
+APT:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install snapper snapper-apt</span></code></pre></div>
+<p>The <code>snapper-apt</code> package installs an APT configuration
+hook located at <code>/etc/apt/apt.conf.d/80snapper</code> that triggers
+snapshot creation automatically during <code>apt</code> operations.</p>
+<h3 id="step-2-configure-snapper-for-the-root-subvolume">Step 2:
+Configure Snapper for the Root Subvolume</h3>
+<p>Create a new configuration profile named <code>root</code> targeting
+the root mount point:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snapper <span class="at">-c</span> root create-config /</span></code></pre></div>
+<p>This command generates a configuration file at
+<code>/etc/snapper/configs/root</code> and creates a subvolume at
+<code>/.snapshots</code> where metadata and snapshots are tracked.</p>
+<p>If your installation already contains a <code>/.snapshots</code>
+directory as a regular folder, the command may fail. To resolve this,
+remove the existing directory and re-run the configuration:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-rf</span> /.snapshots</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snapper <span class="at">-c</span> root create-config /</span></code></pre></div>
+<h3 id="step-3-adjust-permissions-and-retention-policies">Step 3: Adjust
+Permissions and Retention Policies</h3>
+<p>By default, only the <code>root</code> user can view snapshots. To
+allow your user account to run Snapper commands without
+<code>sudo</code>, edit the configuration file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/snapper/configs/root</span></code></pre></div>
+<p>Modify the following lines to grant permissions and adjust
+retention:</p>
+<ol type="1">
+<li><p><strong>Allow non-root access:</strong></p>
+<pre class="text"><code>ALLOW_USERS=&quot;your_username&quot;
+SYNC_ACL=&quot;yes&quot;</code></pre></li>
+<li><p><strong>Adjust cleanup limits:</strong> To prevent snapshots from
+consuming all available disk space, configure how many snapshots to
+keep. Modify the number cleanup limits as needed:</p>
+<pre class="text"><code>NUMBER_MIN_AGE=&quot;1800&quot;
+NUMBER_LIMIT=&quot;10&quot;
+NUMBER_LIMIT_IMPORTANT=&quot;5&quot;</code></pre></li>
+</ol>
+<p>Save and exit the file. Apply the new permissions to the snapshot
+directory:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 750 /.snapshots</span></code></pre></div>
+<h3 id="step-4-enable-automatic-cleanup-timers">Step 4: Enable Automatic
+Cleanup Timers</h3>
+<p>Snapper uses systemd timers to periodically remove old snapshots
+based on the limits defined in your configuration:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> snapper-cleanup.timer</span></code></pre></div>
+<h3 id="step-5-test-the-apt-snapshot-automation">Step 5: Test the APT
+Snapshot Automation</h3>
+<p>Run a simulated package installation or update to trigger the
+hook:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">--reinstall</span> bzip2</span></code></pre></div>
+<p>Once the process finishes, list the snapshots to confirm that both a
+"pre" snapshot (captured before the package was altered) and a "post"
+snapshot (captured after completion) were taken:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snapper</span> <span class="at">-c</span> root list</span></code></pre></div>
+<p>The output will display snapshot IDs, types (<code>pre</code>,
+<code>post</code>, or <code>single</code>), and a description showing
+the exact <code>apt</code> command executed.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

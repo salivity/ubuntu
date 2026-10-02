@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install TLP on Ubuntu to Maximize Battery Life - ubuntu</title>
+    <meta name="description" content="This guide provides a step-by-step walkthrough for installing and configuring TLP, an advanced command-line power management tool for Linux, on an Ubuntu laptop. You will learn how to properly prepare your system by removing conflicting power daemons, in">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-tlp-on-ubuntu-to-maximize-battery-life">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install TLP on Ubuntu to Maximize Battery Life - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-tlp-on-ubuntu-to-maximize-battery-life" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a step-by-step walkthrough for installing and configuring TLP, an advanced command-line power management tool for Linux, on an Ubuntu laptop. You will learn how to properly prepare your system by removing conflicting power daemons, in" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-tlp-on-ubuntu-to-maximize-battery-life">How to
+Install TLP on Ubuntu to Maximize Battery Life</h1>
+<p>This guide provides a step-by-step walkthrough for installing and
+configuring TLP, an advanced command-line power management tool for
+Linux, on an Ubuntu laptop. You will learn how to properly prepare your
+system by removing conflicting power daemons, install the latest version
+of TLP, adjust key configuration parameters to maximize battery
+longevity, and verify that the power-saving optimizations are actively
+running.</p>
+<h3 id="step-1-remove-conflicting-services">Step 1: Remove Conflicting
+Services</h3>
+<p>Modern Ubuntu versions come pre-installed with
+<code>power-profiles-daemon</code>. This service conflicts with TLP's
+background operations. Before installing TLP, you must disable or
+uninstall it:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt remove power-profiles-daemon</span></code></pre></div>
+<h3 id="step-2-install-tlp">Step 2: Install TLP</h3>
+<p>TLP is available directly from the official Ubuntu repositories.
+Install TLP alongside the Radio Device Wizard (<code>tlp-rdw</code>) by
+running:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tlp tlp-rdw</span></code></pre></div>
+<h3 id="step-3-enable-and-start-tlp">Step 3: Enable and Start TLP</h3>
+<p>Once installed, enable TLP so that it automatically runs on system
+boot, then start the service immediately:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable tlp.service</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tlp start</span></code></pre></div>
+<p>TLP runs automatically in the background with optimized default
+settings that automatically detect whether your device is on AC power or
+battery.</p>
+<h3 id="step-4-configure-tlp-for-maximum-battery-life">Step 4: Configure
+TLP for Maximum Battery Life</h3>
+<p>While default settings are effective, you can fine-tune TLP to
+prioritize maximum battery life over performance. Configuration settings
+are managed in <code>/etc/tlp.conf</code>.</p>
+<p>Open the file in a text editor with administrative privileges:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/tlp.conf</span></code></pre></div>
+<p>Locate and adjust the following parameters by removing the
+<code>#</code> at the beginning of each line to uncomment them:</p>
+<ul>
+<li><p><strong>CPU Performance Governors:</strong> Force the CPU to run
+in low-power modes when running on battery:</p>
+<pre class="text"><code>CPU_SCALING_GOVERNOR_ON_BAT=powersave
+CPU_ENERGY_PERF_POLICY_ON_BAT=power</code></pre></li>
+<li><p><strong>CPU Turbo Boost:</strong> Disabling CPU boost on battery
+significantly reduces power consumption and heat:</p>
+<pre class="text"><code>CPU_BOOST_ON_BAT=0</code></pre></li>
+<li><p><strong>PCI Express Active State Power Management
+(ASPM):</strong> Enforce the highest power-saving state for PCIe bus
+devices:</p>
+<pre class="text"><code>PCIE_ASPM_ON_BAT=powersupersave</code></pre></li>
+<li><p><strong>Wi-Fi Power Saving:</strong> Enable power-saving mode for
+wireless cards:</p>
+<pre class="text"><code>WIFI_PWR_ON_BAT=on</code></pre></li>
+<li><p><strong>Audio Power Saving:</strong> Put audio chipsets into
+standby after a set number of seconds of inactivity:</p>
+<pre class="text"><code>SOUND_POWER_SAVE_ON_BAT=1</code></pre></li>
+</ul>
+<p>Save and exit the file (in nano, press <code>Ctrl + O</code>,
+<code>Enter</code>, then <code>Ctrl + X</code>).</p>
+<h3 id="step-5-set-battery-charge-thresholds-hardware-dependent">Step 5:
+Set Battery Charge Thresholds (Hardware Dependent)</h3>
+<p>If your laptop supports charge thresholds (such as Lenovo ThinkPads
+and certain Asus, Dell, or LG models), you can prevent the battery from
+charging to 100%, which prolongs battery lifespan over time. In
+<code>/etc/tlp.conf</code>, set:</p>
+<pre class="text"><code>START_CHARGE_THRESH_BAT0=75
+STOP_CHARGE_THRESH_BAT0=80</code></pre>
+<h3 id="step-6-apply-and-verify-changes">Step 6: Apply and Verify
+Changes</h3>
+<p>Apply the new configurations immediately without rebooting:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tlp start</span></code></pre></div>
+<p>To verify that TLP is operating correctly and check your system's
+current power state, run:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tlp-stat <span class="at">-s</span></span></code></pre></div>
+<p>To inspect CPU frequency scaling, temperatures, and power profiles,
+use:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tlp-stat <span class="at">-p</span></span></code></pre></div>
+<p>To view battery health and threshold status, use:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tlp-stat <span class="at">-b</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

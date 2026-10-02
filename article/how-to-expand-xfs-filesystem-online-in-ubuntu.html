@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Expand XFS Filesystem Online in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to increase the size of an XFS filesystem on Ubuntu while the system remains fully online and operational. XFS natively supports online growth, allowing administrators to allocate more storage to a mounted volume without unmountin">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-expand-xfs-filesystem-online-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Expand XFS Filesystem Online in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-expand-xfs-filesystem-online-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to increase the size of an XFS filesystem on Ubuntu while the system remains fully online and operational. XFS natively supports online growth, allowing administrators to allocate more storage to a mounted volume without unmountin" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-expand-xfs-filesystem-online-in-ubuntu">How to Expand XFS
+Filesystem Online in Ubuntu</h1>
+<p>This guide explains how to increase the size of an XFS filesystem on
+Ubuntu while the system remains fully online and operational. XFS
+natively supports online growth, allowing administrators to allocate
+more storage to a mounted volume without unmounting it or causing
+service downtime. The process involves expanding the underlying disk or
+partition first, followed by resizing the filesystem using the native
+<code>xfs_growfs</code> utility.</p>
+<h3 id="step-1-identify-the-disk-and-mount-point">Step 1: Identify the
+Disk and Mount Point</h3>
+<p>Before expanding, check the current disk layout and mount points
+using the <code>lsblk</code> and <code>df</code> commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-hT</span></span></code></pre></div>
+<p>Locate the target filesystem, its mount point (e.g., <code>/</code>
+or <code>/data</code>), and verify that the Type is listed as
+<code>xfs</code>.</p>
+<h3 id="step-2-expand-the-underlying-storage">Step 2: Expand the
+Underlying Storage</h3>
+<p>Before you can expand the filesystem, the storage layer underneath it
+must be enlarged:</p>
+<ul>
+<li><p><strong>For Cloud/Virtual Disks with Partitions:</strong> If you
+resized a virtual disk (such as on AWS EBS, Azure, or VMware), install
+and use <code>growpart</code> to expand the partition:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install <span class="at">-y</span> cloud-guest-utils</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> growpart /dev/sda 1</span></code></pre></div>
+<p><em>(Replace <code>/dev/sda</code> with your disk name and
+<code>1</code> with the partition number.)</em></p></li>
+<li><p><strong>For LVM Volumes:</strong> If your XFS filesystem is on a
+Logical Volume, extend the logical volume to consume the free space in
+the volume group:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lvextend <span class="at">-l</span> +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv</span></code></pre></div>
+<p><em>(Replace the path with your actual logical volume
+path.)</em></p></li>
+</ul>
+<h3 id="step-3-expand-the-xfs-filesystem">Step 3: Expand the XFS
+Filesystem</h3>
+<p>Unlike other filesystems like ext4, XFS must be expanded while
+mounted using the <code>xfs_growfs</code> command, and it requires the
+<strong>mount point</strong> as the target argument rather than the
+block device path.</p>
+<p>Run the following command to expand the filesystem to the maximum
+available space:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> xfs_growfs /mount/point</span></code></pre></div>
+<p>Replace <code>/mount/point</code> with the actual directory where the
+volume is mounted (for example, <code>/</code> or
+<code>/mnt/data</code>).</p>
+<h3 id="step-4-verify-the-new-size">Step 4: Verify the New Size</h3>
+<p>Confirm that the filesystem has expanded successfully by running:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-h</span> /mount/point</span></code></pre></div>
+<p>The output will display the updated total size and available space,
+confirming the online expansion is complete.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

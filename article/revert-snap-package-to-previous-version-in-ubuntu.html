@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revert Snap Package to Previous Version in Ubuntu - ubuntu</title>
+    <meta name="description" content="Ubuntu's Snap package manager automatically handles application updates in the background, but new releases can occasionally introduce bugs or disrupt your workflow. Fortunately, the Snap system retains older revisions of installed packages by default, a">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/revert-snap-package-to-previous-version-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Revert Snap Package to Previous Version in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/revert-snap-package-to-previous-version-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Ubuntu's Snap package manager automatically handles application updates in the background, but new releases can occasionally introduce bugs or disrupt your workflow. Fortunately, the Snap system retains older revisions of installed packages by default, a" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="revert-snap-package-to-previous-version-in-ubuntu">Revert Snap
+Package to Previous Version in Ubuntu</h1>
+<p>Ubuntu's Snap package manager automatically handles application
+updates in the background, but new releases can occasionally introduce
+bugs or disrupt your workflow. Fortunately, the Snap system retains
+older revisions of installed packages by default, allowing you to
+quickly roll back to a working release. This guide outlines how to check
+existing revisions, revert a package to its previous state, and
+optionally lock the version to prevent immediate re-updates.</p>
+<h3 id="1-view-available-package-revisions">1. View Available Package
+Revisions</h3>
+<p>Before reverting, check the currently installed and previous
+revisions of the application. Open your terminal and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snap</span> list <span class="at">--all</span> <span class="op">&lt;</span>package_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Replace <code>&lt;package_name&gt;</code> with the name of the
+software (for example, <code>snap list --all vlc</code>). The output
+will display the active version along with disabled older revisions,
+including their unique revision numbers.</p>
+<h3 id="2-revert-to-the-immediately-preceding-version">2. Revert to the
+Immediately Preceding Version</h3>
+<p>If you only need to roll back to the version that was active right
+before the latest automatic update, use the <code>revert</code>
+command:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap revert <span class="op">&lt;</span>package_name<span class="op">&gt;</span></span></code></pre></div>
+<p>Snap will roll back the application binary and restore the user data
+associated with that prior revision.</p>
+<h3 id="3-revert-to-a-specific-revision-number">3. Revert to a Specific
+Revision Number</h3>
+<p>If multiple revisions are retained on your system and you need to
+target an older release rather than the immediate predecessor, specify
+the revision number identified in step 1:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap revert <span class="op">&lt;</span>package_name<span class="op">&gt;</span> --revision <span class="op">&lt;</span>revision_number<span class="op">&gt;</span></span></code></pre></div>
+<p>For example:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap revert vlc <span class="at">--revision</span> 2344</span></code></pre></div>
+<h3 id="4-prevent-the-package-from-updating-again">4. Prevent the
+Package from Updating Again</h3>
+<p>By default, Snap will eventually try to update the reverted package
+again during its regular refresh cycles. To prevent the application from
+automatically updating to the problematic version, place a hold on
+it:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--hold</span> <span class="op">&lt;</span>package_name<span class="op">&gt;</span></span></code></pre></div>
+<p>To hold the package for a specific duration, such as 72 hours,
+specify the time limit:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--hold</span><span class="op">=</span>72h <span class="op">&lt;</span>package_name<span class="op">&gt;</span></span></code></pre></div>
+<p>When a bug fix is released and you are ready to resume automatic
+updates, unhold the package using:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> snap refresh <span class="at">--unhold</span> <span class="op">&lt;</span>package_name<span class="op">&gt;</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

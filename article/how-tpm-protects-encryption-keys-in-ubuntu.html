@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How TPM Protects Encryption Keys in Ubuntu - ubuntu</title>
+    <meta name="description" content="The Trusted Platform Module (TPM) in Ubuntu acts as a dedicated, tamper-resistant hardware component designed to protect full-disk encryption keys, primarily used with LUKS (Linux Unified Key Setup). Instead of relying exclusively on a manually entered p">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-tpm-protects-encryption-keys-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How TPM Protects Encryption Keys in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-tpm-protects-encryption-keys-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Trusted Platform Module (TPM) in Ubuntu acts as a dedicated, tamper-resistant hardware component designed to protect full-disk encryption keys, primarily used with LUKS (Linux Unified Key Setup). Instead of relying exclusively on a manually entered p" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-tpm-protects-encryption-keys-in-ubuntu">How TPM Protects
+Encryption Keys in Ubuntu</h1>
+<p>The Trusted Platform Module (TPM) in Ubuntu acts as a dedicated,
+tamper-resistant hardware component designed to protect full-disk
+encryption keys, primarily used with LUKS (Linux Unified Key Setup).
+Instead of relying exclusively on a manually entered passphrase at boot,
+the TPM securely stores and manages cryptographic keys, releasing them
+only when the system verifies that the hardware, firmware, and
+bootloader have not been compromised. This article explains how the TPM
+functions within Ubuntu, the concept of cryptographic sealing, and how
+it balances robust physical security with automated boot processes.</p>
+<h2 id="hardware-isolated-key-storage">Hardware-Isolated Key
+Storage</h2>
+<p>A primary function of the TPM is to prevent encryption keys from
+resting unprotected in standard storage or exposed memory. In
+traditional disk encryption setups, the decryption key is derived from a
+user passphrase and stored in the system's RAM while active.</p>
+<p>When integrated with Ubuntu, the TPM 2.0 chip generates and stores
+the cryptographic keys inside its own physical hardware boundary.
+Because the private key material never leaves the dedicated chip
+unencrypted, attackers cannot easily extract it by extracting the hard
+drive or using common memory-dumping techniques.</p>
+<h2 id="cryptographic-sealing-and-platform-integrity">Cryptographic
+Sealing and Platform Integrity</h2>
+<p>The TPM ensures security through a process known as "sealing." When
+Ubuntu binds an encryption key to the TPM, it ties decryption to
+specific Platform Configuration Registers (PCRs).</p>
+<p>PCRs record measurements (cryptographic hashes) of each component in
+the boot process, including:</p>
+<ul>
+<li>The UEFI firmware and configuration</li>
+<li>The bootloader (GRUB)</li>
+<li>The Linux kernel and initial RAM filesystem (initramfs)</li>
+<li>Secure Boot state</li>
+</ul>
+<p>If an attacker alters the kernel, modifies the boot sequence, or
+installs an unauthorized operating system, the PCR measurements change.
+When these measurements do not match the expected state defined during
+key enrollment, the TPM refuses to "unseal" (release) the decryption
+key, effectively locking the drive.</p>
+<h2 id="automated-boot-without-sacrificing-security">Automated Boot
+Without Sacrificing Security</h2>
+<p>Traditionally, full-disk encryption requires a user to enter a
+passphrase every time the machine reboots. This is impractical for
+headless servers, IoT gateways, and remote deployments.</p>
+<p>By leveraging the TPM, Ubuntu can automatically unlock the encrypted
+root filesystem during a clean boot. As long as the integrity checks
+succeed, the operating system decrypts and boots unattended. If the
+physical machine is stolen or the storage drive is moved to another
+motherboard, the TPM remains absent or unmatching, leaving the data
+fully encrypted and inaccessible.</p>
+<h2 id="how-ubuntu-implements-tpm-key-storage">How Ubuntu Implements TPM
+Key Storage</h2>
+<p>Modern versions of Ubuntu (such as Ubuntu 23.10 and later desktop
+releases, Ubuntu Core, and modern server setups) leverage TPM 2.0
+through standardized Linux subsystems:</p>
+<ul>
+<li><strong>systemd-cryptenroll:</strong> Ubuntu utilizes
+<code>systemd-cryptenroll</code> to bind existing LUKS2-encrypted
+volumes to a TPM 2.0 chip using specific PCR policies (commonly PCR 7
+for Secure Boot state).</li>
+<li><strong>FDE in Ubuntu Core and Desktop:</strong> Canonical's native
+implementation of TPM-backed full-disk encryption automatically
+configures Secure Boot, shim, and GRUB to establish an unbroken chain of
+trust from power-on to the user environment.</li>
+</ul>
+<p>By bridging hardware-level integrity checks with LUKS disk
+encryption, the TPM provides Ubuntu systems with transparent physical
+theft protection, prevents offline tampering, and streamlines boot
+operations.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

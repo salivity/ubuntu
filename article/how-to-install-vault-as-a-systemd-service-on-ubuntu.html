@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install Vault as a Systemd Service on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough for installing HashiCorp Vault on Ubuntu using the standalone binary and configuring it to run securely as a systemd service. By following these steps, you will set up a dedicated system user, prepare sto">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-install-vault-as-a-systemd-service-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install Vault as a Systemd Service on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-install-vault-as-a-systemd-service-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough for installing HashiCorp Vault on Ubuntu using the standalone binary and configuring it to run securely as a systemd service. By following these steps, you will set up a dedicated system user, prepare sto" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-install-vault-as-a-systemd-service-on-ubuntu">How to
+Install Vault as a Systemd Service on Ubuntu</h1>
+<p>This guide provides a straightforward walkthrough for installing
+HashiCorp Vault on Ubuntu using the standalone binary and configuring it
+to run securely as a systemd service. By following these steps, you will
+set up a dedicated system user, prepare storage directories, define a
+baseline HCL configuration, and manage the Vault service lifecycle using
+Ubuntu's native service manager.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have administrative (sudo) privileges and that essential
+utilities are installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> curl unzip</span></code></pre></div>
+<hr />
+<h3 id="step-1-download-and-install-the-vault-binary">Step 1: Download
+and Install the Vault Binary</h3>
+<p>Fetch the desired Vault binary directly from HashiCorp's release
+registry, extract it, and move it to your system execution path.</p>
+<ol type="1">
+<li><p>Export the desired version and system architecture:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">VAULT_VERSION</span><span class="op">=</span><span class="st">&quot;1.15.6&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ARCH</span><span class="op">=</span><span class="st">&quot;amd64&quot;</span></span></code></pre></div></li>
+<li><p>Download and unzip the archive:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-remote-name</span> https://releases.hashicorp.com/vault/<span class="va">${VAULT_VERSION}</span>/vault_<span class="va">${VAULT_VERSION}</span>_linux_<span class="va">${ARCH}</span>.zip</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> vault_<span class="va">${VAULT_VERSION}</span>_linux_<span class="va">${ARCH}</span>.zip</span></code></pre></div></li>
+<li><p>Move the binary to <code>/usr/local/bin/</code> and set proper
+ownership:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown root:root vault</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv vault /usr/local/bin/</span></code></pre></div></li>
+<li><p>Verify the installation:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vault</span> <span class="at">--version</span></span></code></pre></div></li>
+<li><p>Enable the binary to lock memory without running as full root
+(preventing secrets from being swapped to disk):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> setcap cap_ipc_lock=+ep /usr/local/bin/vault</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-2-create-a-dedicated-system-user-and-directories">Step 2:
+Create a Dedicated System User and Directories</h3>
+<p>For security reasons, Vault must run under an unprivileged dedicated
+service account.</p>
+<ol type="1">
+<li><p>Create a <code>vault</code> system group and user:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> useradd <span class="at">--system</span> <span class="at">--home</span> /etc/vault.d <span class="at">--shell</span> /bin/false vault</span></code></pre></div></li>
+<li><p>Create directories for configuration and persistent data
+storage:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">--parents</span> /etc/vault.d</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">--parents</span> /opt/vault/data</span></code></pre></div></li>
+<li><p>Set ownership and restrict permissions:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> vault:vault /etc/vault.d /opt/vault/data</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 700 /etc/vault.d /opt/vault/data</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-3-create-the-vault-configuration-file">Step 3: Create the
+Vault Configuration File</h3>
+<p>Create the primary configuration file in HashiCorp Configuration
+Language (HCL).</p>
+<ol type="1">
+<li><p>Open <code>/etc/vault.d/vault.hcl</code> in a text editor:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/vault.d/vault.hcl</span></code></pre></div></li>
+<li><p>Add the following basic configuration (adjust
+<code>tls_disable = 1</code> to <code>0</code> and provide certificate
+paths for production environments):</p>
+<pre class="hcl"><code>storage &quot;file&quot; {
+  path = &quot;/opt/vault/data&quot;
+}
+
+listener &quot;tcp&quot; {
+  address     = &quot;127.0.0.1:8200&quot;
+  tls_disable = 1
+}
+
+api_addr     = &quot;http://127.0.0.1:8200&quot;
+cluster_addr = &quot;https://127.0.0.1:8201&quot;
+ui           = true
+disable_mlock = false</code></pre></li>
+<li><p>Secure the configuration file permissions:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown vault:vault /etc/vault.d/vault.hcl</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 640 /etc/vault.d/vault.hcl</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-4-configure-the-systemd-service">Step 4: Configure the
+systemd Service</h3>
+<p>Create a systemd unit file to manage the Vault lifecycle.</p>
+<ol type="1">
+<li><p>Create <code>/etc/systemd/system/vault.service</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/systemd/system/vault.service</span></code></pre></div></li>
+<li><p>Paste the following unit definition:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">&quot;HashiCorp Vault - A tool for managing secrets&quot;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">Documentation</span><span class="ot">=</span><span class="st">https://developer.hashicorp.com/vault/docs</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="dt">Requires</span><span class="ot">=</span><span class="st">network-online.target</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="dt">After</span><span class="ot">=</span><span class="st">network-online.target</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="dt">ConditionFileNotEmpty</span><span class="ot">=</span><span class="st">/etc/vault.d/vault.hcl</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">StartLimitIntervalSec</span><span class="ot">=</span><span class="dv">60</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="dt">StartLimitBurst</span><span class="ot">=</span><span class="dv">3</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[Service]</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="dt">Type</span><span class="ot">=</span><span class="st">notify</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="dt">User</span><span class="ot">=</span><span class="st">vault</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="dt">Group</span><span class="ot">=</span><span class="st">vault</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="dt">ProtectSystem</span><span class="ot">=</span><span class="st">full</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="dt">ProtectHome</span><span class="ot">=</span><span class="st">read-only</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateTmp</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateDevices</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="dt">SecureBits</span><span class="ot">=</span><span class="st">keep-caps</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="dt">AmbientCapabilities</span><span class="ot">=</span><span class="st">CAP_IPC_LOCK</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="dt">Capabilities</span><span class="ot">=</span><span class="st">CAP_IPC_LOCK+ep</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="dt">CapabilityBoundingSet</span><span class="ot">=</span><span class="st">CAP_SYSLOG CAP_IPC_LOCK</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="dt">NoNewPrivileges</span><span class="ot">=</span><span class="kw">yes</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecStart</span><span class="ot">=</span><span class="st">/usr/local/bin/vault server -config=/etc/vault.d/vault.hcl</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="dt">ExecReload</span><span class="ot">=</span><span class="st">/bin/kill --signal HUP $MAINPID</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="dt">KillMode</span><span class="ot">=</span><span class="st">process</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="dt">KillSignal</span><span class="ot">=</span><span class="st">SIGINT</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="dt">Restart</span><span class="ot">=</span><span class="st">on-failure</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="dt">RestartSec</span><span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="dt">TimeoutStopSec</span><span class="ot">=</span><span class="dv">30</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="dt">LimitNOFILE</span><span class="ot">=</span><span class="dv">65536</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="dt">LimitMEMLOCK</span><span class="ot">=</span><span class="st">infinity</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">multi-user.target</span></span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-5-start-and-enable-the-vault-service">Step 5: Start and
+Enable the Vault Service</h3>
+<ol type="1">
+<li><p>Reload systemd to recognize the new unit file:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl daemon-reload</span></code></pre></div></li>
+<li><p>Enable the service to start automatically at boot:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable vault</span></code></pre></div></li>
+<li><p>Start the service:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start vault</span></code></pre></div></li>
+<li><p>Check the service status:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status vault</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="step-6-initialize-the-vault-instance">Step 6: Initialize the
+Vault Instance</h3>
+<p>Now that Vault is running, it must be initialized and unsealed before
+storing secrets.</p>
+<ol type="1">
+<li><p>Configure your local shell environment:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">VAULT_ADDR</span><span class="op">=</span><span class="st">&quot;http://127.0.0.1:8200&quot;</span></span></code></pre></div></li>
+<li><p>Run the initialization command:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vault</span> operator init</span></code></pre></div></li>
+<li><p>Save the generated <strong>Unseal Keys</strong> and
+<strong>Initial Root Token</strong> in a secure password
+manager.</p></li>
+<li><p>Unseal the vault by running the following command three times
+using three distinct unseal keys:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vault</span> operator unseal</span></code></pre></div></li>
+</ol>
+<p>Once unsealed, authenticate using the root token to begin
+provisioning secrets:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">vault</span> login <span class="op">&lt;</span>INITIAL_ROOT_TOKEN<span class="op">&gt;</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

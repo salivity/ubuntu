@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Align Partitions Using Parted on Ubuntu - ubuntu</title>
+    <meta name="description" content="Proper partition alignment is essential for maximizing drive performance and prolonging the lifespan of modern solid-state drives (SSDs) and Advanced Format hard disks. Misaligned partitions force the storage controller to perform redundant read-modify-w">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-align-partitions-using-parted-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Align Partitions Using Parted on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-align-partitions-using-parted-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Proper partition alignment is essential for maximizing drive performance and prolonging the lifespan of modern solid-state drives (SSDs) and Advanced Format hard disks. Misaligned partitions force the storage controller to perform redundant read-modify-w" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-align-partitions-using-parted-on-ubuntu">How to Align
+Partitions Using Parted on Ubuntu</h1>
+<p>Proper partition alignment is essential for maximizing drive
+performance and prolonging the lifespan of modern solid-state drives
+(SSDs) and Advanced Format hard disks. Misaligned partitions force the
+storage controller to perform redundant read-modify-write operations
+across physical sector boundaries, causing noticeable I/O bottlenecks.
+This guide explains how to use the GNU Parted utility in Ubuntu to
+create and verify optimally aligned disk partitions.</p>
+<h3 id="step-1-identify-the-target-disk">Step 1: Identify the Target
+Disk</h3>
+<p>Open your terminal and list all connected storage devices to identify
+the disk you want to partition:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsblk</span></span></code></pre></div>
+<p>Locate the drive's path, such as <code>/dev/sdb</code> or
+<code>/dev/nvme1n1</code>. Ensure you select the correct device, as
+modifying partition tables will erase existing data on that disk.</p>
+<h3 id="step-2-open-the-disk-in-parted">Step 2: Open the Disk in
+Parted</h3>
+<p>Start the <code>parted</code> utility using the optimal alignment
+flag alongside your target disk path:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> parted <span class="at">-a</span> optimal /dev/sdb</span></code></pre></div>
+<p>The <code>-a optimal</code> (or <code>--align optimal</code>) flag
+instructs Parted to automatically calculate and adhere to the hardware's
+optimal physical block alignment rules.</p>
+<h3 id="step-3-create-a-partition-table">Step 3: Create a Partition
+Table</h3>
+<p>If you are working with a new or uninitialized disk, create a GUID
+Partition Table (GPT):</p>
+<pre class="text"><code>(parted) mklabel gpt</code></pre>
+<p>For older systems that require legacy MBR partitioning, use
+<code>mklabel msdos</code> instead.</p>
+<h3 id="step-4-create-the-aligned-partition">Step 4: Create the Aligned
+Partition</h3>
+<p>To guarantee that your partition starts on an optimal sector
+boundary, specify your starting position using mebibytes
+(<code>MiB</code>) or percentage (<code>%</code>) units rather than raw
+sectors or bytes. A 1 MiB offset aligns cleanly with 4096-byte sectors
+and modern SSD page sizes.</p>
+<p>To create a single partition spanning the entire drive:</p>
+<pre class="text"><code>(parted) mkpart primary ext4 1MiB 100%</code></pre>
+<p>Alternatively, you can specify <code>0%</code> as the start point;
+Parted will automatically adjust the offset to the nearest optimal
+alignment point (typically 1 MiB / sector 2048):</p>
+<pre class="text"><code>(parted) mkpart primary ext4 0% 100%</code></pre>
+<h3 id="step-5-verify-optimal-alignment">Step 5: Verify Optimal
+Alignment</h3>
+<p>Before exiting, verify whether the partition meets optimal alignment
+parameters using the <code>align-check</code> command followed by the
+alignment type and the partition number:</p>
+<pre class="text"><code>(parted) align-check optimal 1</code></pre>
+<p>If successful, Parted will return:</p>
+<pre class="text"><code>1 aligned</code></pre>
+<p>If it returns <code>1 not aligned</code>, the starting boundary was
+incorrectly specified and must be removed using <code>rm 1</code> and
+recreated using the <code>1MiB</code> start point.</p>
+<h3 id="step-6-exit-parted">Step 6: Exit Parted</h3>
+<p>Print the final partition table to review the layout, then exit the
+program:</p>
+<pre class="text"><code>(parted) print
+(parted) quit</code></pre>
+<p>Once Parted closes, the partition is ready to be formatted with your
+chosen filesystem (such as <code>sudo mkfs.ext4 /dev/sdb1</code>) and
+mounted for use.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

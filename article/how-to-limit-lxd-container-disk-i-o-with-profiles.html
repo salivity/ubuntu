@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Limit LXD Container Disk I/O with Profiles - ubuntu</title>
+    <meta name="description" content="This guide explains how to restrict disk input/output (I/O) performance for Ubuntu containers using LXD profiles. By defining read and write limits for throughput (bytes per second) or IOPS (input/output operations per second), you can prevent high-load">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-limit-lxd-container-disk-i-o-with-profiles">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Limit LXD Container Disk I/O with Profiles - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-limit-lxd-container-disk-i-o-with-profiles" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to restrict disk input/output (I/O) performance for Ubuntu containers using LXD profiles. By defining read and write limits for throughput (bytes per second) or IOPS (input/output operations per second), you can prevent high-load" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-limit-lxd-container-disk-io-with-profiles">How to Limit
+LXD Container Disk I/O with Profiles</h1>
+<p>This guide explains how to restrict disk input/output (I/O)
+performance for Ubuntu containers using LXD profiles. By defining read
+and write limits for throughput (bytes per second) or IOPS (input/output
+operations per second), you can prevent high-load containers from
+saturating host storage and ensure balanced performance across all
+instances.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>LXD enforces disk I/O limits using Linux Control Groups (cgroups). To
+apply these limits, ensure the following:</p>
+<ul>
+<li>The host runs a Linux kernel that supports the <code>blkio</code>
+(cgroups v1) or <code>io</code> (cgroups v2) controller.</li>
+<li>The container uses a storage pool backed by standard block devices
+(such as ZFS, Btrfs, or LVM). Note that directory-based storage
+(<code>dir</code>) does not support cgroup-based block I/O
+throttling.</li>
+</ul>
+<h2 id="step-1-create-a-dedicated-lxd-profile">Step 1: Create a
+Dedicated LXD Profile</h2>
+<p>While you can edit the <code>default</code> profile directly,
+creating a specialized profile keeps your configuration modular.</p>
+<p>Create a new profile named <code>io-limited</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile create io-limited</span></code></pre></div>
+<h2 id="step-2-configure-the-root-disk-device-limits">Step 2: Configure
+the Root Disk Device Limits</h2>
+<p>Disk limits are defined on the container's <code>root</code> disk
+device. If your container inherits its root disk from the
+<code>default</code> profile, you must specify the root disk device in
+your new profile to override its limits.</p>
+<p>Add the root disk device to the profile, linking it to your storage
+pool (replace <code>default</code> with your pool's name if
+different):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device add io-limited root disk path=/ pool=default</span></code></pre></div>
+<h3 id="limiting-throughput-bps">Limiting Throughput (Bps)</h3>
+<p>You can limit sequential throughput by specifying values in bytes per
+second (e.g., <code>KB</code>, <code>MB</code>, <code>GB</code>).</p>
+<p>To set a combined ceiling for both reading and writing:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device set io-limited root limits.max 20MB</span></code></pre></div>
+<p>To configure separate limits for read and write operations:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device set io-limited root limits.read 30MB</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device set io-limited root limits.write 10MB</span></code></pre></div>
+<h3 id="limiting-operations-iops">Limiting Operations (IOPS)</h3>
+<p>If your workload involves random reads and writes, limiting IOPS is
+often more effective than limiting throughput. Specify values using the
+<code>iops</code> suffix:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device set io-limited root limits.read 500iops</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile device set io-limited root limits.write 250iops</span></code></pre></div>
+<h2 id="step-3-apply-the-profile-to-an-ubuntu-container">Step 3: Apply
+the Profile to an Ubuntu Container</h2>
+<p>You can assign the profile to an existing container or attach it
+during container creation.</p>
+<h3 id="for-an-existing-container">For an Existing Container</h3>
+<p>Attach the profile to your running or stopped container:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile add <span class="op">&lt;</span>container_name<span class="op">&gt;</span> io-limited</span></code></pre></div>
+<p>If you prefer to assign a specific list of profiles directly:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> profile assign <span class="op">&lt;</span>container_name<span class="op">&gt;</span> default,io-limited</span></code></pre></div>
+<h3 id="for-a-new-container">For a New Container</h3>
+<p>Launch an Ubuntu container with the profile attached:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> launch ubuntu:22.04 <span class="op">&lt;</span>container_name<span class="op">&gt;</span> --profile default <span class="at">--profile</span> io-limited</span></code></pre></div>
+<h2 id="step-4-verify-the-configuration">Step 4: Verify the
+Configuration</h2>
+<p>To confirm that the limits are actively inherited by the container,
+inspect its expanded configuration:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> config show <span class="op">&lt;</span>container_name<span class="op">&gt;</span> --expanded</span></code></pre></div>
+<p>Look for the <code>devices</code> section in the output to ensure the
+limits are listed under the <code>root</code> device:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">devices</span><span class="kw">:</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">root</span><span class="kw">:</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">limits.read</span><span class="kw">:</span><span class="at"> 30MB</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">limits.write</span><span class="kw">:</span><span class="at"> 10MB</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">pool</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> disk</span></span></code></pre></div>
+<p>You can test the limit inside the container by running a basic write
+test using <code>dd</code>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lxc</span> exec <span class="op">&lt;</span>container_name<span class="op">&gt;</span> -- dd if=/dev/zero of=/tmp/testfile bs=1M count=100 oflag=direct</span></code></pre></div>
+<p>The output transfer speed should match the threshold set in the LXD
+profile.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Btrfs Scrub on Ubuntu: Detect Silent Data Corruption - ubuntu</title>
+    <meta name="description" content="This article explains the role of the btrfs scrub command in identifying and repairing silent data corruption on Ubuntu systems. It covers what silent data corruption is, how Btrfs uses checksum verification during a scrub to maintain storage health, how">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/btrfs-scrub-on-ubuntu-detect-silent-data-corruption">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Btrfs Scrub on Ubuntu: Detect Silent Data Corruption - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/btrfs-scrub-on-ubuntu-detect-silent-data-corruption" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of the btrfs scrub command in identifying and repairing silent data corruption on Ubuntu systems. It covers what silent data corruption is, how Btrfs uses checksum verification during a scrub to maintain storage health, how" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="btrfs-scrub-on-ubuntu-detect-silent-data-corruption">Btrfs Scrub
+on Ubuntu: Detect Silent Data Corruption</h1>
+<p>This article explains the role of the <code>btrfs scrub</code>
+command in identifying and repairing silent data corruption on Ubuntu
+systems. It covers what silent data corruption is, how Btrfs uses
+checksum verification during a scrub to maintain storage health, how
+automatic repair operates under redundant configurations, and the
+specific commands needed to initiate and monitor scrubbing tasks.</p>
+<h2 id="understanding-silent-data-corruption">Understanding Silent Data
+Corruption</h2>
+<p>Silent data corruption, often called "bit rot," occurs when data on a
+storage medium subtly degrades or changes due to hardware glitches,
+electromagnetic interference, firmware bugs, or aging drive platters and
+flash cells. Unlike catastrophic drive failures, silent corruption does
+not trigger typical operating system read or write errors. Traditional
+Linux filesystems like ext4 generally only compute checksums for
+filesystem metadata, leaving the actual file contents vulnerable to
+undetected decay until an application tries and fails to read the
+damaged file.</p>
+<h2 id="how-btrfs-scrub-works">How <code>btrfs scrub</code> Works</h2>
+<p>The <code>btrfs scrub</code> command is an active integrity-checking
+mechanism designed specifically to address silent data corruption.
+Unlike standard read operations, which only verify data as applications
+access it, a scrub systematically reads every allocated data and
+metadata block across the entire filesystem or specified device.</p>
+<p>Btrfs calculates checksums (such as CRC32c, xxHash, SHA256, or
+BLAKE2b) for both metadata and file data at the time of writing and
+stores these hashes in its metadata tree. When <code>btrfs scrub</code>
+runs:</p>
+<ol type="1">
+<li>It reads all data and metadata blocks sequentially from the disk in
+the background.</li>
+<li>It recalculates the checksum for each block in real time.</li>
+<li>It compares the newly generated checksum against the stored
+checksum.</li>
+<li>If the checksums match, the data is verified as healthy. If they do
+not match, the block is flagged as corrupted.</li>
+</ol>
+<h2 id="detection-and-automatic-repair">Detection and Automatic
+Repair</h2>
+<p>Detection is only the first stage of the scrub process. What happens
+upon detecting corruption depends on the filesystem’s storage
+layout:</p>
+<ul>
+<li><strong>Redundant Profiles (RAID1, RAID1c3/c4, RAID10):</strong> If
+an integrity error is found on one mirror, Btrfs queries the alternate
+mirror containing the identical data. It verifies the healthy copy using
+its checksum, uses it to overwrite the damaged block on the corrupted
+drive, and repairs the data without administrative intervention or
+downtime.</li>
+<li><strong>Single Disk / Non-Redundant Profiles:</strong> If data is
+stored on a single drive without redundancy (profile
+<code>single</code>), Btrfs cannot repair corrupted user data. However,
+the scrub immediately detects the corruption, reports the exact extent
+of the damage, and logs an error to <code>dmesg</code> and the system
+journal. This prevents corrupted data from propagating undetected into
+system backups. Metadata, which typically defaults to the
+<code>DUP</code> (duplicate) profile on single-drive Btrfs setups, can
+still be repaired automatically because two copies exist on the
+drive.</li>
+</ul>
+<h2 id="executing-and-managing-scrub-on-ubuntu">Executing and Managing
+Scrub on Ubuntu</h2>
+<p>Ubuntu includes the core Btrfs tools through the
+<code>btrfs-progs</code> package. The scrub process runs entirely in the
+background at an idle I/O priority to avoid interrupting regular system
+performance.</p>
+<h3 id="starting-a-scrub">Starting a Scrub</h3>
+<p>To initiate a scrub on a mounted Btrfs filesystem, provide the mount
+point:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs scrub start /</span></code></pre></div>
+<p>To run the scrub in the foreground and monitor its completion
+directly in the terminal, add the <code>-B</code> flag:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs scrub start <span class="at">-B</span> /</span></code></pre></div>
+<h3 id="checking-scrub-status">Checking Scrub Status</h3>
+<p>If started in the background, you can inspect the progress, elapsed
+time, and error counters at any time:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs scrub status /</span></code></pre></div>
+<p>The output details the total bytes scrubbed, read errors, unverified
+errors, and how many errors were successfully corrected.</p>
+<h3 id="canceling-or-resuming">Canceling or Resuming</h3>
+<p>If heavy disk I/O requires the scrub to halt, use the cancel
+command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs scrub cancel /</span></code></pre></div>
+<p>A paused or interrupted scrub can be resumed from the point it
+stopped:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> btrfs scrub resume /</span></code></pre></div>
+<p>Regularly scheduling <code>btrfs scrub</code> via systemd timers or
+cron jobs ensures that storage degradation on Ubuntu is identified
+early, giving administrators the opportunity to repair data or replace
+failing hardware before data loss becomes permanent.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure OBS Studio NVENC on Ubuntu with NVIDIA - ubuntu</title>
+    <meta name="description" content="Configuring the NVIDIA NVENC encoder in OBS Studio on Ubuntu allows you to leverage your NVIDIA GPU for hardware-accelerated video encoding, significantly reducing CPU load during streaming and recording. This guide provides a straightforward process to">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/configure-obs-studio-nvenc-on-ubuntu-with-nvidia">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Configure OBS Studio NVENC on Ubuntu with NVIDIA - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/configure-obs-studio-nvenc-on-ubuntu-with-nvidia" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring the NVIDIA NVENC encoder in OBS Studio on Ubuntu allows you to leverage your NVIDIA GPU for hardware-accelerated video encoding, significantly reducing CPU load during streaming and recording. This guide provides a straightforward process to" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="configure-obs-studio-nvenc-on-ubuntu-with-nvidia">Configure OBS
+Studio NVENC on Ubuntu with NVIDIA</h1>
+<p>Configuring the NVIDIA NVENC encoder in OBS Studio on Ubuntu allows
+you to leverage your NVIDIA GPU for hardware-accelerated video encoding,
+significantly reducing CPU load during streaming and recording. This
+guide provides a straightforward process to install the required
+proprietary NVIDIA drivers, install a fully compatible version of OBS
+Studio, and adjust the encoder settings within the application for
+optimal performance.</p>
+<h3 id="1-install-proprietary-nvidia-drivers">1. Install Proprietary
+NVIDIA Drivers</h3>
+<p>Hardware encoding requires the official proprietary NVIDIA drivers
+rather than the default open-source Nouveau drivers.</p>
+<ol type="1">
+<li>Open your terminal and check for recommended drivers:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ubuntu-drivers</span> devices</span></code></pre></div></li>
+<li>Install the recommended proprietary driver automatically:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ubuntu-drivers autoinstall</span></code></pre></div>
+<em>(Alternatively, install a specific version:
+<code>sudo apt install nvidia-driver-535</code>)</em></li>
+<li>Reboot your system to load the driver:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div></li>
+<li>After restarting, verify the installation by checking GPU status:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nvidia-smi</span></span></code></pre></div></li>
+</ol>
+<h3 id="2-install-obs-studio">2. Install OBS Studio</h3>
+<p>To avoid sandboxing issues that may block access to the NVENC
+libraries, install OBS Studio via the official PPA rather than Snap or
+Flatpak.</p>
+<ol type="1">
+<li>Add the official OBS Studio PPA:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:obsproject/obs-studio</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div></li>
+<li>Install OBS Studio and the required FFmpeg dependencies:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install ffmpeg obs-studio</span></code></pre></div></li>
+</ol>
+<h3 id="3-configure-nvenc-in-obs-studio">3. Configure NVENC in OBS
+Studio</h3>
+<ol type="1">
+<li>Launch <strong>OBS Studio</strong>.</li>
+<li>Open <strong>Settings</strong> (located in the bottom right corner
+or via <strong>File &gt; Settings</strong>).</li>
+<li>Select the <strong>Output</strong> tab from the left sidebar.</li>
+<li>Set the <strong>Output Mode</strong> dropdown at the top to
+<strong>Advanced</strong>.</li>
+<li>Configure the <strong>Streaming</strong> tab:
+<ul>
+<li><strong>Video Encoder:</strong> Select <strong>NVIDIA NVENC
+H.264</strong> (or <strong>HEVC</strong> / <strong>AV1</strong> if your
+card supports it).</li>
+<li><strong>Rate Control:</strong> Set to <strong>CBR</strong> (Constant
+Bitrate).</li>
+<li><strong>Bitrate:</strong> Enter your desired target bitrate (e.g.,
+<code>6000 Kbps</code> for 1080p60 on standard platforms).</li>
+<li><strong>Keyframe Interval:</strong> Set to <code>2 s</code>.</li>
+<li><strong>Preset:</strong> Choose based on quality needs (e.g.,
+<code>P5: Slow (Good Quality)</code> or
+<code>P6: Slower (Better Quality)</code>).</li>
+<li><strong>Tuning:</strong> Set to <code>High Quality</code>.</li>
+</ul></li>
+<li>Configure the <strong>Recording</strong> tab (optional):
+<ul>
+<li><strong>Video Encoder:</strong> Select <strong>NVIDIA NVENC
+H.264</strong> or <strong>HEVC</strong>.</li>
+<li><strong>Rate Control:</strong> Set to <strong>CQP</strong> (Constant
+Quantization Parameter) for local recording.</li>
+<li><strong>CQ Level:</strong> Set between <code>18</code> (high
+quality) and <code>23</code> (standard quality).</li>
+</ul></li>
+<li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+</ol>
+<h3 id="4-test-the-configuration">4. Test the Configuration</h3>
+<p>Click <strong>Start Recording</strong> in the OBS main interface. To
+verify that your GPU is actively handling the encoding workload, open a
+terminal window and run:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 nvidia-smi</span></code></pre></div>
+<p>Look at the <strong>Enc</strong> column under the GPU utilization
+section; a non-zero percentage confirms that NVENC is actively encoding
+your session.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

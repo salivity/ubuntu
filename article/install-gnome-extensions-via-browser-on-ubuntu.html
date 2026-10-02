@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install GNOME Extensions via Browser on Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide explains how to install and manage GNOME Shell extensions directly from your web browser on Ubuntu. By setting up the native host connector and your browser's integration add-on, you can browse, toggle, configure, and remove desktop extensions">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/install-gnome-extensions-via-browser-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Install GNOME Extensions via Browser on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/install-gnome-extensions-via-browser-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to install and manage GNOME Shell extensions directly from your web browser on Ubuntu. By setting up the native host connector and your browser's integration add-on, you can browse, toggle, configure, and remove desktop extensions" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="install-gnome-extensions-via-browser-on-ubuntu">Install GNOME
+Extensions via Browser on Ubuntu</h1>
+<p>This guide explains how to install and manage GNOME Shell extensions
+directly from your web browser on Ubuntu. By setting up the native host
+connector and your browser's integration add-on, you can browse, toggle,
+configure, and remove desktop extensions seamlessly using the official
+GNOME extensions repository.</p>
+<h3 id="step-1-install-the-native-host-connector">Step 1: Install the
+Native Host Connector</h3>
+<p>Your web browser needs a native connector package to communicate with
+your desktop environment.</p>
+<p>Open your terminal and run the following commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install gnome-browser-connector</span></code></pre></div>
+<p><em>Note: On older Ubuntu releases (prior to 22.10), run
+<code>sudo apt install chrome-gnome-shell</code> instead.</em></p>
+<h3 id="step-2-install-the-browser-extension">Step 2: Install the
+Browser Extension</h3>
+<p>Open your preferred web browser (Google Chrome, Firefox, Brave, or
+Microsoft Edge) and navigate to the official repository:</p>
+<p><strong>extensions.gnome.org</strong></p>
+<ol type="1">
+<li>A banner will appear at the top of the webpage stating that the
+browser extension is missing.</li>
+<li>Click the link that says: <strong>"Click here to install browser
+extension"</strong>.</li>
+<li>Confirm the installation prompt in your browser to add the
+<strong>GNOME Shell integration</strong> extension.</li>
+</ol>
+<p><em>(Note for Ubuntu's default Snap version of Firefox: If the
+connector fails to communicate due to Snap sandboxing, install the
+extension using Google Chrome, a Chromium deb package, or the standalone
+GNOME Extensions desktop application).</em></p>
+<h3 id="step-3-install-gnome-extensions">Step 3: Install GNOME
+Extensions</h3>
+<p>Once the connector and browser add-on are installed, you can add
+extensions:</p>
+<ol type="1">
+<li>Refresh the <strong>extensions.gnome.org</strong> webpage.</li>
+<li>Search for or select an extension you want to install (such as
+<em>Dash to Dock</em> or <em>User Themes</em>).</li>
+<li>On the extension page, switch the toggle switch from
+<strong>OFF</strong> to <strong>ON</strong>.</li>
+<li>A desktop prompt will appear asking to confirm. Click
+<strong>Install</strong>.</li>
+</ol>
+<p>The extension will download, install, and activate immediately
+without requiring a system reboot.</p>
+<h3 id="step-4-manage-installed-extensions">Step 4: Manage Installed
+Extensions</h3>
+<p>You can manage your extensions directly from the browser:</p>
+<ol type="1">
+<li>Go to <strong>extensions.gnome.org</strong> and click the
+<strong>Installed Extensions</strong> tab in the top navigation
+bar.</li>
+<li><strong>Toggle On/Off</strong>: Use the slider next to any extension
+to temporarily enable or disable it.</li>
+<li><strong>Configure</strong>: Click the <strong>wrench/gear
+icon</strong> to open the preferences window for extensions that support
+customization.</li>
+<li><strong>Update</strong>: Click the <strong>green arrow icon</strong>
+if an update is available for an extension.</li>
+<li><strong>Uninstall</strong>: Click the <strong>red "X" icon</strong>
+to remove an extension from your system completely.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

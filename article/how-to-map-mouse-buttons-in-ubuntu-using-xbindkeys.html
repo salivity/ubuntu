@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Map Mouse Buttons in Ubuntu Using xbindkeys - ubuntu</title>
+    <meta name="description" content="This guide explains how to remap mouse buttons to custom keyboard shortcuts, system commands, or scripts in Ubuntu using xbindkeys. By pairing xbindkeys with an automation utility like xdotool or xautomation, you can detect button presses on any multi-bu">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-map-mouse-buttons-in-ubuntu-using-xbindkeys">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Map Mouse Buttons in Ubuntu Using xbindkeys - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-map-mouse-buttons-in-ubuntu-using-xbindkeys" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to remap mouse buttons to custom keyboard shortcuts, system commands, or scripts in Ubuntu using xbindkeys. By pairing xbindkeys with an automation utility like xdotool or xautomation, you can detect button presses on any multi-bu" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-map-mouse-buttons-in-ubuntu-using-xbindkeys">How to Map
+Mouse Buttons in Ubuntu Using xbindkeys</h1>
+<p>This guide explains how to remap mouse buttons to custom keyboard
+shortcuts, system commands, or scripts in Ubuntu using
+<code>xbindkeys</code>. By pairing <code>xbindkeys</code> with an
+automation utility like <code>xdotool</code> or
+<code>xautomation</code>, you can detect button presses on any
+multi-button mouse and assign them to specific desktop actions.</p>
+<h3 id="1-install-required-packages">1. Install Required Packages</h3>
+<p>Open your terminal and install <code>xbindkeys</code> along with
+<code>xdotool</code> (used to simulate key presses) and
+<code>x11-utils</code> (used to detect button numbers):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install xbindkeys xdotool x11-utils</span></code></pre></div>
+<h3 id="2-identify-your-mouse-button-number">2. Identify Your Mouse
+Button Number</h3>
+<p>To map a button, you need to find its hardware event number. Run the
+following command in your terminal:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xev</span> <span class="at">-event</span> button</span></code></pre></div>
+<p>A small white window will appear. Move your cursor into this window
+and click the mouse button you want to map. Watch the terminal output
+for lines containing <code>ButtonPress</code> or
+<code>ButtonRelease</code>. Note the button number displayed after the
+<code>button</code> field (for example, <code>button 8</code> or
+<code>button 9</code>). Once identified, close the <code>xev</code>
+window or press <code>Ctrl + C</code> in the terminal.</p>
+<h3 id="3-generate-the-configuration-file">3. Generate the Configuration
+File</h3>
+<p>Create a default <code>.xbindkeysrc</code> file in your home
+directory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xbindkeys</span> <span class="at">--defaults</span> <span class="op">&gt;</span> ~/.xbindkeysrc</span></code></pre></div>
+<h3 id="4-edit-the-configuration-file">4. Edit the Configuration
+File</h3>
+<p>Open the configuration file in a text editor:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.xbindkeysrc</span></code></pre></div>
+<p>Scroll to the bottom of the file and add your custom mapping. The
+syntax consists of the command to execute enclosed in double quotes on
+the first line, followed by the mouse button identifier on the next line
+(written as <code>b:</code> followed by the button number).</p>
+<p><strong>Example: Map Button 8 to the Back command (Alt + Left
+Arrow)</strong></p>
+<pre class="text"><code>&quot;xdotool key alt+Left&quot;
+  b:8</code></pre>
+<p><strong>Example: Map Button 9 to open the terminal (Ctrl + Alt +
+T)</strong></p>
+<pre class="text"><code>&quot;xdotool key ctrl+alt+t&quot;
+  b:9</code></pre>
+<p><strong>Example: Map a button to launch a specific
+application</strong></p>
+<pre class="text"><code>&quot;firefox&quot;
+  b:10</code></pre>
+<p>Save and exit the editor (in <code>nano</code>, press
+<code>Ctrl + O</code>, then <code>Enter</code>, and
+<code>Ctrl + X</code>).</p>
+<h3 id="5-start-and-test-xbindkeys">5. Start and Test xbindkeys</h3>
+<p>If an instance of <code>xbindkeys</code> is already running, reload
+it:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">killall</span> xbindkeys</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">xbindkeys</span></span></code></pre></div>
+<p>Test your mouse buttons to ensure the actions trigger as expected. If
+you need to debug any issues, run <code>xbindkeys -n -v</code> in a
+terminal to see verbose output of button presses and triggered commands
+in real time.</p>
+<h3 id="6-enable-automatic-startup">6. Enable Automatic Startup</h3>
+<p>Ubuntu may not launch <code>xbindkeys</code> on boot by default. To
+make it persistent across reboots:</p>
+<ol type="1">
+<li>Open the <strong>Startup Applications</strong> utility from the
+application menu.</li>
+<li>Click <strong>Add</strong>.</li>
+<li>Set the name to <code>xbindkeys</code>.</li>
+<li>Set the command to <code>/usr/bin/xbindkeys</code>.</li>
+<li>Click <strong>Save</strong>.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture PCAP Files Using TShark on Ubuntu - ubuntu</title>
+    <meta name="description" content="Capturing network traffic on a headless server or command-line environment is essential for troubleshooting network issues, analyzing performance, and conducting security audits. This article explains how to install TShark—the terminal-based version of">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/capture-pcap-files-using-t-shark-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Capture PCAP Files Using TShark on Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/capture-pcap-files-using-t-shark-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Capturing network traffic on a headless server or command-line environment is essential for troubleshooting network issues, analyzing performance, and conducting security audits. This article explains how to install TShark—the terminal-based version of" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="capture-pcap-files-using-tshark-on-ubuntu">Capture PCAP Files
+Using TShark on Ubuntu</h1>
+<p>Capturing network traffic on a headless server or command-line
+environment is essential for troubleshooting network issues, analyzing
+performance, and conducting security audits. This article explains how
+to install TShark—the terminal-based version of Wireshark—on Ubuntu,
+identify network interfaces, and record network packets directly into a
+<code>.pcap</code> file for later inspection and analysis in tools like
+Wireshark.</p>
+<h3 id="1-install-tshark-on-ubuntu">1. Install TShark on Ubuntu</h3>
+<p>Update your package index and install TShark using the APT package
+manager:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tshark <span class="at">-y</span></span></code></pre></div>
+<p>During installation, a prompt will ask whether non-superusers should
+be able to capture packets. Selecting <strong>Yes</strong> allows
+members of the <code>wireshark</code> group to capture packets without
+<code>sudo</code> privileges. If you select <strong>No</strong>, you
+will need to run capture commands with <code>sudo</code>.</p>
+<h3 id="2-identify-the-network-interface">2. Identify the Network
+Interface</h3>
+<p>Before starting a capture, identify the network interface
+transmitting the traffic you want to record:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tshark</span> <span class="at">-D</span></span></code></pre></div>
+<p>This command outputs a numbered list of available interfaces (such as
+<code>eth0</code>, <code>ens33</code>, or <code>wlan0</code>). Note the
+name or number of the target interface.</p>
+<h3 id="3-capture-packets-to-a-pcap-file">3. Capture Packets to a PCAP
+File</h3>
+<p>To start recording traffic to a file, use the <code>-i</code> flag to
+specify the interface and the <code>-w</code> flag to write output to a
+file with the <code>.pcap</code> extension:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tshark <span class="at">-i</span> eth0 <span class="at">-w</span> /tmp/network_trace.pcap</span></code></pre></div>
+<p>Press <code>Ctrl+C</code> at any time to stop capturing. TShark will
+save the captured packets to the specified path.</p>
+<h3 id="4-apply-common-capture-modifiers">4. Apply Common Capture
+Modifiers</h3>
+<p>You can customize the capture process using additional flags to
+control file size and capture duration:</p>
+<ul>
+<li><p><strong>Limit by Packet Count (<code>-c</code>):</strong>
+Automatically stop recording after capturing a set number of
+packets.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tshark <span class="at">-i</span> eth0 <span class="at">-c</span> 500 <span class="at">-w</span> capture_limit.pcap</span></code></pre></div></li>
+<li><p><strong>Apply a Capture Filter (<code>-f</code>):</strong> Record
+only specific traffic using Berkeley Packet Filter (BPF) syntax to keep
+the file size manageable.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tshark <span class="at">-i</span> eth0 <span class="at">-f</span> <span class="st">&quot;tcp port 80 or tcp port 443&quot;</span> <span class="at">-w</span> web_traffic.pcap</span></code></pre></div></li>
+<li><p><strong>Limit by Duration
+(<code>-a duration:seconds</code>):</strong> Stop capturing after a
+defined period.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tshark <span class="at">-i</span> eth0 <span class="at">-a</span> duration:60 <span class="at">-w</span> one_minute_capture.pcap</span></code></pre></div></li>
+<li><p><strong>Create Ring Buffers (<code>-b</code>):</strong> Split
+large captures across multiple rotating files based on file size or time
+intervals to avoid filling the disk.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tshark <span class="at">-i</span> eth0 <span class="at">-b</span> filesize:10240 <span class="at">-b</span> files:5 <span class="at">-w</span> rotating_trace.pcap</span></code></pre></div>
+<p><em>(This keeps up to 5 files of 10 MB each, overwriting the oldest
+when full).</em></p></li>
+</ul>
+<h3 id="5-verify-the-captured-file">5. Verify the Captured File</h3>
+<p>Confirm the contents of your capture directly from the command line
+using the <code>-r</code> (read) flag:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tshark</span> <span class="at">-r</span> /tmp/network_trace.pcap</span></code></pre></div>
+<p>You can now transfer the generated <code>.pcap</code> file to another
+machine via SCP or SFTP to perform in-depth graphical analysis using
+Wireshark.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

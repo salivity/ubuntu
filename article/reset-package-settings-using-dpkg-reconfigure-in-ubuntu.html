@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Package Settings Using dpkg-reconfigure in Ubuntu - ubuntu</title>
+    <meta name="description" content="The dpkg-reconfigure command is a core utility in Ubuntu and Debian-based systems designed to re-open the initial configuration interface of already installed packages. Instead of requiring administrators to remove and reinstall software to fix misconfig">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/reset-package-settings-using-dpkg-reconfigure-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Reset Package Settings Using dpkg-reconfigure in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/reset-package-settings-using-dpkg-reconfigure-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The dpkg-reconfigure command is a core utility in Ubuntu and Debian-based systems designed to re-open the initial configuration interface of already installed packages. Instead of requiring administrators to remove and reinstall software to fix misconfig" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="reset-package-settings-using-dpkg-reconfigure-in-ubuntu">Reset
+Package Settings Using dpkg-reconfigure in Ubuntu</h1>
+<p>The <code>dpkg-reconfigure</code> command is a core utility in Ubuntu
+and Debian-based systems designed to re-open the initial configuration
+interface of already installed packages. Instead of requiring
+administrators to remove and reinstall software to fix
+misconfigurations, this tool accesses the <code>debconf</code> database
+to prompt users with the package setup questions again and regenerate
+configuration files. This article explains how
+<code>dpkg-reconfigure</code> works, its role in resetting system
+settings, and how to use it effectively with different configuration
+priorities and frontends.</p>
+<h2 id="what-is-dpkg-reconfigure">What is dpkg-reconfigure?</h2>
+<p>In Ubuntu, many packages rely on <code>debconf</code>, a backend
+configuration management system. When you first install a service or
+system tool, <code>debconf</code> asks questions regarding basic
+setup—such as setting the system timezone, defining default locales, or
+configuring an display manager.</p>
+<p>Once installation finishes, those questions are typically not shown
+again during updates. The <code>dpkg-reconfigure</code> tool exposes
+these configuration stages on demand, allowing you to alter or reset
+existing settings without altering the underlying package binaries.</p>
+<h2 id="how-dpkg-reconfigure-resets-settings">How dpkg-reconfigure
+Resets Settings</h2>
+<p>When you run <code>dpkg-reconfigure</code>, the following steps
+occur:</p>
+<ol type="1">
+<li><strong>Loads the debconf Database:</strong> It queries the
+package's configuration script and template files to identify which
+settings can be adjusted.</li>
+<li><strong>Prompts the Administrator:</strong> It launches an
+interactive menu presenting the original configuration prompts, often
+prepopulated with current or default choices.</li>
+<li><strong>Executes Post-Installation Scripts:</strong> Once choices
+are submitted, the command runs the package's <code>postinst</code>
+(post-installation) script.</li>
+<li><strong>Regenerates Configuration Files:</strong> The script writes
+the new values into the appropriate configuration files in
+<code>/etc/</code> and restarts relevant system services if
+necessary.</li>
+</ol>
+<p>This method is faster and safer than running <code>apt purge</code>
+followed by <code>apt install</code>, as it preserves package
+dependencies and binary files while targeting only configuration
+parameters.</p>
+<h2 id="basic-syntax-and-common-examples">Basic Syntax and Common
+Examples</h2>
+<p>The standard syntax requires administrative privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> package-name</span></code></pre></div>
+<p>Common system packages frequently managed with this command
+include:</p>
+<ul>
+<li><p><strong>Timezone configuration:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure tzdata</span></code></pre></div>
+<p>Opens the interactive menu to select your geographic area and time
+zone, immediately updating <code>/etc/timezone</code> and
+<code>/etc/localtime</code>.</p></li>
+<li><p><strong>System locales:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure locales</span></code></pre></div>
+<p>Allows you to generate new character sets and choose the primary
+system language.</p></li>
+<li><p><strong>Keyboard mapping:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure keyboard-configuration</span></code></pre></div>
+<p>Guides you through selecting keyboard models, layouts, and key
+combinations.</p></li>
+</ul>
+<h2 id="adjusting-priority-and-interface">Adjusting Priority and
+Interface</h2>
+<p>By default, <code>dpkg-reconfigure</code> only shows questions
+categorized with a priority level equal to or higher than the system
+default (usually <code>high</code>). If you need to access every hidden
+setting or perform a complete, granular reset, use the <code>-p</code>
+(priority) flag:</p>
+<ul>
+<li><strong>low:</strong> Displays all questions, offering the most
+comprehensive configuration reset.</li>
+<li><strong>medium:</strong> Displays normal questions.</li>
+<li><strong>high:</strong> Displays questions with non-reasonable
+defaults.</li>
+<li><strong>critical:</strong> Displays only questions that could break
+the system if unanswered.</li>
+</ul>
+<p>To see all available options for a package:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure <span class="at">-p</span> low package-name</span></code></pre></div>
+<p>You can also specify the frontend interface with the <code>-f</code>
+flag. Options include <code>dialog</code> (default terminal menu),
+<code>readline</code> (plain text for basic terminals), and
+<code>noninteractive</code> (applies defaults without prompts):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure <span class="at">-f</span> readline package-name</span></code></pre></div>
+<h2 id="limitations">Limitations</h2>
+<p>While <code>dpkg-reconfigure</code> is effective, it only resets
+files and settings managed directly by <code>debconf</code>. If a user
+manually edits a configuration file in a way that diverges from the
+template generated by <code>debconf</code>, the package script may
+preserve the custom edits rather than overwriting them. For complete
+resets of manually altered files, inspecting <code>/etc/</code> or
+consulting the package's default templates in <code>/usr/share/</code>
+may still be necessary.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

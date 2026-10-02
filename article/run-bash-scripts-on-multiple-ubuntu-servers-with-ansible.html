@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Bash Scripts on Multiple Ubuntu Servers with Ansible - ubuntu</title>
+    <meta name="description" content="Managing operations across dozens of nodes manually is time-consuming and error-prone. This guide explains how to use Ansible to distribute and execute a local bash script across 50 remote Ubuntu servers simultaneously. By configuring an inventory file,">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/run-bash-scripts-on-multiple-ubuntu-servers-with-ansible">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Run Bash Scripts on Multiple Ubuntu Servers with Ansible - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/run-bash-scripts-on-multiple-ubuntu-servers-with-ansible" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing operations across dozens of nodes manually is time-consuming and error-prone. This guide explains how to use Ansible to distribute and execute a local bash script across 50 remote Ubuntu servers simultaneously. By configuring an inventory file," />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="run-bash-scripts-on-multiple-ubuntu-servers-with-ansible">Run
+Bash Scripts on Multiple Ubuntu Servers with Ansible</h1>
+<p>Managing operations across dozens of nodes manually is time-consuming
+and error-prone. This guide explains how to use Ansible to distribute
+and execute a local bash script across 50 remote Ubuntu servers
+simultaneously. By configuring an inventory file, adjusting Ansible's
+concurrency settings (<code>forks</code>), and leveraging the built-in
+<code>script</code> module, you can automate fleet-wide maintenance
+tasks in seconds without needing to manually copy files to each remote
+machine.</p>
+<hr />
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have the following requirements configured before running
+commands:</p>
+<ul>
+<li><strong>Control Node:</strong> Ansible installed on your local
+machine or administrative workstation.</li>
+<li><strong>Target Nodes:</strong> 50 Ubuntu servers reachable over
+SSH.</li>
+<li><strong>Authentication:</strong> SSH key-based authentication
+configured from the control node to the remote servers (passwordless
+<code>sudo</code> access is recommended).</li>
+<li><strong>Python:</strong> Python 3 installed on all target Ubuntu
+servers (standard on modern Ubuntu releases).</li>
+</ul>
+<hr />
+<h3 id="step-1-define-the-inventory">Step 1: Define the Inventory</h3>
+<p>Create an inventory file named <code>hosts.ini</code> listing your 50
+Ubuntu servers. Group them together under a single label, such as
+<code>[ubuntu_servers]</code>.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[ubuntu_servers]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">server1.example.com</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">server2.example.com</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">server3.example.com</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add remaining servers through server50</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">server50.example.com</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">[ubuntu_servers:vars]</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="dt">ansible_user</span><span class="ot">=</span><span class="st">ubuntu</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">ansible_ssh_private_key_file</span><span class="ot">=</span><span class="st">~/.ssh/id_rsa</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="dt">ansible_python_interpreter</span><span class="ot">=</span><span class="st">/usr/bin/python3</span></span></code></pre></div>
+<p>You can also use IP addresses instead of domain names if
+preferred.</p>
+<hr />
+<h3 id="step-2-configure-concurrency-forks">Step 2: Configure
+Concurrency (Forks)</h3>
+<p>By default, Ansible processes tasks across 5 remote servers at a
+time. To run your script across all 50 servers concurrently, increase
+the <code>forks</code> parameter to <code>50</code>.</p>
+<p>Create or edit an <code>ansible.cfg</code> file in the same directory
+as your inventory:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[defaults]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">inventory </span><span class="ot">=</span><span class="st"> hosts.ini</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">forks </span><span class="ot">=</span><span class="st"> </span><span class="dv">50</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="dt">host_key_checking </span><span class="ot">=</span><span class="st"> </span><span class="kw">False</span></span></code></pre></div>
+<p>Alternatively, you can pass <code>-f 50</code> directly in the
+command line.</p>
+<hr />
+<h3 id="step-3-prepare-the-bash-script">Step 3: Prepare the Bash
+Script</h3>
+<p>Create the bash script you want to run on the control node. For
+example, create <code>maintenance.sh</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Update package lists and perform tasks</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> update <span class="at">-y</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> autoremove <span class="at">-y</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Output confirmation</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Maintenance complete on </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st"> at </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Make sure the script is executable locally:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x maintenance.sh</span></code></pre></div>
+<hr />
+<h3 id="step-4-execute-the-script">Step 4: Execute the Script</h3>
+<p>There are two primary methods to execute the script: using an ad-hoc
+command or using an Ansible playbook.</p>
+<h4 id="method-a-ad-hoc-command-fastest">Method A: Ad-Hoc Command
+(Fastest)</h4>
+<p>The <code>ansible.builtin.script</code> module automatically copies
+your local script to a temporary directory on the remote targets,
+executes it, and collects the output.</p>
+<p>Run the following command:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible</span> ubuntu_servers <span class="at">-m</span> ansible.builtin.script <span class="at">-a</span> <span class="st">&quot;maintenance.sh&quot;</span> <span class="at">--become</span></span></code></pre></div>
+<ul>
+<li><code>-m ansible.builtin.script</code>: Tells Ansible to execute the
+local script on remote nodes.</li>
+<li><code>-a "maintenance.sh"</code>: Path to your local script.</li>
+<li><code>--become</code>: Runs the script with administrative
+privileges (<code>sudo</code>).</li>
+</ul>
+<h4 id="method-b-ansible-playbook-recommended-for-automation">Method B:
+Ansible Playbook (Recommended for Automation)</h4>
+<p>For reproducible workflows, define a playbook named
+<code>run_script.yml</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Execute Maintenance Script Across Fleet</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> ubuntu_servers</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">become</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tasks</span><span class="kw">:</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Run local bash script remotely</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">ansible.builtin.script</span><span class="kw">:</span><span class="at"> maintenance.sh</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">register</span><span class="kw">:</span><span class="at"> script_output</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Display script output</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">ansible.builtin.debug</span><span class="kw">:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">var</span><span class="kw">:</span><span class="at"> script_output.stdout_lines</span></span></code></pre></div>
+<p>Run the playbook:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible-playbook</span> run_script.yml</span></code></pre></div>
+<hr />
+<h3 id="verification-and-troubleshooting">Verification and
+Troubleshooting</h3>
+<ul>
+<li><strong>Check Connectivity:</strong> Before executing heavy scripts,
+verify all 50 hosts respond by running
+<code>ansible ubuntu_servers -m ping</code>.</li>
+<li><strong>Resource Limits:</strong> Running 50 concurrent SSH
+connections requires adequate file descriptors on the control node.
+Check your limits with <code>ulimit -n</code> and increase if
+necessary.</li>
+<li><strong>Failures:</strong> If a server fails during execution,
+Ansible records it in the final summary. You can re-run against failed
+hosts only using the <code>--limit @run_script.retry</code> flag.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

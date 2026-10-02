@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recover Corrupted Partition Table with GParted Live - ubuntu</title>
+    <meta name="description" content="A corrupted partition table can render an Ubuntu installation unbootable and make your storage drives appear completely unallocated. This guide provides a direct, step-by-step walkthrough for recovering lost or damaged partition tables using the GParted">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/recover-corrupted-partition-table-with-g-parted-live">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Recover Corrupted Partition Table with GParted Live - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/recover-corrupted-partition-table-with-g-parted-live" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A corrupted partition table can render an Ubuntu installation unbootable and make your storage drives appear completely unallocated. This guide provides a direct, step-by-step walkthrough for recovering lost or damaged partition tables using the GParted" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="recover-corrupted-partition-table-with-gparted-live">Recover
+Corrupted Partition Table with GParted Live</h1>
+<p>A corrupted partition table can render an Ubuntu installation
+unbootable and make your storage drives appear completely unallocated.
+This guide provides a direct, step-by-step walkthrough for recovering
+lost or damaged partition tables using the GParted Live CD environment.
+By leveraging the recovery utilities bundled within GParted
+Live—specifically the command-line tool TestDisk—you can scan the
+physical disk structure, locate original partition boundaries, and
+rewrite a functional partition table to restore access to your Ubuntu
+system.</p>
+<h3 id="step-1-boot-into-the-gparted-live-environment">Step 1: Boot into
+the GParted Live Environment</h3>
+<ol type="1">
+<li>Download the official GParted Live ISO and create a bootable USB
+flash drive using a tool such as Ventoy, Rufus, or BalenaEtcher.</li>
+<li>Insert the bootable media into the affected computer and boot into
+it via your system's boot menu (commonly accessed via F12, F11, or Del
+during startup).</li>
+<li>On the boot screen, select <strong>GParted Live (Default
+settings)</strong>.</li>
+<li>When prompted, select <strong>Don't touch keymap</strong>, choose
+your preferred language, and press Enter at the video mode prompt to
+load the default graphical environment.</li>
+</ol>
+<h3 id="step-2-identify-the-target-drive">Step 2: Identify the Target
+Drive</h3>
+<p>Once the desktop loads, open the GParted graphical interface if it
+does not launch automatically.</p>
+<ol type="1">
+<li>Use the drop-down menu in the top-right corner of the GParted window
+to identify your drive's device path (for example, <code>/dev/sda</code>
+for SATA drives or <code>/dev/nvme0n1</code> for NVMe drives).</li>
+<li>Note whether the drive space is reported as "unallocated" or
+displays an unrecognized partition scheme.</li>
+<li>Close the GParted graphical window, as the recovery tool requires
+exclusive access to the storage device.</li>
+</ol>
+<h3 id="step-3-launch-testdisk-via-terminal">Step 3: Launch TestDisk via
+Terminal</h3>
+<p>GParted Live bundles TestDisk, a specialized utility for searching
+and restoring lost partition structures.</p>
+<ol type="1">
+<li>Double-click the <strong>Terminal</strong> icon on the GParted
+desktop.</li>
+<li>Launch TestDisk with administrative privileges:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> testdisk</span></code></pre></div></li>
+<li>Use the arrow keys to select <strong>Create</strong> to start a new
+log file, then press <strong>Enter</strong>.</li>
+</ol>
+<h3 id="step-4-scan-for-lost-partitions">Step 4: Scan for Lost
+Partitions</h3>
+<ol type="1">
+<li>Highlight the corrupted drive you identified in Step 2 and select
+<strong>Proceed</strong>.</li>
+<li>Select your partition table type:
+<ul>
+<li>Choose <strong>EFI GPT</strong> for modern systems using UEFI.</li>
+<li>Choose <strong>Intel</strong> for older systems using legacy BIOS
+and MBR.</li>
+<li>TestDisk usually detects the original type automatically; accept its
+default if unsure.</li>
+</ul></li>
+<li>Select <strong>Analyse</strong>, then choose <strong>Quick
+Search</strong>.</li>
+<li>TestDisk will scan the disk sectors for known file system headers
+(such as <code>ext4</code>, <code>swap</code>, or <code>fat32</code> for
+the EFI system partition).</li>
+</ol>
+<h3 id="step-5-verify-and-inspect-partitions">Step 5: Verify and Inspect
+Partitions</h3>
+<ol type="1">
+<li>Review the list of partitions discovered by the scan.</li>
+<li>Highlight each partition and press <strong>P</strong> to list its
+files. Verifying that your Ubuntu directories (such as
+<code>/home</code>, <code>/etc</code>, or <code>/var</code>) are visible
+confirms that the partition boundary is accurate.</li>
+<li>Press <strong>Q</strong> to exit the file listing.</li>
+<li>Ensure the partition status flags on the left are correct:
+<ul>
+<li><code>*</code> indicates a primary bootable partition.</li>
+<li><code>P</code> indicates a primary partition.</li>
+<li><code>L</code> indicates a logical partition.</li>
+</ul></li>
+<li>If the Quick Search did not locate all partitions, press
+<strong>Enter</strong> and select <strong>Deeper Search</strong> to
+perform a thorough, sector-by-sector scan.</li>
+</ol>
+<h3 id="step-6-write-the-restored-partition-table">Step 6: Write the
+Restored Partition Table</h3>
+<ol type="1">
+<li>Once the correct partition layout is displayed in the list, press
+<strong>Enter</strong> to proceed.</li>
+<li>Select the <strong>Write</strong> option at the bottom of the
+screen.</li>
+<li>Type <strong>Y</strong> and press <strong>Enter</strong> to confirm
+that you want to write the recovered partition table to disk.</li>
+<li>If prompted to reboot for the changes to take effect, acknowledge
+the message.</li>
+<li>Select <strong>Quit</strong> repeatedly until you exit TestDisk,
+then close the terminal.</li>
+</ol>
+<h3 id="step-7-reboot-into-ubuntu">Step 7: Reboot into Ubuntu</h3>
+<ol type="1">
+<li>Double-click the <strong>Exit</strong> icon on the GParted
+desktop.</li>
+<li>Choose <strong>Reboot</strong>, remove the GParted Live USB drive
+when prompted, and press <strong>Enter</strong>.</li>
+<li>Allow the machine to boot directly into your local Ubuntu
+installation. The operating system should now recognize the recovered
+partitions and boot normally.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

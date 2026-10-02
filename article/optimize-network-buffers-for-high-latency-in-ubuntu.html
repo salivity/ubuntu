@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimize Network Buffers for High Latency in Ubuntu - ubuntu</title>
+    <meta name="description" content="High-latency network connections, such as satellite links or long-distance transcontinental routes, often suffer from poor TCP throughput due to default operating system buffer limits. This guide demonstrates how to calculate the required Bandwidth-Delay">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/optimize-network-buffers-for-high-latency-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Optimize Network Buffers for High Latency in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/optimize-network-buffers-for-high-latency-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="High-latency network connections, such as satellite links or long-distance transcontinental routes, often suffer from poor TCP throughput due to default operating system buffer limits. This guide demonstrates how to calculate the required Bandwidth-Delay" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="optimize-network-buffers-for-high-latency-in-ubuntu">Optimize
+Network Buffers for High Latency in Ubuntu</h1>
+<p>High-latency network connections, such as satellite links or
+long-distance transcontinental routes, often suffer from poor TCP
+throughput due to default operating system buffer limits. This guide
+demonstrates how to calculate the required Bandwidth-Delay Product (BDP)
+and adjust Ubuntu's network stack buffer limits using
+<code>sysctl</code> to maximize throughput across high-latency,
+high-bandwidth networks.</p>
+<h3 id="understanding-the-bandwidth-delay-product-bdp">Understanding the
+Bandwidth-Delay Product (BDP)</h3>
+<p>Standard TCP throughput is heavily constrained by the TCP receive
+window size. To saturate a high-latency link, the network buffer must be
+at least as large as the Bandwidth-Delay Product (BDP):</p>
+<p><span class="math display">\[\text{BDP (bytes)} = \text{Bandwidth
+(bytes/sec)} \times \text{Round-Trip Time (seconds)}\]</span></p>
+<p>For example, a 1 Gbps link with a 150 ms Round-Trip Time (RTT):</p>
+<ul>
+<li>Bandwidth: <span class="math inline">\(1{,}000{,}000{,}000 \text{
+bits/sec} = 125{,}000{,}000 \text{ bytes/sec}\)</span></li>
+<li>RTT: <span class="math inline">\(0.150 \text{ seconds}\)</span></li>
+<li>BDP: <span class="math inline">\(125{,}000{,}000 \times 0.150 =
+18{,}750{,}000 \text{ bytes}\)</span> (approx. 18.75 MB)</li>
+</ul>
+<p>Ubuntu’s default maximum buffer size is typically set between 4 MB
+and 6 MB, which throttles a connection requiring an 18.75 MB window.</p>
+<h3 id="step-1-open-the-sysctl-configuration">Step 1: Open the Sysctl
+Configuration</h3>
+<p>To make buffer adjustments persistent across reboots, edit or create
+a configuration file in the <code>/etc/sysctl.d/</code> directory:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.d/99-network-tuning.conf</span></code></pre></div>
+<h3 id="step-2-define-buffer-limits-and-kernel-parameters">Step 2:
+Define Buffer Limits and Kernel Parameters</h3>
+<p>Add the following configuration parameters. These settings increase
+the global core buffers, expand the TCP dynamic auto-tuning boundaries,
+enable TCP window scaling, and enable modern congestion control:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable TCP Window Scaling (RFC 1323)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv4.tcp_window_scaling </span><span class="ot">=</span><span class="st"> </span><span class="dv">1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Increase the maximum socket receive and send buffer sizes (in bytes)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: 32 MB = 33554432 bytes</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.rmem_max </span><span class="ot">=</span><span class="st"> </span><span class="dv">33554432</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.wmem_max </span><span class="ot">=</span><span class="st"> </span><span class="dv">33554432</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Set core default socket buffers</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.rmem_default </span><span class="ot">=</span><span class="st"> </span><span class="dv">1048576</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.wmem_default </span><span class="ot">=</span><span class="st"> </span><span class="dv">1048576</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Set maximum number of packets queued on the input side</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.netdev_max_backlog </span><span class="ot">=</span><span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># TCP Autotuning memory limits: min, default, max (in bytes)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># The max value should match or slightly exceed net.core.rmem_max / wmem_max</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv4.tcp_rmem </span><span class="ot">=</span><span class="st"> 4096 1048576 33554432</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv4.tcp_wmem </span><span class="ot">=</span><span class="st"> 4096 1048576 33554432</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable BBR congestion control for optimal performance on high-latency paths</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="dt">net.core.default_qdisc </span><span class="ot">=</span><span class="st"> fq</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="dt">net.ipv4.tcp_congestion_control </span><span class="ot">=</span><span class="st"> bbr</span></span></code></pre></div>
+<h3 id="parameter-breakdown">Parameter Breakdown</h3>
+<ul>
+<li><strong><code>net.ipv4.tcp_window_scaling</code></strong>: Allows
+TCP window sizes to exceed the legacy 64 KB limit up to 1 GB.</li>
+<li><strong><code>net.core.rmem_max</code> and
+<code>net.core.wmem_max</code></strong>: Define the ceiling for all
+socket receive and transmit buffers across the kernel.</li>
+<li><strong><code>net.ipv4.tcp_rmem</code> and
+<code>net.ipv4.tcp_wmem</code></strong>: Control dynamic auto-tuning
+boundaries for TCP buffers specifically. The third value sets the upper
+boundary up to which the kernel automatically scales socket allocations
+based on current traffic demands.</li>
+<li><strong><code>net.ipv4.tcp_congestion_control = bbr</code></strong>:
+Google's BBR (Bottleneck Bandwidth and RTT) algorithm maintains high
+throughput over high-latency networks far more effectively than
+traditional loss-based algorithms like CUBIC.</li>
+</ul>
+<h3 id="step-3-apply-and-verify-changes">Step 3: Apply and Verify
+Changes</h3>
+<p>Apply the new parameters without rebooting:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">--system</span></span></code></pre></div>
+<p>Verify that the active parameters match your newly applied
+values:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.ipv4.tcp_rmem</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.core.rmem_max</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.ipv4.tcp_congestion_control</span></code></pre></div>
+<p>Ensure memory headroom is available on the system. The configured
+maximum limits represent peak allocations per socket, so systems
+handling thousands of concurrent connections should monitor total RAM
+usage under heavy load to prevent out-of-memory events.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

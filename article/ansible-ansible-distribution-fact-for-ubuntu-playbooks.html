@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansible ansible_distribution Fact for Ubuntu Playbooks - ubuntu</title>
+    <meta name="description" content="The ansibledistribution fact is a core variable gathered by Ansible during the setup phase that specifically identifies the operating system name running on a target host. When writing playbooks tailored for Ubuntu, this fact allows administrators to imp">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/ansible-ansible-distribution-fact-for-ubuntu-playbooks">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ansible ansible_distribution Fact for Ubuntu Playbooks - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/ansible-ansible-distribution-fact-for-ubuntu-playbooks" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The ansibledistribution fact is a core variable gathered by Ansible during the setup phase that specifically identifies the operating system name running on a target host. When writing playbooks tailored for Ubuntu, this fact allows administrators to imp" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="ansible-ansible_distribution-fact-for-ubuntu-playbooks">Ansible
+ansible_distribution Fact for Ubuntu Playbooks</h1>
+<p>The <code>ansible_distribution</code> fact is a core variable
+gathered by Ansible during the setup phase that specifically identifies
+the operating system name running on a target host. When writing
+playbooks tailored for Ubuntu, this fact allows administrators to
+implement precise conditional logic, include distribution-specific
+variables, and execute tasks uniquely intended for Ubuntu without
+impacting other systems. This article details the purpose of
+<code>ansible_distribution</code>, why it is essential for Ubuntu
+environments, and how to effectively implement it in automation
+workflows.</p>
+<h3 id="identifying-the-operating-system-accurately">Identifying the
+Operating System Accurately</h3>
+<p>When Ansible connects to a managed node, its <code>setup</code>
+module automatically gathers system properties known as facts. For an
+Ubuntu system, the <code>ansible_distribution</code> variable returns
+the string <code>"Ubuntu"</code>.</p>
+<p>While Ansible also collects <code>ansible_os_family</code>, that fact
+returns <code>"Debian"</code> for Ubuntu machines. Relying solely on
+<code>ansible_os_family</code> makes it impossible to differentiate
+between a native Debian server and an Ubuntu system. The
+<code>ansible_distribution</code> fact provides the exact granularity
+needed to confirm that the host is indeed running Ubuntu.</p>
+<h3 id="managing-ubuntu-specific-features-and-repositories">Managing
+Ubuntu-Specific Features and Repositories</h3>
+<p>Ubuntu introduces several tools, utilities, and repository structures
+that are not present or functional on other distributions, even those
+within the Debian family:</p>
+<ul>
+<li><strong>Personal Package Archives (PPAs):</strong> Ubuntu relies
+heavily on PPAs via the <code>add-apt-repository</code> tool. Attempting
+to add a PPA on a pure Debian host or non-Debian distribution using the
+<code>ansible.builtin.apt_repository</code> module can cause
+failures.</li>
+<li><strong>Canonical-Specific Packages:</strong> Ubuntu often names
+packages differently or uses Canonical-specific packages such as
+<code>ubuntu-advantage-tools</code>, <code>landscape-client</code>, or
+Snap packages (<code>snapd</code>), which may not be present or desired
+on generic Debian installations.</li>
+<li><strong>Hardware and Kernel Enablement:</strong> Hardware Enablement
+(HWE) kernels and specific proprietary driver managers are unique to
+Ubuntu environments.</li>
+</ul>
+<h3 id="applying-conditional-logic-with-when-statements">Applying
+Conditional Logic with <code>when</code> Statements</h3>
+<p>The primary technical purpose of <code>ansible_distribution</code> is
+to serve as a guardrail in conditional statements. It ensures that tasks
+targeted specifically at Ubuntu are skipped automatically on any other
+host in the inventory.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Add an Ubuntu PPA repository</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ansible.builtin.apt_repository</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">repo</span><span class="kw">:</span><span class="at"> ppa:git-core/ppa</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> present</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">when</span><span class="kw">:</span><span class="at"> ansible_distribution == &quot;Ubuntu&quot;</span></span></code></pre></div>
+<p>In heterogeneous environments containing multiple Linux
+distributions, this pattern guarantees that non-Ubuntu servers do not
+fail when processing the play.</p>
+<h3 id="loading-distribution-specific-variables">Loading
+Distribution-Specific Variables</h3>
+<p>The <code>ansible_distribution</code> fact is frequently used to
+dynamically load configuration variables suited specifically to Ubuntu.
+By structuring variable files around distribution names, a single
+playbook can configure multiple platforms cleanly:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Load distribution-specific variables</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ansible.builtin.include_vars</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{ ansible_distribution }}.yml&quot;</span></span></code></pre></div>
+<p>In this setup, an <code>Ubuntu.yml</code> file can contain package
+lists, configuration file paths, and service names designated
+specifically for Ubuntu, keeping the core playbook clean and
+maintainable.</p>
+<h3 id="combining-with-version-facts-for-finer-control">Combining with
+Version Facts for Finer Control</h3>
+<p>Ubuntu releases differ significantly between versions (such as LTS
+releases 20.04, 22.04, and 24.04). The <code>ansible_distribution</code>
+fact is commonly combined with <code>ansible_distribution_version</code>
+or <code>ansible_distribution_major_version</code> to target specific
+Ubuntu releases:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Apply configuration for Ubuntu 22.04 and newer</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ansible.builtin.template</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">src</span><span class="kw">:</span><span class="at"> netplan_config.j2</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">dest</span><span class="kw">:</span><span class="at"> /etc/netplan/01-netcfg.yaml</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">when</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ansible_distribution == &quot;Ubuntu&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ansible_distribution_version is version(&#39;22.04&#39;, &#39;&gt;=&#39;)</span></span></code></pre></div>
+<p>This multi-level approach allows automation engineers to isolate
+Ubuntu from other distributions while also accounting for architectural
+and configuration changes across Ubuntu lifecycle releases.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

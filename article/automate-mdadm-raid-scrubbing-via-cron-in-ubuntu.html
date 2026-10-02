@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automate mdadm RAID Scrubbing via Cron in Ubuntu - ubuntu</title>
+    <meta name="description" content="Regularly scrubbing an mdadm software RAID array ensures data integrity by scanning all disk blocks to detect and correct silent data corruption or read errors before drive failures happen. This guide covers how to identify your array, configure an autom">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/automate-mdadm-raid-scrubbing-via-cron-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Automate mdadm RAID Scrubbing via Cron in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/automate-mdadm-raid-scrubbing-via-cron-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Regularly scrubbing an mdadm software RAID array ensures data integrity by scanning all disk blocks to detect and correct silent data corruption or read errors before drive failures happen. This guide covers how to identify your array, configure an autom" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="automate-mdadm-raid-scrubbing-via-cron-in-ubuntu">Automate mdadm
+RAID Scrubbing via Cron in Ubuntu</h1>
+<p>Regularly scrubbing an <code>mdadm</code> software RAID array ensures
+data integrity by scanning all disk blocks to detect and correct silent
+data corruption or read errors before drive failures happen. This guide
+covers how to identify your array, configure an automated cron job to
+perform routine integrity checks using Ubuntu's built-in tools, and
+monitor the scrub status.</p>
+<h3 id="step-1-identify-your-raid-array">Step 1: Identify Your RAID
+Array</h3>
+<p>Before creating the schedule, determine the device name and status of
+your active RAID array by checking <code>/proc/mdstat</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/mdstat</span></code></pre></div>
+<p>Look for the array identifier, such as <code>md0</code> or
+<code>md127</code>, and ensure all expected drives are marked active
+without degradation.</p>
+<h3 id="step-2-test-the-scrub-command">Step 2: Test the Scrub
+Command</h3>
+<p>Ubuntu includes an official script specifically designed to manage
+RAID checks safely: <code>/usr/share/mdadm/checkarray</code>. It
+initiates a non-destructive read check across the array.</p>
+<p>Test the command manually as root, replacing <code>/dev/md0</code>
+with your array identifier:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /usr/share/mdadm/checkarray /dev/md0</span></code></pre></div>
+<p>To run a check on all active arrays simultaneously:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /usr/share/mdadm/checkarray <span class="at">--all</span></span></code></pre></div>
+<p>Alternatively, you can trigger a scrub directly via the Linux
+<code>sysfs</code> interface:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> check <span class="kw">|</span> <span class="fu">sudo</span> tee /sys/block/md0/md/sync_action</span></code></pre></div>
+<h3 id="step-3-configure-the-automated-cron-job">Step 3: Configure the
+Automated Cron Job</h3>
+<p>To run the scrub automatically, create a scheduled entry in the
+system crontab. Scrubbing introduces I/O overhead, so it is best
+scheduled during low-traffic periods, such as early Sunday morning once
+per month.</p>
+<ol type="1">
+<li>Open the root user's crontab editor:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> crontab <span class="at">-e</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Add a schedule entry. For example, to run a scrub on
+<code>/dev/md0</code> at 02:00 AM on the first Sunday of every month,
+add the following line:</li>
+</ol>
+<pre class="cron"><code>0 2 1-7 * * [ $(date +\%u) -eq 7 ] &amp;&amp; /usr/share/mdadm/checkarray -a /dev/md0 &gt; /dev/null 2&gt;&amp;1</code></pre>
+<p>If you prefer a simple monthly schedule running on the 1st of every
+month at 03:00 AM across all arrays:</p>
+<pre class="cron"><code>0 3 1 * * /usr/share/mdadm/checkarray --all &gt; /dev/null 2&gt;&amp;1</code></pre>
+<ol start="3" type="1">
+<li>Save and close the editor.</li>
+</ol>
+<h3 id="step-4-monitor-and-verify-the-scrub-process">Step 4: Monitor and
+Verify the Scrub Process</h3>
+<p>Once a scrub has started, you can track its real-time progress and
+estimated completion time:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/mdstat</span></code></pre></div>
+<p>The output will display a progress bar, completion percentage, and
+current speed.</p>
+<p>After the check finishes, verify whether any data discrepancies were
+found:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/block/md0/md/mismatch_cnt</span></code></pre></div>
+<p>A value of <code>0</code> indicates no parity errors were
+encountered. If non-zero values appear on RAID 5 or RAID 6, it may
+indicate silent corruption or hardware issues requiring
+investigation.</p>
+<h3 id="step-5-stopping-a-scrub-optional">Step 5: Stopping a Scrub
+(Optional)</h3>
+<p>If high disk I/O from an active scrub interferes with critical tasks,
+you can abort the scan immediately by resetting the sync action:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> idle <span class="kw">|</span> <span class="fu">sudo</span> tee /sys/block/md0/md/sync_action</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Files Modified in Last 24 Hours in Ubuntu - ubuntu</title>
+    <meta name="description" content="This guide demonstrates how to use the find utility in Ubuntu to quickly locate files modified within the last 24 hours. By leveraging time-based evaluation flags such as -mtime and -mmin, system administrators and users can track recent changes, monitor">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/find-files-modified-in-last-24-hours-in-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Find Files Modified in Last 24 Hours in Ubuntu - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/find-files-modified-in-last-24-hours-in-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide demonstrates how to use the find utility in Ubuntu to quickly locate files modified within the last 24 hours. By leveraging time-based evaluation flags such as -mtime and -mmin, system administrators and users can track recent changes, monitor" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="find-files-modified-in-last-24-hours-in-ubuntu">Find Files
+Modified in Last 24 Hours in Ubuntu</h1>
+<p>This guide demonstrates how to use the <code>find</code> utility in
+Ubuntu to quickly locate files modified within the last 24 hours. By
+leveraging time-based evaluation flags such as <code>-mtime</code> and
+<code>-mmin</code>, system administrators and users can track recent
+changes, monitor log updates, or recover recently edited files directly
+from the command line.</p>
+<h2 id="the-basic-command">The Basic Command</h2>
+<p>To search for files modified within the last 24 hours in a specific
+directory, run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> /path/to/search <span class="at">-type</span> f <span class="at">-mtime</span> <span class="at">-1</span></span></code></pre></div>
+<ul>
+<li>Replace <code>/path/to/search</code> with the directory you want to
+scan (use <code>.</code> for the current directory).</li>
+<li><code>-type f</code> restricts the results to regular files,
+excluding directories.</li>
+<li><code>-mtime -1</code> instructs <code>find</code> to look for files
+modified strictly less than 24 hours ago.</li>
+</ul>
+<h2 id="searching-by-exact-minutes">Searching by Exact Minutes</h2>
+<p>While <code>-mtime -1</code> checks for changes within the last
+24-hour cycle, the <code>-mmin</code> option allows you to specify time
+in minutes for precise filtering:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> /path/to/search <span class="at">-type</span> f <span class="at">-mmin</span> <span class="at">-1440</span></span></code></pre></div>
+<p>Because 24 hours equals 1,440 minutes, <code>-mmin -1440</code>
+achieves the exact same time cutoff down to the minute.</p>
+<h2 id="common-practical-examples">Common Practical Examples</h2>
+<h3 id="search-the-current-working-directory">Search the Current Working
+Directory</h3>
+<p>To find all recently edited files in your current working
+location:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-type</span> f <span class="at">-mtime</span> <span class="at">-1</span></span></code></pre></div>
+<h3 id="search-system-directories-requiring-root-privileges">Search
+System Directories (Requiring Root Privileges)</h3>
+<p>When scanning directories such as <code>/etc</code> or
+<code>/var/log</code>, prepend <code>sudo</code> to avoid "Permission
+denied" errors:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> find /var/log <span class="at">-type</span> f <span class="at">-mtime</span> <span class="at">-1</span></span></code></pre></div>
+<h3 id="display-file-details-along-with-the-search">Display File Details
+Along with the Search</h3>
+<p>To view modification dates, file sizes, and permissions alongside the
+filenames, append <code>-ls</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-type</span> f <span class="at">-mtime</span> <span class="at">-1</span> <span class="at">-ls</span></span></code></pre></div>
+<p>Alternatively, pass the results to <code>ls -lh</code> using
+<code>-exec</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-type</span> f <span class="at">-mtime</span> <span class="at">-1</span> <span class="at">-exec</span> ls <span class="at">-lh</span> {} +</span></code></pre></div>
+<h2 id="summary-of-flags">Summary of Flags</h2>
+<ul>
+<li><strong><code>-mtime</code></strong>: Evaluates file modification
+time in increments of 24-hour days.</li>
+<li><strong><code>-mmin</code></strong>: Evaluates file modification
+time in minutes.</li>
+<li><strong>Minus sign (<code>-</code>)</strong>: Indicates "less than"
+the specified duration (e.g., <code>-1</code> means less than 24 hours
+ago).</li>
+<li><strong>Plus sign (<code>+</code>)</strong>: Indicates "greater
+than" the specified duration (e.g., <code>+1</code> means older than 24
+hours).</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

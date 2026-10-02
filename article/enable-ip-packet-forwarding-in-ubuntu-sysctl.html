@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable IP Packet Forwarding in Ubuntu Sysctl - ubuntu</title>
+    <meta name="description" content="This guide explains how to permanently enable network packet forwarding on an Ubuntu system using the sysctl configuration. By default, Linux disables packet forwarding for security reasons, preventing the system from acting as a router or gateway. Modif">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/enable-ip-packet-forwarding-in-ubuntu-sysctl">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Enable IP Packet Forwarding in Ubuntu Sysctl - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/enable-ip-packet-forwarding-in-ubuntu-sysctl" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to permanently enable network packet forwarding on an Ubuntu system using the sysctl configuration. By default, Linux disables packet forwarding for security reasons, preventing the system from acting as a router or gateway. Modif" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="enable-ip-packet-forwarding-in-ubuntu-sysctl">Enable IP Packet
+Forwarding in Ubuntu Sysctl</h1>
+<p>This guide explains how to permanently enable network packet
+forwarding on an Ubuntu system using the <code>sysctl</code>
+configuration. By default, Linux disables packet forwarding for security
+reasons, preventing the system from acting as a router or gateway.
+Modifying the persistent <code>sysctl</code> settings ensures that IPv4
+and IPv6 traffic routing remains active even after system reboots.</p>
+<h3 id="step-1-check-current-forwarding-status">Step 1: Check Current
+Forwarding Status</h3>
+<p>Before making changes, verify whether packet forwarding is currently
+active on your system. Run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.ipv4.ip_forward</span></code></pre></div>
+<p>If the output is <code>net.ipv4.ip_forward = 0</code>, forwarding is
+disabled. A value of <code>1</code> indicates it is already active.</p>
+<h3 id="step-2-edit-the-sysctl-configuration-file">Step 2: Edit the
+Sysctl Configuration File</h3>
+<p>To make packet forwarding permanent across reboots, you must edit the
+kernel parameters. Open <code>/etc/sysctl.conf</code> in a text editor
+with root privileges:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/sysctl.conf</span></code></pre></div>
+<p>Alternatively, you can create a dedicated configuration file in
+<code>/etc/sysctl.d/</code> (e.g.,
+<code>/etc/sysctl.d/99-ip-forward.conf</code>), which is recommended for
+modern Ubuntu versions.</p>
+<h3 id="step-3-enable-ip-forwarding-directives">Step 3: Enable IP
+Forwarding Directives</h3>
+<p>Search for the following line in <code>/etc/sysctl.conf</code>:</p>
+<pre class="text"><code>#net.ipv4.ip_forward=1</code></pre>
+<p>Uncomment it by removing the <code>#</code> symbol at the beginning
+of the line:</p>
+<pre class="text"><code>net.ipv4.ip_forward=1</code></pre>
+<p>If you also need to route IPv6 packets, locate and uncomment the IPv6
+forwarding directive:</p>
+<pre class="text"><code>net.ipv6.conf.all.forwarding=1</code></pre>
+<p>Save the file and exit the editor (in <code>nano</code>, press
+<code>Ctrl+O</code>, <code>Enter</code>, and then
+<code>Ctrl+X</code>).</p>
+<h3 id="step-4-apply-the-changes">Step 4: Apply the Changes</h3>
+<p>Apply the modified configuration immediately without restarting the
+server by running:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">-p</span></span></code></pre></div>
+<p>If you placed the configuration inside a custom file in
+<code>/etc/sysctl.d/</code>, load it using:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">--system</span></span></code></pre></div>
+<h3 id="step-5-verify-the-configuration">Step 5: Verify the
+Configuration</h3>
+<p>Confirm that packet forwarding is now enabled:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.ipv4.ip_forward</span></code></pre></div>
+<p>The output should confirm:</p>
+<pre class="text"><code>net.ipv4.ip_forward = 1</code></pre>
+<p>For IPv6, verify with:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.ipv6.conf.all.forwarding</span></code></pre></div>
+<p>The output should return <code>1</code>. Network packet forwarding is
+now permanently configured on your Ubuntu machine.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

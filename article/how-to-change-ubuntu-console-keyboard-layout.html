@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Change Ubuntu Console Keyboard Layout - ubuntu</title>
+    <meta name="description" content="This guide explains how to permanently change the keyboard layout mapping in the Ubuntu console (TTY) environment. While graphical desktop environments manage keyboard settings through their own control panels, the virtual console relies on core system c">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/how-to-change-ubuntu-console-keyboard-layout">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Change Ubuntu Console Keyboard Layout - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/how-to-change-ubuntu-console-keyboard-layout" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains how to permanently change the keyboard layout mapping in the Ubuntu console (TTY) environment. While graphical desktop environments manage keyboard settings through their own control panels, the virtual console relies on core system c" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-change-ubuntu-console-keyboard-layout">How to Change
+Ubuntu Console Keyboard Layout</h1>
+<p>This guide explains how to permanently change the keyboard layout
+mapping in the Ubuntu console (TTY) environment. While graphical desktop
+environments manage keyboard settings through their own control panels,
+the virtual console relies on core system configuration files. You will
+learn the standard interactive method, the systemd command-line tool
+approach, and how to edit the configuration files directly to ensure
+your layout changes persist across system reboots.</p>
+<h3 id="method-1-using-the-interactive-configuration-tool">Method 1:
+Using the Interactive Configuration Tool</h3>
+<p>The most reliable and standard way to configure the keyboard layout
+for the Ubuntu console is using the <code>dpkg-reconfigure</code>
+package management tool.</p>
+<ol type="1">
+<li>Open your terminal or switch to a virtual console (using
+<code>Ctrl</code> + <code>Alt</code> + <code>F3</code>).</li>
+<li>Run the keyboard configuration wizard:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure keyboard-configuration</span></code></pre></div></li>
+<li>Follow the on-screen prompts:
+<ul>
+<li>Select your hardware keyboard model (the default
+<code>Generic 105-key PC</code> works for most systems).</li>
+<li>Choose the country of origin for the layout.</li>
+<li>Select the specific layout variant (e.g., standard, alternate, or
+international).</li>
+<li>Choose a key to function as the AltGr key.</li>
+<li>Choose a key to serve as the Compose key (optional).</li>
+</ul></li>
+<li>After completing the wizard, apply the changes immediately without
+rebooting:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> setupcon</span></code></pre></div></li>
+</ol>
+<h3 id="method-2-using-localectl">Method 2: Using
+<code>localectl</code></h3>
+<p>For headless servers or automated scripts, <code>localectl</code> is
+a systemd utility that manages system locale and keyboard mapping
+settings permanently.</p>
+<ol type="1">
+<li>Check your current keyboard configuration:
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">localectl</span> status</span></code></pre></div></li>
+<li>Search for your desired console keymap code:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">localectl</span> list-keymaps <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;us\|uk\|de\|fr&quot;</span></span></code></pre></div></li>
+<li>Set the new console keymap:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> localectl set-keymap <span class="op">&lt;</span>keymap_code<span class="op">&gt;</span></span></code></pre></div>
+<em>(For example: <code>sudo localectl set-keymap de</code> for standard
+German)</em></li>
+</ol>
+<p>This command automatically updates the console configuration and
+persists across system restarts.</p>
+<h3 id="method-3-manually-editing-the-configuration-file">Method 3:
+Manually Editing the Configuration File</h3>
+<p>You can directly modify the centralized keyboard configuration file
+read by the console subsystem at boot.</p>
+<ol type="1">
+<li><p>Open <code>/etc/default/keyboard</code> in your preferred text
+editor:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/default/keyboard</span></code></pre></div></li>
+<li><p>Modify the relevant variables to match your desired layout:</p>
+<pre class="text"><code>XKBMODEL=&quot;pc105&quot;
+XKBLAYOUT=&quot;us&quot;
+XKBVARIANT=&quot;&quot;
+XKBOPTIONS=&quot;&quot;</code></pre>
+<p>To set multiple layouts or specific variants, adjust
+<code>XKBLAYOUT</code> (e.g., <code>XKBLAYOUT="gb"</code> for United
+Kingdom, <code>XKBLAYOUT="fr"</code> for French).</p></li>
+<li><p>Save the file and exit the editor.</p></li>
+<li><p>Reload the configuration in the current console session:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> setupcon</span></code></pre></div></li>
+</ol>
+<p>To ensure the new settings are built into the initial RAM filesystem
+for early boot availability, update <code>initramfs</code>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-initramfs <span class="at">-u</span></span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

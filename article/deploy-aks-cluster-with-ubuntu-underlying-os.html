@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy AKS Cluster with Ubuntu Underlying OS - ubuntu</title>
+    <meta name="description" content="Deploying an Azure Kubernetes Service (AKS) cluster with an Ubuntu host operating system provides a reliable, secure, and familiar Linux foundation for containerized workloads. Ubuntu is currently the default Linux distribution for AKS node pools, but ex">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/deploy-aks-cluster-with-ubuntu-underlying-os">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deploy AKS Cluster with Ubuntu Underlying OS - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/deploy-aks-cluster-with-ubuntu-underlying-os" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Deploying an Azure Kubernetes Service (AKS) cluster with an Ubuntu host operating system provides a reliable, secure, and familiar Linux foundation for containerized workloads. Ubuntu is currently the default Linux distribution for AKS node pools, but ex" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="deploy-aks-cluster-with-ubuntu-underlying-os">Deploy AKS Cluster
+with Ubuntu Underlying OS</h1>
+<p>Deploying an Azure Kubernetes Service (AKS) cluster with an Ubuntu
+host operating system provides a reliable, secure, and familiar Linux
+foundation for containerized workloads. Ubuntu is currently the default
+Linux distribution for AKS node pools, but explicitly specifying the OS
+ensures consistency across environments and automation pipelines. This
+guide provides direct, step-by-step methods to deploy an AKS cluster
+with Ubuntu nodes using the Azure CLI and Terraform, as well as how to
+verify the operating system once provisioned.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure the following tools are installed and configured:</p>
+<ul>
+<li>Azure CLI (version 2.45.0 or later)</li>
+<li><code>kubectl</code> for interacting with the Kubernetes
+cluster</li>
+<li>An active Azure subscription with sufficient quota</li>
+</ul>
+<h3 id="deploy-an-aks-cluster-with-ubuntu-via-azure-cli">Deploy an AKS
+Cluster with Ubuntu via Azure CLI</h3>
+<p>To create an AKS cluster running Ubuntu, set the
+<code>--os-sku</code> parameter to <code>Ubuntu</code>. This configures
+the node pool with the LTS version of Ubuntu validated for AKS
+(typically Ubuntu 22.04).</p>
+<ol type="1">
+<li><p><strong>Create an Azure Resource Group:</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">az</span> group create <span class="at">--name</span> myResourceGroup <span class="at">--location</span> eastus</span></code></pre></div></li>
+<li><p><strong>Create the AKS Cluster:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">az</span> aks create <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource-group</span> myResourceGroup <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> myUbuntuCluster <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--node-count</span> 3 <span class="dt">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--os-sku</span> Ubuntu <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--generate-ssh-keys</span></span></code></pre></div></li>
+</ol>
+<h3 id="add-an-ubuntu-node-pool-to-an-existing-cluster">Add an Ubuntu
+Node Pool to an Existing Cluster</h3>
+<p>If you have an existing AKS cluster and want to add a dedicated
+Ubuntu-based node pool, run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">az</span> aks nodepool add <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource-group</span> myResourceGroup <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--cluster-name</span> myUbuntuCluster <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> ubuntupool <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--node-count</span> 2 <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--os-sku</span> Ubuntu</span></code></pre></div>
+<h3 id="deploy-using-terraform">Deploy Using Terraform</h3>
+<p>If deploying via Infrastructure as Code (IaC), specify
+<code>"Ubuntu"</code> in the <code>os_sku</code> attribute inside the
+<code>default_node_pool</code> block of your
+<code>azurerm_kubernetes_cluster</code> resource:</p>
+<pre class="hcl"><code>resource &quot;azurerm_kubernetes_cluster&quot; &quot;aks&quot; {
+  name                = &quot;myUbuntuCluster&quot;
+  location            = &quot;East US&quot;
+  resource_group_name = &quot;myResourceGroup&quot;
+  dns_prefix          = &quot;ubuntuaks&quot;
+
+  default_node_pool {
+    name       = &quot;default&quot;
+    node_count = 3
+    vm_size    = &quot;Standard_D2s_v3&quot;
+    os_sku     = &quot;Ubuntu&quot;
+  }
+
+  identity {
+    type = &quot;SystemAssigned&quot;
+  }
+}</code></pre>
+<h3 id="verify-the-node-operating-system">Verify the Node Operating
+System</h3>
+<ol type="1">
+<li><p><strong>Connect to the Cluster:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">az</span> aks get-credentials <span class="at">--resource-group</span> myResourceGroup <span class="at">--name</span> myUbuntuCluster</span></code></pre></div></li>
+<li><p><strong>Check the Node OS Details:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get nodes <span class="at">-o</span> wide</span></code></pre></div></li>
+</ol>
+<p>The <code>OS-IMAGE</code> column in the terminal output will display
+the running OS, such as <code>Ubuntu 22.04.x LTS</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

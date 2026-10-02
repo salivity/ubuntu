@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of lxc-create in Ubuntu Legacy LXC - ubuntu</title>
+    <meta name="description" content="This article provides an overview of the lxc-create command, detailing its specific role, syntax, and functionality within legacy Linux Containers (LXC) on Ubuntu. Readers will learn how this utility initializes container environments, prepares file syst">
+    <link rel="canonical" href="https://salivity.github.io/ubuntu/article/role-of-lxc-create-in-ubuntu-legacy-lxc">
+    <link rel="search" type="application/opensearchdescription+xml" title="ubuntu" href="/ubuntu/opensearch.xml">
+    <link rel="icon" href="/ubuntu/favicon.ico">
+    <link rel="stylesheet" href="/ubuntu/css/style.css">
+    <link media="print" rel="stylesheet" href="/ubuntu/css/print.css">
+    <script src="/ubuntu/js/fuse.min.js"></script>
+    <script src="/ubuntu/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of lxc-create in Ubuntu Legacy LXC - ubuntu" />
+    <meta property="og:url" content="https://salivity.github.io/ubuntu/article/role-of-lxc-create-in-ubuntu-legacy-lxc" />
+    <meta property="og:image" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ubuntu/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides an overview of the lxc-create command, detailing its specific role, syntax, and functionality within legacy Linux Containers (LXC) on Ubuntu. Readers will learn how this utility initializes container environments, prepares file syst" />
+    <link rel="manifest" href="/ubuntu/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ubuntu/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ubuntu</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ubuntu/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="role-of-lxc-create-in-ubuntu-legacy-lxc">Role of lxc-create in
+Ubuntu Legacy LXC</h1>
+<p>This article provides an overview of the <code>lxc-create</code>
+command, detailing its specific role, syntax, and functionality within
+legacy Linux Containers (LXC) on Ubuntu. Readers will learn how this
+utility initializes container environments, prepares file systems using
+templates, and sets up configuration metadata prior to container
+execution.</p>
+<h3 id="what-is-lxc-create">What is lxc-create?</h3>
+<p>In legacy LXC (the foundational containerization framework preceding
+modern managers like LXD), containers operate through direct, userspace
+system commands. Within this architecture, <code>lxc-create</code>
+serves as the primary provisioning tool. Its sole purpose is to allocate
+and assemble the root filesystem (rootfs) and configuration files
+required for a container before it is ever powered on.</p>
+<p>Unlike modern container engines that pull pre-packaged images via
+background daemons, legacy LXC uses <code>lxc-create</code> to execute
+local shell scripts called templates. These scripts actively bootstrap a
+minimal Linux distribution inside the target host environment.</p>
+<h3 id="core-functions-of-lxc-create">Core Functions of lxc-create</h3>
+<p>When executed on an Ubuntu host, <code>lxc-create</code> performs
+several critical tasks:</p>
+<ol type="1">
+<li><strong>Namespace and Resource Allocation</strong>: It registers the
+container under the default LXC directory structure (typically
+<code>/var/lib/lxc/&lt;container_name&gt;</code>).</li>
+<li><strong>Template Execution</strong>: By calling a specified
+template, it downloads, de-bootstraps, or caches the base operating
+system packages necessary to form a functioning rootfs.</li>
+<li><strong>Configuration File Generation</strong>: It generates the
+<code>config</code> file containing parameters for network bridging,
+cgroup constraints, storage mounts, and security permissions (such as
+AppArmor profiles and POSIX capabilities).</li>
+<li><strong>Storage Backend Integration</strong>: It formats and
+attaches the rootfs to a designated storage system, supporting standard
+directory structures (<code>dir</code>), LVM logical volumes, Btrfs
+subvolumes, or ZFS filesystems.</li>
+</ol>
+<h3 id="basic-syntax-and-parameters">Basic Syntax and Parameters</h3>
+<p>The standard command structure for <code>lxc-create</code> requires
+at least a container name and a template designation:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lxc-create <span class="at">-n</span> container_name <span class="at">-t</span> template_name</span></code></pre></div>
+<p>Commonly used arguments include:</p>
+<ul>
+<li><strong><code>-n, --name</code></strong>: Designates the unique
+identifier for the container.</li>
+<li><strong><code>-t, --template</code></strong>: Specifies the template
+script found in <code>/usr/share/lxc/templates/</code> (e.g.,
+<code>ubuntu</code>, <code>debian</code>, or <code>download</code>).
+Using <code>-t download</code> connects to standard repositories to
+retrieve pre-built, lightweight root filesystems rather than
+bootstrapping from scratch.</li>
+<li><strong><code>-B, --bdev</code></strong>: Selects the underlying
+block device or filesystem type (e.g., <code>lvm</code>,
+<code>zfs</code>, <code>btrfs</code>, <code>dir</code>).</li>
+<li><strong><code>--</code> (Template Options)</strong>: Passes specific
+flags directly to the template script, such as distribution release
+(<code>-r focal</code>) and architecture (<code>-a amd64</code>).</li>
+</ul>
+<p>For example, provisioning an Ubuntu container on an Ubuntu host using
+the download template:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lxc-create <span class="at">-n</span> web-server <span class="at">-t</span> download <span class="at">--</span> <span class="at">-d</span> ubuntu <span class="at">-r</span> jammy <span class="at">-a</span> amd64</span></code></pre></div>
+<h3 id="role-in-the-container-lifecycle">Role in the Container
+Lifecycle</h3>
+<p><code>lxc-create</code> handles strictly the definition and build
+phase of a container. It does not run processes, isolate namespaces
+dynamically, or start network interfaces. Once <code>lxc-create</code>
+builds the environment, the operational lifecycle shifts to other
+utility commands:</p>
+<ul>
+<li><code>lxc-start</code> launches the container into active
+namespaces.</li>
+<li><code>lxc-attach</code> or <code>lxc-console</code> provides shell
+access.</li>
+<li><code>lxc-stop</code> terminates containerized processes.</li>
+<li><code>lxc-destroy</code> unlinks and deletes the filesystem
+constructed by <code>lxc-create</code>.</li>
+</ul>
+<p>By decoupling the container creation step from execution,
+<code>lxc-create</code> provides fine-grained control over system-level
+virtualization, allowing administrators to customize the initial rootfs
+and configuration before any service runs.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ubuntu'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ubuntu/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ubuntu/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
